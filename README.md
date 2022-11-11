@@ -1,6 +1,4 @@
  
-# XXX Xavier please fix the sentences you wrote to start with capital letter and fix typos -- Marcin
-
 proca is the most advanced opensource campaign tool (petition, twitterstorm, mailtotarget...).
 
 Even if you use our SaaS services, you will want to automatically push supporters and actions into your CRM or mailinglist tool.
