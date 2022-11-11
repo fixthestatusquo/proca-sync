@@ -1,0 +1,4 @@
+#!/usr/bin/env node
+// Script to install in /usr/local/bin/ if you do npm instal -g this-package
+
+require("../dist/index").main(process.argv.slice(2))
