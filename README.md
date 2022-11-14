@@ -19,15 +19,17 @@ We provide node packages to help with passing messages from queue to your callba
 
 - fork this repository (please call it proc-sync-{name-of-your-CRM}
 - git clone the fork
+- cp .env.example .env
 
-You need to know queue service credentials (username and password) and queue name from which to read from. 
+You need to know queue service credentials (name, username and password) from which to read from.
 
 # test and develop
 read the queue and process it
 
 ```
+$ yarn start
 $ yarn build
-$ ./bin/proca-sync-template -u user -p password -q cus.123.deliver
+$$$$ ./yarn run
 ```
 
 Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `pip install proca` as root.
