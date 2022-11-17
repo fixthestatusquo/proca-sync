@@ -21,8 +21,8 @@ function configFromOptions(opt: any): Configuration {
 
   // we allow opt.U to override the url
   return {
-    url: opt.U || `amqps://${opt.u}:${opt.p}@api.proca.app/proca_live`,
-    queue: opt.q,
+    url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
+    queue: process.env.PROCA_QUEUE,
   };
 }
 
