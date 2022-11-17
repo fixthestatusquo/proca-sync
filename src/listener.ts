@@ -1,12 +1,24 @@
 
 import {syncQueue, ActionMessageV2, EventMessageV2} from '@proca/queue'
 import {Configuration} from './config'
+<<<<<<< HEAD
 import * as crm from './crm'
 
 
 export type Callback = Parameters<typeof syncQueue>[2]
 
 export const handler : Callback = async (actionOrEvent) => {
+=======
+
+//import * as crm from './crm.debug';
+let crm : any = {};
+// TODO: set type
+//
+// Main listen loop which waits on new messages and handles them
+export function listen(config : Configuration)  {
+  return syncQueue(config.url, config.queue, async (actionOrEvent) => {
+  crm = await import("./crm/"+process.env.CRM);
+>>>>>>> f51bcf701cc901e450a2daaa4d6f7c325a8de97c
     // Handle a new message
     //
     // Throw an error if you want to NACK the message and make it re-deliver again.
@@ -41,33 +53,35 @@ export const handler : Callback = async (actionOrEvent) => {
         // ignore other message types
     }
     // show what we have now
+<<<<<<< HEAD
     crm.showContacts()
 }
 
 // Main listen loop which waits on new messages and handles them
 export function listen(config : Configuration, callback = handler)  {
   return syncQueue(config.url, config.queue, callback);
+=======
+  });
+>>>>>>> f51bcf701cc901e450a2daaa4d6f7c325a8de97c
 }
 
 // Ok lets add a new signature!
 export async function handleNewAction({action, contact, campaignId, campaign, privacy} : ActionMessageV2) {
+//crm.showContacts()
+
+  console.log(action,contact,campaign, privacy);
   console.log(`Action type ${action.actionType} from ${contact.email}`)
   // we only want register action type, and not share and so on
   if (action.actionType !== 'register') return
 
-  // first, lets see if the campaign is in the CRM
-  // We fetch it by id because the title could be changed in Proca by a campaigner
-  const camp = await crm.getCampaignByExternalId(campaignId)
+  let campId = await crm.getCampaign(campaign);
   // this is campaign id in our CRM
-  let campId : number
 
-  if (camp) {
-    campId = camp.id
-  } else {
+  if (!!campId) {
     // Campaign does not exist, we need to create it
     // In proca campaign has short name (alphanumeric) and longer title (human friendly)
     // our CRM only stores one name, we decide to use the human readable
-    campId = await crm.addCampaign(campaign.title, campaignId)
+    campId = await crm.addCampaign(campaign)
   }
 
   // we know the campaign id now, lets also upsert the contact
@@ -79,21 +93,7 @@ export async function handleNewAction({action, contact, campaignId, campaign, pr
     // found contact, get id
     contactId = cont.id
   } else {
-    // creating a new contact.
-    // Our CRM only stores these PII
-    // Depending on the widget and campaign, the contact can have following fields:
-    //
-    // contact.email
-    // contact.firstName
-    // contact.lastName
-    // contact.postcode
-    // contact.country
-    // contact.address.street
-    // contact.address.street_number
-    // contact.address.locality
-    // contact.address.region
-
-    contactId = await crm.addContact(contact.email, contact.firstName, contact.lastName)
+    contactId = await crm.addContact(contact)
   }
 
   // Lets manage the subscription if we are honoring opt in under form
@@ -102,7 +102,7 @@ export async function handleNewAction({action, contact, campaignId, campaign, pr
   }
 
   // Lets now add a signature
-  await crm.addSignature(contactId, campId)
+  await crm.addAction(contactId, campId)
 
   // and we are done
 }

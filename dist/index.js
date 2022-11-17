@@ -8,7 +8,6 @@ exports.main = void 0;
 const minimist_1 = __importDefault(require("minimist"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const listener_1 = require("./listener");
-const dump_1 = require("./dump");
 function help() {
     console.error(`edit .env or set --env=path/to/.env:
   PROCA_USERNAME=
@@ -18,17 +17,16 @@ function help() {
 }
 // you can also use env vars, or any other config style
 function configFromOptions(opt) {
-    console.log(opt);
-    if (!opt.q && !process.env.PROCA_QUEUE)
+    if (!process.env.PROCA_QUEUE)
         throw Error("Provide queue name");
     if (!process.env.PROCA_USERNAME && !process.env.PROCA_URL)
-        throw Error("Provide queue user");
+        throw Error("Provide user");
     if (!process.env.PROCA_PASSWORD && !process.env.PROCA_URL)
-        throw Error("Provide queue password");
+        throw Error("Provide password");
     // we allow opt.U to override the url
     return {
-        url: opt.U || `amqps://${opt.u}:${opt.p}@queue.proca.app/proca_live`,
-        queue: opt.q,
+        url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
+        queue: process.env.PROCA_QUEUE,
     };
 }
 const main = (argv) => {
@@ -42,12 +40,11 @@ const main = (argv) => {
         envConfig =
             { path: opt.env };
     }
-    dotenv_1.default.config(envConfig);
-    const dumpHandler = opt.D ? (0, dump_1.makeDumpHandler)(opt.D) : undefined;
+    const conf = dotenv_1.default.config(envConfig);
     try {
-        const config = configFromOptions(opt);
+        const config = configFromOptions(conf);
         console.log("listening for messages");
-        (0, listener_1.listen)(config, dumpHandler || listener_1.handler);
+        (0, listener_1.listen)(config);
     }
     catch (er) {
         console.error(`Problem: ${er}`);
