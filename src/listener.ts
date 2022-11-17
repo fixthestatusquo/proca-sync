@@ -1,13 +1,12 @@
 
 import {syncQueue, ActionMessageV2, EventMessageV2} from '@proca/queue'
 import {Configuration} from './config'
+import * as crm from './crm'
 
-import * as crm from './crm';
 
+export type Callback = Parameters<typeof syncQueue>[2]
 
-// Main listen loop which waits on new messages and handles them
-export function listen(config : Configuration)  {
-  return syncQueue(config.url, config.queue, async (actionOrEvent) => {
+export const handler : Callback = async (actionOrEvent) => {
     // Handle a new message
     //
     // Throw an error if you want to NACK the message and make it re-deliver again.
@@ -41,10 +40,13 @@ export function listen(config : Configuration)  {
         }
         // ignore other message types
     }
-
     // show what we have now
     crm.showContacts()
-  });
+}
+
+// Main listen loop which waits on new messages and handles them
+export function listen(config : Configuration, callback = handler)  {
+  return syncQueue(config.url, config.queue, callback);
 }
 
 // Ok lets add a new signature!

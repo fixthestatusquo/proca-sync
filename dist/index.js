@@ -6,34 +6,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 // to parse options
 const minimist_1 = __importDefault(require("minimist"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const listener_1 = require("./listener");
+const dump_1 = require("./dump");
 function help() {
-    console.error(`Call me with arguments:
-  -u username
-  -p password
-  -q queue-name [eg: cus.123.deliver]
+    console.error(`edit .env or set --env=path/to/.env:
+  PROCA_USERNAME=
+  PROCA_PASSWORD=
+  PROCA_QUEUE= [eg: cus.123.deliver]
 `);
 }
 // you can also use env vars, or any other config style
 function configFromOptions(opt) {
-    if (!opt.u && !opt.U)
-        throw Error("Provide user");
-    if (!opt.p && !opt.U)
-        throw Error("Provide password");
-    if (!opt.q)
+    console.log(opt);
+    if (!opt.q && !process.env.PROCA_QUEUE)
         throw Error("Provide queue name");
+    if (!process.env.PROCA_USERNAME && !process.env.PROCA_URL)
+        throw Error("Provide queue user");
+    if (!process.env.PROCA_PASSWORD && !process.env.PROCA_URL)
+        throw Error("Provide queue password");
     // we allow opt.U to override the url
     return {
-        url: opt.U || `amqps://${opt.u}:${opt.p}@api.proca.app/proca_live`,
-        queue: opt.q
+        url: opt.U || `amqps://${opt.u}:${opt.p}@queue.proca.app/proca_live`,
+        queue: opt.q,
     };
 }
 const main = (argv) => {
-    const opt = (0, minimist_1.default)(argv);
+    const opt = (0, minimist_1.default)(argv, {
+        alias: { e: "env", v: "verbose" },
+        default: { env: "" },
+        boolean: ["verbose"],
+    });
+    let envConfig = undefined;
+    if (opt.env) {
+        envConfig =
+            { path: opt.env };
+    }
+    dotenv_1.default.config(envConfig);
+    const dumpHandler = opt.D ? (0, dump_1.makeDumpHandler)(opt.D) : undefined;
     try {
         const config = configFromOptions(opt);
-        console.log('listening for messages');
-        (0, listener_1.listen)(config);
+        console.log("listening for messages");
+        (0, listener_1.listen)(config, dumpHandler || listener_1.handler);
     }
     catch (er) {
         console.error(`Problem: ${er}`);
@@ -41,3 +55,6 @@ const main = (argv) => {
     }
 };
 exports.main = main;
+if (require.main === module) {
+    (0, exports.main)(process.argv.slice(2));
+}

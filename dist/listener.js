@@ -32,44 +32,46 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleEmailStatusChange = exports.handleNewAction = exports.listen = void 0;
+exports.handleEmailStatusChange = exports.handleNewAction = exports.listen = exports.handler = void 0;
 const queue_1 = require("@proca/queue");
 const crm = __importStar(require("./crm"));
-// Main listen loop which waits on new messages and handles them
-function listen(config) {
-    return (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(this, void 0, void 0, function* () {
-        // Handle a new message
-        //
-        // Throw an error if you want to NACK the message and make it re-deliver again.
-        // Return nothing to have the message ACKed (removed from queue)
-        //
-        // What is this?
-        switch (actionOrEvent.schema) {
-            case 'proca:action:2': {
-                // An action done by Supporter
-                const action = actionOrEvent;
-                yield handleNewAction(action);
-                break;
-            }
-            case 'proca:event:2': {
-                // Some other event
-                const event = actionOrEvent;
-                // We are interested most in email status changes
-                switch (event.eventType) {
-                    case 'email_status': {
-                        // An email status update such as Double opt in or bounce
-                        yield handleEmailStatusChange(event);
-                        break;
-                    }
-                    // ignore other events
-                }
-                break;
-            }
-            // ignore other message types
+const handler = (actionOrEvent) => __awaiter(void 0, void 0, void 0, function* () {
+    // Handle a new message
+    //
+    // Throw an error if you want to NACK the message and make it re-deliver again.
+    // Return nothing to have the message ACKed (removed from queue)
+    //
+    // What is this?
+    switch (actionOrEvent.schema) {
+        case 'proca:action:2': {
+            // An action done by Supporter
+            const action = actionOrEvent;
+            yield handleNewAction(action);
+            break;
         }
-        // show what we have now
-        crm.showContacts();
-    }));
+        case 'proca:event:2': {
+            // Some other event
+            const event = actionOrEvent;
+            // We are interested most in email status changes
+            switch (event.eventType) {
+                case 'email_status': {
+                    // An email status update such as Double opt in or bounce
+                    yield handleEmailStatusChange(event);
+                    break;
+                }
+                // ignore other events
+            }
+            break;
+        }
+        // ignore other message types
+    }
+    // show what we have now
+    crm.showContacts();
+});
+exports.handler = handler;
+// Main listen loop which waits on new messages and handles them
+function listen(config, callback = exports.handler) {
+    return (0, queue_1.syncQueue)(config.url, config.queue, callback);
 }
 exports.listen = listen;
 // Ok lets add a new signature!
