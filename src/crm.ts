@@ -1,7 +1,7 @@
 import { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 export type handleResult = {
-  pause?: 0; // should it wait delay seconds before reading the next message?
   processed: boolean; // if the message has been processed or skipped
+  // there will likely be more attributes to let the CRM inform the queue processor to pause for instance
 };
 
 export { ActionMessageV2 as ActionMessage };
