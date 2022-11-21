@@ -3,7 +3,7 @@ import parseArg from "minimist";
 import dotenv from "dotenv";
 import { Configuration, help, configFromOptions } from "./config";
 
-export const main = (argv: string[]) => {
+export const main = async (argv: string[]) => {
   const opt = parseArg(argv, {
     default: { env: "" },
   });
@@ -22,11 +22,21 @@ export const main = (argv: string[]) => {
   const conf = dotenv.config(envConfig);
 
   const config = configFromOptions(conf);
+    if (!process.env.CRM) {
+      console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts")
+      throw new Error ("missing process.env.CRM");
+    }
+    let crm = await import("./crm/"+process.env.CRM);
+    if (crm.default) {
+      crm = crm.default;
+    } else {
+      throw new Error (process.env.CRM +" missing export default new YourCRM()");
+    }
 
   for (const file of opt._) {
     try {
       const message = JSON.parse(readFileSync(file, "utf8"));
-      console.log(message);
+      crm.handleActionContact(message);
     } catch (er) {
       console.error(`Problem: ${er}`);
       help();
