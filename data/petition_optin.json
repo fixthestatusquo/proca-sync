@@ -1,0 +1,59 @@
+{
+  "action": {
+    "actionType": "register",
+    "createdAt": "2022-11-01T11:11:11Z",
+    "customFields": {
+      "comment": "This is a comment",
+      "emailProvider": "gmail.com"
+    },
+    "testing": true
+  },
+  "actionId": 1732850,
+  "actionPage": {
+    "locale": "en",
+    "name": "test/fixthestatusquo/en",
+    "supporterConfirmTemplate": null,
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 2466,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "test",
+    "title": "Pineapple doesn’t belong on pizza!"
+  },
+  "campaignId": 9,
+  "contact": {
+    "area": "BE",
+    "contactRef": "MDWJu2fbogTgTHgLTLl-OFvRII63xZE76i7w3qHfbbE",
+    "country": "BE",
+    "dupeRank": 0,
+    "email": "test@example.org",
+    "firstName": "alonso",
+    "lastName": "Bistro",
+    "postcode": "1234"
+  },
+  "org": {
+    "name": "your_org",
+    "title": "Your Organisation"
+  },
+  "orgId": 766,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": null,
+    "emailStatusChanged": null,
+    "givenAt": "2022-11-20T23:21:54Z",
+    "optIn": true,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "test",
+    "content": "",
+    "location": "https://example.org",
+    "medium": "proca",
+    "source": "test"
+  }
+}

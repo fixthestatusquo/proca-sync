@@ -2,35 +2,14 @@
 import parseArg from "minimist";
 import dotenv from "dotenv";
 
-import { Configuration, DEFAULT_URL } from "./config";
+import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { listen } from "./listener";
-
-function help() {
-  console.error(`edit .env or set --env=path/to/.env:
-  PROCA_USERNAME=
-  PROCA_PASSWORD=
-  PROCA_QUEUE= [eg: cus.123.deliver]
-`);
-}
-
-// you can also use env vars, or any other config style
-function configFromOptions(opt: any): Configuration {
-  if (!process.env.PROCA_QUEUE) throw Error("Provide queue name");
-  if (!process.env.PROCA_USERNAME  && !process.env.PROCA_URL) throw Error("Provide user");
-  if (!process.env.PROCA_PASSWORD && !process.env.PROCA_URL) throw Error("Provide password");
-
-  // we allow opt.U to override the url
-  return {
-    url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
-    queue: process.env.PROCA_QUEUE,
-  };
-}
 
 export const main = (argv: string[]) => {
   const opt = parseArg(argv, {
     alias: { e: "env", v: "verbose" },
     default: { env: "" },
-    boolean: ["verbose"],
+    boolean: ["verbose", "dump"],
   });
   let envConfig = undefined;
   if (opt.env) {
@@ -42,6 +21,10 @@ export const main = (argv: string[]) => {
   try {
     const config = configFromOptions(conf);
 
+    if (opt.dump) {
+      console.warn ("saving into data folder instead of using "+process.env.CRM);
+      process.env.CRM = "file";
+    }
     console.log("listening for messages");
     listen(config);
   } catch (er) {

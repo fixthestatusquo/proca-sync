@@ -9,7 +9,17 @@ let crm : any = {};
 // Main listen loop which waits on new messages and handles them
 export function listen(config : Configuration)  {
   return syncQueue(config.url, config.queue, async (actionOrEvent) => {
-  crm = await import("./crm/"+process.env.CRM);
+    if (!process.env.CRM) {
+      console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts")
+      throw new Error ("missing process.env.CRM");
+    }
+    crm = await import("./crm/"+process.env.CRM);
+    if (crm.default) {
+      crm = crm.default;
+    } else {
+      throw new Error (process.env.CRM +" missing export default new YourCRM()");
+    }
+    console.log(crm);
     // Handle a new message
     //
     // Throw an error if you want to NACK the message and make it re-deliver again.
@@ -20,7 +30,7 @@ export function listen(config : Configuration)  {
         case 'proca:action:2': {
           // An action done by Supporter
           const action : ActionMessageV2 = actionOrEvent
-          await handleNewAction(action)
+          await crm.handleActionContact (action)
 
           break
         }
@@ -33,7 +43,7 @@ export function listen(config : Configuration)  {
           switch (event.eventType) {
               case 'email_status': {
                 // An email status update such as Double opt in or bounce
-                await handleEmailStatusChange(event)
+                await crm.handleEmailStatusChange(event)
                 break
               }
               // ignore other events
@@ -46,48 +56,6 @@ export function listen(config : Configuration)  {
 
     // show what we have now
   });
-}
-
-// Ok lets add a new signature!
-export async function handleNewAction({action, contact, campaignId, campaign, privacy} : ActionMessageV2) {
-//crm.showContacts()
-
-  console.log(action,contact,campaign, privacy);
-  console.log(`Action type ${action.actionType} from ${contact.email}`)
-  // we only want register action type, and not share and so on
-  if (action.actionType !== 'register') return
-
-  let campId = await crm.getCampaign(campaign);
-  // this is campaign id in our CRM
-
-  if (!!campId) {
-    // Campaign does not exist, we need to create it
-    // In proca campaign has short name (alphanumeric) and longer title (human friendly)
-    // our CRM only stores one name, we decide to use the human readable
-    campId = await crm.addCampaign(campaign)
-  }
-
-  // we know the campaign id now, lets also upsert the contact
-
-  const cont = await crm.getContactByEmail(contact.email)
-  let contactId : number
-
-  if (cont) {
-    // found contact, get id
-    contactId = cont.id
-  } else {
-    contactId = await crm.addContact(contact)
-  }
-
-  // Lets manage the subscription if we are honoring opt in under form
-  if (privacy.optIn) {
-    await crm.setSubscribed(contactId, privacy.optIn)
-  }
-
-  // Lets now add a signature
-  await crm.addAction(contactId, campId)
-
-  // and we are done
 }
 
 export async function handleEmailStatusChange(event : EventMessageV2) {

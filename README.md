@@ -17,9 +17,11 @@ We provide node packages to help with passing messages from queue to your callba
 
 # setup
 
-- fork this repository (please call it proc-sync-{name-of-your-CRM}
+- fork this repository
 - git clone the fork
+- create a new src/crm/{yourcrm}.ts
 - cp .env.example .env
+- modify CRM={yourcrm} in your .env
 
 You need to know queue service credentials (name, username and password) from which to read from.
 
@@ -28,49 +30,43 @@ read the queue and process it
 
 ```
 $ yarn start
-$ yarn build
-$$$$ ./yarn run
 ```
+
+if you want to save the messages received into the data folder, set CRM=file or yarn start --dump
+
 
 Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `pip install proca` as root.
 
-To deploy and run in production
+# build for production
+
 ```
-$ yarn pack
-$ npm i -g --reinstall ./proca-sync-template-v1.0.0.tgz
-$ proca-sync-template -u user -p password -q cus.123.deliver
+$ yarn build
 ```
 
-# to be implemented
+# run in production
+
+```
+$ ./proca-sync-template
+```
+
 
 ## other run modes
 
 instead of reading from the queue, read the message from a file
 
 ```
-
-$yarn test data/example-signature.json 
+$yarn test data/petition_optin.json 
+```
 
 instead of processing the messages, save them into the data folder (useful to run yarn test later)
-$yarn dump 
+
+```
+$yarn start --dump
 ```
 
 
 
 ## extra configuration/filters
 
-proca sends all events to the queue. In most synchroniser, only some of the events are actually needed:
-
-- primary="include"|"exclude"
-- secondary="include"|"exclude"
-- optin_only
-- double_optin_only
-
-
-
-
-
-
-
-
-
+the construtor of your CRM should set the type of events it want to process
+TBD

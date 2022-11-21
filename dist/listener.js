@@ -1,11 +1,7 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -32,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleEmailStatusChange = exports.handleNewAction = exports.listen = void 0;
+exports.handleEmailStatusChange = exports.listen = void 0;
 const queue_1 = require("@proca/queue");
 //import * as crm from './crm.debug';
 let crm = {};
@@ -41,8 +37,18 @@ let crm = {};
 // Main listen loop which waits on new messages and handles them
 function listen(config) {
     return (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(this, void 0, void 0, function* () {
-        crm = yield Promise.resolve().then(() => __importStar(require("./crm.debug")));
-        console.log("crm", crm);
+        if (!process.env.CRM) {
+            console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
+            throw new Error("missing process.env.CRM");
+        }
+        crm = yield Promise.resolve().then(() => __importStar(require("./crm/" + process.env.CRM)));
+        if (crm.default) {
+            crm = crm.default;
+        }
+        else {
+            throw new Error(process.env.CRM + " missing export default new YourCRM()");
+        }
+        console.log(crm);
         // Handle a new message
         //
         // Throw an error if you want to NACK the message and make it re-deliver again.
@@ -53,7 +59,7 @@ function listen(config) {
             case 'proca:action:2': {
                 // An action done by Supporter
                 const action = actionOrEvent;
-                yield handleNewAction(action);
+                yield crm.handleActionContact(action);
                 break;
             }
             case 'proca:event:2': {
@@ -63,7 +69,7 @@ function listen(config) {
                 switch (event.eventType) {
                     case 'email_status': {
                         // An email status update such as Double opt in or bounce
-                        yield handleEmailStatusChange(event);
+                        yield crm.handleEmailStatusChange(event);
                         break;
                     }
                     // ignore other events
@@ -76,61 +82,6 @@ function listen(config) {
     }));
 }
 exports.listen = listen;
-// Ok lets add a new signature!
-function handleNewAction({ action, contact, campaignId, campaign, privacy }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        //crm.showContacts()
-        console.log(`Action type ${action.actionType} from ${contact.email}`);
-        // we only want register action type, and not share and so on
-        if (action.actionType !== 'register')
-            return;
-        // first, lets see if the campaign is in the CRM
-        // We fetch it by id because the title could be changed in Proca by a campaigner
-        const camp = yield crm.getCampaignByExternalId(campaignId);
-        // this is campaign id in our CRM
-        let campId;
-        if (camp) {
-            campId = camp.id;
-        }
-        else {
-            // Campaign does not exist, we need to create it
-            // In proca campaign has short name (alphanumeric) and longer title (human friendly)
-            // our CRM only stores one name, we decide to use the human readable
-            campId = yield crm.addCampaign(campaign);
-        }
-        // we know the campaign id now, lets also upsert the contact
-        const cont = yield crm.getContactByEmail(contact.email);
-        let contactId;
-        if (cont) {
-            // found contact, get id
-            contactId = cont.id;
-        }
-        else {
-            // creating a new contact.
-            // Our CRM only stores these PII
-            // Depending on the widget and campaign, the contact can have following fields:
-            //
-            // contact.email
-            // contact.firstName
-            // contact.lastName
-            // contact.postcode
-            // contact.country
-            // contact.address.street
-            // contact.address.street_number
-            // contact.address.locality
-            // contact.address.region
-            contactId = yield crm.addContact(contact);
-        }
-        // Lets manage the subscription if we are honoring opt in under form
-        if (privacy.optIn) {
-            yield crm.setSubscribed(contactId, privacy.optIn);
-        }
-        // Lets now add a signature
-        yield crm.addAction(contactId, campId);
-        // and we are done
-    });
-}
-exports.handleNewAction = handleNewAction;
 function handleEmailStatusChange(event) {
     return __awaiter(this, void 0, void 0, function* () {
         // If we want to detect supporter clicking on opt in link in email, we can do this here

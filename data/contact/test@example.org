@@ -1,0 +1,10 @@
+{
+  "area": "FR",
+  "contactRef": "MDWJu2fbogTgTHgLTLl-OFvRII63xZE76i7w3qHfbbX",
+  "country": "FR",
+  "dupeRank": 0,
+  "email": "test@example.org",
+  "firstName": "Alonso",
+  "lastName": "Bistro",
+  "postcode": "1234"
+}

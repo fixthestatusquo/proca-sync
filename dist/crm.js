@@ -8,76 +8,49 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.showContacts = exports.addCampaign = exports.getCampaignByExternalId = exports.getCampaignByName = exports.addSignature = exports.setBounced = exports.setSubscribed = exports.addContact = exports.getContactByEmail = exports.CRM = void 0;
-const lodash_1 = __importDefault(require("lodash"));
-// global CRM in memory here
-exports.CRM = {
-    contacts: [],
-    campaigns: []
-};
-// APIs to call the CRM
-// I make them async as if they are networked api calls
-const getContactByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    return lodash_1.default.find(exports.CRM.contacts, (c) => c.email === email);
-});
-exports.getContactByEmail = getContactByEmail;
-const addContact = (email, firstName, lastName) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = exports.CRM.contacts.length;
-    exports.CRM.contacts.push({
-        id,
-        firstName: firstName,
-        lastName: lastName || '',
-        email,
-        subscribed: false,
-        bounced: false,
-        campaigns: []
-    });
-    return id;
-});
-exports.addContact = addContact;
-const setSubscribed = (id, subscribed) => __awaiter(void 0, void 0, void 0, function* () {
-    exports.CRM.contacts[id].subscribed = subscribed;
-});
-exports.setSubscribed = setSubscribed;
-const setBounced = (id, bounced) => __awaiter(void 0, void 0, void 0, function* () {
-    exports.CRM.contacts[id].subscribed = bounced;
-});
-exports.setBounced = setBounced;
-const addSignature = (contactId, campaignId) => __awaiter(void 0, void 0, void 0, function* () {
-    const cs = exports.CRM.contacts[contactId].campaigns;
-    if (cs.indexOf(campaignId) < 0) {
-        cs.push(campaignId);
+exports.CRM = exports.CRMType = void 0;
+var CRMType;
+(function (CRMType) {
+    CRMType[CRMType["ActionContact"] = 0] = "ActionContact";
+    CRMType[CRMType["Contact"] = 1] = "Contact";
+    CRMType[CRMType["OptIn"] = 2] = "OptIn";
+    //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
+})(CRMType = exports.CRMType || (exports.CRMType = {}));
+class CRM {
+    constructor() {
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
+            // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist
+            // by campaign, we mean whatever your CRM uses to segment contacts and actions, it might be named list, segment...
+            return Promise.resolve(campaign);
+        });
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            throw new Error("you need to implement handleContact in your CRM");
+        });
+        this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            if (message.privacy.withConsent && this.crmType === CRMType.Contact) {
+                return this.handleContact(message);
+            }
+            if (message.privacy.optIn && this.crmType === CRMType.OptIn) {
+                return this.handleContact(message);
+            }
+            if (this.crmType === CRMType.ActionContact) {
+                throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");
+            }
+        });
+        this.campaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            const name = campaign.name;
+            if (!this.campaigns[name]) {
+                this.campaigns[name] = yield this.fetchCampaign(campaign);
+            }
+            return Promise.resolve(this.campaigns[name]);
+        });
+        this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve({ processed: false });
+        });
+        this.campaigns = {};
+        this.crmType = CRMType.ActionContact;
     }
-});
-exports.addSignature = addSignature;
-const getCampaignByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
-    return lodash_1.default.find(exports.CRM.campaigns, (c) => c.name === name);
-});
-exports.getCampaignByName = getCampaignByName;
-const getCampaignByExternalId = (externalId) => __awaiter(void 0, void 0, void 0, function* () {
-    return lodash_1.default.find(exports.CRM.campaigns, (c) => c.externalId === externalId);
-});
-exports.getCampaignByExternalId = getCampaignByExternalId;
-const addCampaign = (name, externalId) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = exports.CRM.campaigns.length;
-    exports.CRM.campaigns.push({
-        name, id, externalId
-    });
-    return id;
-});
-exports.addCampaign = addCampaign;
-const showContacts = () => {
-    let s = '';
-    for (const c of exports.CRM.contacts) {
-        s = `${c.firstName} ${c.lastName} <${c.email}> subscribed: ${c.subscribed} blocked: ${c.bounced} signatures:`;
-        for (const cid of c.campaigns) {
-            s += ` ${exports.CRM.campaigns[cid].name};`;
-        }
-        console.log(s);
-    }
-};
-exports.showContacts = showContacts;
+}
+exports.CRM = CRM;

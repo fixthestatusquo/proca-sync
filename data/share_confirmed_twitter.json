@@ -1,0 +1,57 @@
+{
+  "action": {
+    "actionType": "share_confirmed",
+    "createdAt": "2022-11-20T23:28:43Z",
+    "customFields": {
+      "medium": "twitter"
+    },
+    "testing": false
+  },
+  "actionId": 1732874,
+  "actionPage": {
+    "locale": "en",
+    "name": "test/fixthestatusquo/en",
+    "supporterConfirmTemplate": null,
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 2466,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "test",
+    "title": "Pineapple doesn’t belong on pizza!"
+  },
+  "campaignId": 9,
+  "contact": {
+    "area": "BE",
+    "contactRef": "MDWJu2fbogTgTHgLTLl-OFvRII63xZE76i7w3qHfbbE",
+    "country": "BE",
+    "dupeRank": 20,
+    "email": "test@tttp.eu",
+    "firstName": "aaa",
+    "postcode": "123"
+  },
+  "org": {
+    "name": "fixthestatusquo",
+    "title": "Fix the Status Quo"
+  },
+  "orgId": 766,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": null,
+    "emailStatusChanged": null,
+    "givenAt": "2022-11-20T23:27:28Z",
+    "optIn": true,
+    "withConsent": false
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://widget.proca.app/d/test/fixthestatusquo/en/index.html",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}

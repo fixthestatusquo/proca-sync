@@ -4,31 +4,33 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
-// to parse options
+const fs_1 = require("fs");
 const minimist_1 = __importDefault(require("minimist"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const config_1 = require("./config");
-const listener_1 = require("./listener");
 const main = (argv) => {
     const opt = (0, minimist_1.default)(argv, {
-        alias: { e: "env", v: "verbose" },
         default: { env: "" },
-        boolean: ["verbose"],
     });
     let envConfig = undefined;
+    if (!opt._[0]) {
+        console.error("missing file(s) to process, eg. yarn test data/petition_optin.json [data/share_twitter.json ...]");
+        process.exit(1);
+    }
     if (opt.env) {
-        envConfig =
-            { path: opt.env };
+        envConfig = { path: opt.env };
     }
     const conf = dotenv_1.default.config(envConfig);
-    try {
-        const config = (0, config_1.configFromOptions)(conf);
-        console.log("listening for messages");
-        (0, listener_1.listen)(config);
-    }
-    catch (er) {
-        console.error(`Problem: ${er}`);
-        (0, config_1.help)();
+    const config = (0, config_1.configFromOptions)(conf);
+    for (const file of opt._) {
+        try {
+            const message = JSON.parse((0, fs_1.readFileSync)(file, "utf8"));
+            console.log(message);
+        }
+        catch (er) {
+            console.error(`Problem: ${er}`);
+            (0, config_1.help)();
+        }
     }
 };
 exports.main = main;
