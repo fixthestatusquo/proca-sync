@@ -28,7 +28,7 @@ class DebugCRM extends CRM {
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    console.log("fetching campaign" + campaign.name);
+    console.log("fake fetching campaign", campaign.name);
     return campaign;
   };
 }

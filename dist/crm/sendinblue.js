@@ -10,27 +10,77 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
-const SibApiV3Sdk = require('@sendinblue/client');
-const apiInstance = new SibApiV3Sdk.AccountApi();
-// Configure API key authorization: apiKey
-apiInstance.setApiKey(SibApiV3Sdk.AccountApiApiKeys.apiKey, 'YOUR API KEY');
-apiInstance.getAccount().then(function (data) {
-    console.log('API called successfully. Returned data: ', data.body);
-}, function (error) {
-    console.error(error);
-});
+const SibApiV3Sdk = require("@sendinblue/client");
+/*
+ *
+
+interface CRM {
+  fetchCampaigns = () : Promise<void>
+}
+*/
 class SendInBlueCRM extends crm_1.CRM {
     constructor() {
-        super(...arguments);
-        this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
+        super();
+        this.apiInstance = new SibApiV3Sdk.ContactsApi();
+        this.folderId = 0;
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             const camp = yield this.campaign(message.campaign);
-            console.log("message", message);
+            console.log(camp.id, message.contact.email);
+            let createContact = new SibApiV3Sdk.CreateContact();
+            createContact.email = message.contact.email;
+            createContact.attributes = { "LANG": message.actionPage.locale, "FIRSTNAME": message.contact.firstName, "LASTNAME": message.contact.lastName || "" };
+            createContact.listIds = [camp.id];
+            createContact.updateEnabled = true;
+            const contact = yield this.apiInstance.createContact(createContact);
             return { processed: true };
         });
-        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            console.log("fetching campaign" + campaign.name);
-            return campaign;
+        this.fetchCampaigns = () => __awaiter(this, void 0, void 0, function* () {
+            try {
+                let folders = yield this.apiInstance.getFolders(10, 0);
+                const name = "proca";
+                if (folders.body.folders) {
+                    let procaFolder = folders.body.folders.filter((d) => d.name === name);
+                    if (!procaFolder.length) {
+                        const createFolder = new SibApiV3Sdk.CreateUpdateFolder();
+                        createFolder.name = name;
+                        const data = yield this.apiInstance.createFolder(createFolder);
+                        procaFolder = data.body;
+                    }
+                    else {
+                        procaFolder = procaFolder[0];
+                    }
+                    this.folderId = procaFolder.id;
+                    let lists = yield this.apiInstance.getLists(20, 0);
+                    lists = lists.body.lists;
+                    if (lists.length) {
+                        lists.forEach((d) => this.campaigns[d.name] = d);
+                    }
+                }
+            }
+            catch (e) {
+                console.log(e);
+            }
         });
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            if (Object.keys(this.campaigns).length === 0) {
+                yield this.fetchCampaigns();
+                if (this.campaigns[campaign.name])
+                    return this.campaigns[campaign.name];
+            }
+            try {
+                const createList = new SibApiV3Sdk.CreateList();
+                createList.name = campaign.name;
+                createList.folderId = this.folderId;
+                const data = yield this.apiInstance.createList(createList);
+                console.log("fetching campaign " + campaign.name, data.body);
+                return data.body;
+            }
+            catch (e) {
+                console.log(e);
+            }
+        });
+        this.crmType = crm_1.CRMType.OptIn;
+        this.apiInstance.setApiKey(SibApiV3Sdk.AccountApiApiKeys.apiKey, process.env.SENDINBLUE_KEY);
     }
 }
 exports.default = new SendInBlueCRM();

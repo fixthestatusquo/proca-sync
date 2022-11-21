@@ -7,8 +7,6 @@ export type handleResult = {
 export { ActionMessageV2 as ActionMessage };
 export { EventMessageV2 as EventMessage };
 
-type Obj = { [key: string]: any };
-
 export type ProcaCampaign = { [key: string]: any }; // TODO export from proca/queue
 
 export type Contact = {
@@ -58,7 +56,7 @@ export enum CRMType {
   //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
 }
 export abstract class CRM implements CRMInterface {
-  public campaigns: Obj;
+  public campaigns: Record<string,any>;
   public crmType: CRMType;
 
   constructor() {
@@ -97,7 +95,7 @@ export abstract class CRM implements CRMInterface {
     }
   };
 
-  campaign = async (campaign: ProcaCampaign): Promise<Obj> => {
+  campaign = async (campaign: ProcaCampaign): Promise<Record<string,any>> => {
     const name: string = campaign.name;
     if (!this.campaigns[name]) {
       this.campaigns[name] = await this.fetchCampaign(campaign);
