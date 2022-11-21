@@ -58,7 +58,7 @@ export enum CRMType {
   //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
 }
 export abstract class CRM implements CRMInterface {
-  private campaigns: Obj;
+  public campaigns: Obj;
   public crmType: CRMType;
 
   constructor() {

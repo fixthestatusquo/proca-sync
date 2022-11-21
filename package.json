@@ -27,6 +27,7 @@
   "dependencies": {
     "@proca/crypto": "^3.3.4",
     "@proca/queue": "^0.2.3",
+    "@sendinblue/client": "^3.2.2",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21",
     "minimist": "^1.2.7"

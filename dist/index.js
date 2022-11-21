@@ -13,7 +13,7 @@ const main = (argv) => {
     const opt = (0, minimist_1.default)(argv, {
         alias: { e: "env", v: "verbose" },
         default: { env: "" },
-        boolean: ["verbose"],
+        boolean: ["verbose", "dump"],
     });
     let envConfig = undefined;
     if (opt.env) {
@@ -23,6 +23,10 @@ const main = (argv) => {
     const conf = dotenv_1.default.config(envConfig);
     try {
         const config = (0, config_1.configFromOptions)(conf);
+        if (opt.dump) {
+            console.warn("saving into data folder instead of using " + process.env.CRM);
+            process.env.CRM = "file";
+        }
         console.log("listening for messages");
         (0, listener_1.listen)(config);
     }
