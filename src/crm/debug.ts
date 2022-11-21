@@ -9,12 +9,9 @@ import {
 import { writeFileSync } from "fs";
 
 /*
- * A debug CRM that saves the data into the data folder
+ * A debug CRM that displays the messages and events in the log
  *
  */
-
-// TODO export from proca/queue
-type ContactID = string | number | undefined;
 
 
 class DebugCRM extends CRM {
