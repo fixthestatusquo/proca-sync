@@ -47,6 +47,7 @@ interface CRMInterface {
   ) => Promise<handleResult | void>; //WIP
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
+  fetchContact?: (email: string) => Promise<any>; // fetch the contact, mostly for debug
 }
 
 export enum CRMType {
@@ -71,6 +72,10 @@ export abstract class CRM implements CRMInterface {
 
     return Promise.resolve(campaign);
   };
+
+  fetchContact = async (email: string): Promise<any> => {
+    throw new Error("you need to implement fetchContact in your CRM");
+  }
 
   handleContact= async (
     message: ActionMessageV2
