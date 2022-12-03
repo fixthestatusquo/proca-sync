@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { listen } from "./listener";
+import * as Sentry from "@sentry/node";
 
 export const main = (argv: string[]) => {
   const opt = parseArg(argv, {
@@ -17,6 +18,9 @@ export const main = (argv: string[]) => {
     { path: opt.env }
   }
   const conf = dotenv.config(envConfig);
+  if (process.env.SENTRY_URL) {
+     Sentry.init({dsn: process.env.SENTRY_URL});
+  }
 
   try {
     const config = configFromOptions(conf);
@@ -29,6 +33,7 @@ export const main = (argv: string[]) => {
     listen(config);
   } catch (er) {
     console.error(`Problem: ${er}`);
+    Sentry.captureException(er);
     help();
   }
 };
