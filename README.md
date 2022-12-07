@@ -17,13 +17,17 @@ We provide node packages to help with passing messages from queue to your callba
 
 # setup
 
-- fork this repository
-- git clone the fork
-- create a new src/crm/{yourcrm}.ts
+if you want to use an existing CRM integration:
+
+- pull this repository
+- check the name of the CRM from /src/crm/{yourcrm}.ts
 - cp .env.example .env
 - modify CRM={yourcrm} in your .env
+- depending of the CRM: add extra environment variables
+- You need to know queue service credentials (name, username and password) from which to read from.
 
-You need to know queue service credentials (name, username and password) from which to read from.
+if you want to create an integration with an new CRM, it's almost the same, gut please clone and PR.
+
 
 # test and develop
 read the queue and process it
@@ -37,6 +41,24 @@ if you want to save the messages received into the data folder, set CRM=file or 
 
 Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `pip install proca` as root.
 
+_tip: instead of reading from the queue, read the message from a file_
+
+```
+$yarn test data/petition_optin.json 
+```
+
+we provide a some example action/contact into data, however, it would likely be more useful to have your own actions from your widget/campaign coming from your queue
+
+instead of processing the messages, save them into the data folder:
+
+```
+$yarn start --dump
+```
+
+by default, the name of the files are not clear, we suggest to rename them based on the type of action/context you want to test (eg an opt-in, opt-out, existing contact, new one...)
+
+_please do not git add these files, they are likely to contain personal data_
+ 
 # build for production
 
 ```
@@ -50,23 +72,7 @@ $ ./proca-sync-template
 ```
 
 
-## other run modes
-
-instead of reading from the queue, read the message from a file
-
-```
-$yarn test data/petition_optin.json 
-```
-
-instead of processing the messages, save them into the data folder (useful to run yarn test later)
-
-```
-$yarn start --dump
-```
-
-
 
 ## extra configuration/filters
 
-the construtor of your CRM should set the type of events it want to process
-TBD
+the construtor of your CRM should set the type of events it want to process (eg only opt-in contacts, all contacts or contacts and events)

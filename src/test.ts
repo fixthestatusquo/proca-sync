@@ -18,6 +18,9 @@ export const main = async (argv: string[]) => {
 
   if (opt.env) {
     envConfig = { path: opt.env };
+    console.log ("using configuration " + opt.env);
+  } else {
+    console.log ("using default config .env (tip:' --env .env.yourconfig' to overwrite)");
   }
   const conf = dotenv.config(envConfig);
 
@@ -25,6 +28,8 @@ export const main = async (argv: string[]) => {
     if (!process.env.CRM) {
       console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts")
       throw new Error ("missing process.env.CRM");
+    } else {
+      console.log("using CRM " +process.env.CRM);
     }
     let crm = await import("./crm/"+process.env.CRM);
     if (crm.default) {
