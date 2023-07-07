@@ -21,7 +21,7 @@ const makeHeaders = () => {
 }
 
 export const postAction = async (body: Signature) => {
-  if ("string" !== process.env.POST_URL) {
+  if ("string" !== typeof process.env.POST_URL) {
     throw new Error ("POST_URL missing in env");
   }
   try {
@@ -36,7 +36,7 @@ export const postAction = async (body: Signature) => {
 }
 
 export const verification = async (verificationToken: string, body: Verification) => {
-  if ("string" !== process.env.POST_URL) {
+  if ("string" !== typeof process.env.VERIFICATION_URL) {
     throw new Error ("POST_URL missing in env");
   }
   const url = process.env.VERIFICATION_URL + verificationToken + '/verify';
@@ -46,6 +46,10 @@ export const verification = async (verificationToken: string, body: Verification
       {body:JSON.stringify(body),
       ...(makeHeaders())}
     );
+    if (response.status === 204) {
+      return "allgood?";
+    }
+
     const data= await response.json();
     console.log('data', data);
     return data;
@@ -56,7 +60,7 @@ export const verification = async (verificationToken: string, body: Verification
 }
 
 export const lookup = async (email: string) => {
-  if ("string" !== process.env.LOOKUP_URL) {
+  if ("string" !== typeof process.env.LOOKUP_URL) {
     throw new Error ("LOOKUP_URL missing in env");
   }
   const url = process.env.LOOKUP_URL + email;
