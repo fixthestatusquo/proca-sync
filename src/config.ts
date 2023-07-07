@@ -5,6 +5,8 @@
 export type Configuration = {
   url: string  // the URL of queue server
   queue: string // the queue name
+  pause?: boolean
+  concurrency?: number
 };
 
 export function help() {
@@ -26,6 +28,8 @@ export function configFromOptions(opt: any): Configuration {
   return {
     url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
     queue: process.env.PROCA_QUEUE,
+    pause:!!process.env.pause,
+    concurrency: parseInt(process.env.concurrency || "1") || 1
   };
 }
 

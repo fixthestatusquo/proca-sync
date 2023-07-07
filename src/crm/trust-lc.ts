@@ -5,7 +5,6 @@ import {
   ActionMessage,
   handleResult,
   ProcaCampaign,
-  pause,
 } from "../crm";
 import { writeFileSync } from "fs";
 import { formatAction, handleConsent } from "./trust-lc/data";
@@ -25,7 +24,7 @@ class TrustCRM extends CRM {
     const camp = await this.campaign(message.campaign);
     console.log("message",message.actionId, message.campaign?.title, message);
         const actionPayload = formatAction(message);
-const r= await pause (20);    
+console.log(actionPayload);
         const verificationPayload = {
           petition_signature: {
             subscribe_newsletter:

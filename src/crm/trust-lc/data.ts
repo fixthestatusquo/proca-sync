@@ -65,7 +65,6 @@ export const formatAction = (queueAction: ActionMessageV2) => {
   if (postData.contact.address?.street) action.address1 = postData.contact.address?.street;
   if (postData.contact.address?.locality) action.location = postData.contact.address?.locality;
 console.log("action",action);
-return;
   const signature: Signature = { "petition_signature": _.omitBy(action, _.isNil) };
 
   return signature;

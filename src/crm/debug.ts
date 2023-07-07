@@ -5,7 +5,6 @@ import {
   ActionMessage,
   handleResult,
   ProcaCampaign,
-  pause,
 } from "../crm";
 import { writeFileSync } from "fs";
 
@@ -22,7 +21,6 @@ class DebugCRM extends CRM {
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
     console.log("message",message.actionId, message.campaign?.title);
-const r= await pause (20);    
 console.log("process X",r);
     return false;
   };

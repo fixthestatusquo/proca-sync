@@ -7,6 +7,14 @@ let crm : any = {};
 // TODO: set type
 //
 // Main listen loop which waits on new messages and handles them
+export const pause = (time : number | undefined): Promise <any>=> {
+      const min = (!time || time >= 7) ? 7: time /2; 
+      const max = time || 42; // wait between min and max
+      time = Math.floor(Math.random() * (max - min + 1) + min) *1000;
+      console.log("waiting",time/1000);
+    return new Promise(resolve => setTimeout(() => resolve(time), time));
+}
+
 export function listen(config : Configuration)  {
   return syncQueue(config.url, config.queue, async (actionOrEvent) => {
     if (!process.env.CRM) {
@@ -51,8 +59,11 @@ export function listen(config : Configuration)  {
         throw new Error ("unknown type " + actionOrEvent.schema);
         // ignore other message types
     }
+    if (config.pause) {
+      console.log("pause...");
+      pause(6);
+    }
 
-    // show what we have now
   });
 }
 
