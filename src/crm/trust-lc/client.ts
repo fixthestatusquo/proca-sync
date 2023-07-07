@@ -27,7 +27,6 @@ export const postAction = async (body: Signature) => {
   try {
     const response= await fetch(process.env.POST_URL,{...(makeHeaders()),body:JSON.stringify(body)});
     const data = await response.json();
-    console.log('Post status: ', data);
     return data;
     } catch (error: any) {
       console.error('post error: ', error);
@@ -47,11 +46,10 @@ export const verification = async (verificationToken: string, body: Verification
       ...(makeHeaders())}
     );
     if (response.status === 204) {
-      return "allgood?";
+      return "allgood";
     }
 
     const data= await response.json();
-    console.log('data', data);
     return data;
     } catch (error: any) {
       console.error('post error: ', error);

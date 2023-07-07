@@ -26,7 +26,6 @@ class TrustCRM extends CRM {
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-    console.log("message",message.actionId, message.campaign?.title, message);
         const actionPayload = formatAction(message);
 console.log(actionPayload);
         const verificationPayload = {

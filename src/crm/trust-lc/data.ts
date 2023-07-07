@@ -1,6 +1,5 @@
 
 import type { ActionMessageV2 } from '@proca/queue'
-import _ from 'lodash';
 
 interface AditionalAttributes {
   name: string;
@@ -43,7 +42,6 @@ export const handleConsent = (action: ActionMessageV2) => {
 
 export const formatAction = (queueAction: ActionMessageV2) => {
   const postData = queueAction;
-console.log("postData", postData);
   const action: TrustAction = {
     first_name: postData.contact.firstName,
     last_name: postData.contact.lastName,
@@ -62,10 +60,15 @@ console.log("postData", postData);
     ]
   }
 
-  if (postData.contact.address?.street) action.address1 = postData.contact.address?.street;
-  if (postData.contact.address?.locality) action.location = postData.contact.address?.locality;
-console.log("action",action);
-  //const signature: Signature = { "petition_signature": _.omitBy(action, _.isNil) };
+  if (postData.contact.address?.street) action.address1 = postData.contact.address.street;
+  if (postData.contact.address?.locality) action.location = postData.contact.address.locality;
+
+    for (const key in action ) {
+      const v = action[key as keyof TrustAction ]
+      if (v === undefined || v === null) {
+        delete action[key as keyof TrustAction];
+    }
+  }
   const signature: Signature = { "petition_signature": action };
 
   return signature;
