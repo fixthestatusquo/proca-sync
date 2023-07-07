@@ -8,7 +8,8 @@ export type Configuration = {
 };
 
 export function help() {
-  console.error(`edit .env or set --env=path/to/.env:
+  console.error(`set --env=path/to/.env and at minima
+  CRM
   PROCA_USERNAME=
   PROCA_PASSWORD=
   PROCA_QUEUE= [eg: cus.123.deliver]

@@ -1,19 +1,15 @@
 {
-  "name": "proca-sync-template",
-  "version": "1.0.0",
-  "description": "An example Proca-to-CRM syncer",
+  "name": "proca-sync",
+  "version": "1.0.1",
+  "description": "Proca-to-CRM syncer",
   "main": "dist/index.js",
-  "repository": "git@github.com:fixthestatusquo/proca-sync-template.git",
-  "author": "Marcin Koziej <marcin@cahoots.pl>",
+  "repository": "git@github.com:fixthestatusquo/proca-sync.git",
   "license": "AGPL-3.0-or-later",
   "files": [
     "dist",
     "src",
     "bin"
   ],
-  "bin": {
-    "proca-sync-template": "./bin/proca-sync-template"
-  },
   "scripts": {
     "build": "tsc",
     "test": "ts-node-dev src/test.ts",

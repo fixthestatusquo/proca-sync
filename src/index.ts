@@ -10,9 +10,21 @@ export const main = (argv: string[]) => {
   const opt = parseArg(argv, {
     alias: { e: "env", v: "verbose" },
     default: { env: "" },
-    boolean: ["verbose", "dump"],
-  });
+    boolean: ["verbose", "dump", "help"],
+   "unknown": (param) => { 
+     if (param[0] === '-') {
+       console.error("invalid parameter",param);
+       process.exit(1);
+     }
+     return true;
+  }});
+
+  
   let envConfig = undefined;
+  if (opt.help) {
+    //clihelp();
+  }
+
   if (opt.env) {
     envConfig = 
     { path: opt.env }
@@ -24,7 +36,6 @@ export const main = (argv: string[]) => {
 
   try {
     const config = configFromOptions(conf);
-
     if (opt.dump) {
       console.warn ("saving into data folder instead of using "+process.env.CRM);
       process.env.CRM = "file";

@@ -19,7 +19,6 @@ export function listen(config : Configuration)  {
     } else {
       throw new Error (process.env.CRM +" missing export default new YourCRM()");
     }
-    console.log(crm);
     // Handle a new message
     //
     // Throw an error if you want to NACK the message and make it re-deliver again.
@@ -30,9 +29,9 @@ export function listen(config : Configuration)  {
         case 'proca:action:2': {
           // An action done by Supporter
           const action : ActionMessageV2 = actionOrEvent
-          await crm.handleActionContact (action)
-
-          break
+          const r= await crm.handleActionContact (action)
+          console.log("r",r);
+          return r;
         }
 
         case 'proca:event:2': {
@@ -43,14 +42,13 @@ export function listen(config : Configuration)  {
           switch (event.eventType) {
               case 'email_status': {
                 // An email status update such as Double opt in or bounce
-                await crm.handleEmailStatusChange(event)
-                break
+                return crm.handleEmailStatusChange(event)
               }
-              // ignore other events
+              // ignore other eventsa
           }
-
-          break
+          return false;
         }
+        throw new Error ("unknown type " + actionOrEvent.schema);
         // ignore other message types
     }
 

@@ -5,6 +5,7 @@ import {
   ActionMessage,
   handleResult,
   ProcaCampaign,
+  pause,
 } from "../crm";
 import { writeFileSync } from "fs";
 
@@ -13,15 +14,17 @@ import { writeFileSync } from "fs";
  *
  */
 
-
 class DebugCRM extends CRM {
+
 
   handleActionContact = async (
     message: ActionMessage
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-    console.log("message",message);
-    return { processed: true };
+    console.log("message",message.actionId, message.campaign?.title);
+const r= await pause (20);    
+console.log("process X",r);
+    return false;
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {

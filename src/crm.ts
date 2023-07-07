@@ -38,10 +38,10 @@ export type Action = {
 interface CRMInterface {
   handleActionContact: (
     message: ActionMessageV2
-  ) => Promise<handleResult | void>;
+  ) => Promise<handleResult | boolean>;
   // TODO: proca/queue exports Action and ContactType, probably source and ap too?
-  handleContact?: (message: ActionMessageV2) => Promise<handleResult|void>,
-  handleEvent?: (message: EventMessageV2) => Promise<handleResult | void>; //WIP
+  handleContact?: (message: ActionMessageV2) => Promise<handleResult|boolean>,
+  handleEvent?: (message: EventMessageV2) => Promise<handleResult | boolean>; //WIP
   handleEmailStatusChange?: (
     message: EventMessageV2
   ) => Promise<handleResult | void>; //WIP
@@ -79,25 +79,31 @@ export abstract class CRM implements CRMInterface {
 
   handleContact= async (
     message: ActionMessageV2
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
       throw new Error("you need to implement handleContact in your CRM");
   }
 
 
+  formatResult = (result: handleResult | boolean) : boolean => {
+    if (typeof result === 'boolean') return result;
+    return result.processed;
+  };
+
   handleActionContact = async (
     message: ActionMessageV2
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     if (message.privacy.withConsent && this.crmType === CRMType.Contact) {
-      return this.handleContact(message);
+      return this.formatResult(await this.handleContact(message));
     }
     if (message.privacy.optIn && this.crmType === CRMType.OptIn) {
-      return this.handleContact(message);
+      return this.formatResult(await this.handleContact(message));
     }
     if (this.crmType === CRMType.ActionContact) {
       throw new Error(
         "You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn"
       );
     }
+    return true;
   };
 
   campaign = async (campaign: ProcaCampaign): Promise<Record<string,any>> => {
@@ -110,7 +116,15 @@ export abstract class CRM implements CRMInterface {
 
   handleEvent = async (
     message: EventMessageV2
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     return Promise.resolve({ processed: false });
   };
+}
+
+export const pause = (time : number | undefined): Promise <any>=> {
+      const min = (!time || time >= 7) ? 7: time /2; 
+      const max = time || 42; // wait between min and max
+      time = Math.floor(Math.random() * (max - min + 1) + min) *1000;
+      console.log("waiting",time/1000);
+    return new Promise(resolve => setTimeout(() => resolve(time), time));
 }
