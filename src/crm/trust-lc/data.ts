@@ -43,7 +43,7 @@ export const handleConsent = (action: ActionMessageV2) => {
 
 export const formatAction = (queueAction: ActionMessageV2) => {
   const postData = queueAction;
-
+console.log("postData", postData);
   const action: TrustAction = {
     first_name: postData.contact.firstName,
     last_name: postData.contact.lastName,
@@ -65,7 +65,8 @@ export const formatAction = (queueAction: ActionMessageV2) => {
   if (postData.contact.address?.street) action.address1 = postData.contact.address?.street;
   if (postData.contact.address?.locality) action.location = postData.contact.address?.locality;
 console.log("action",action);
-  const signature: Signature = { "petition_signature": _.omitBy(action, _.isNil) };
+  //const signature: Signature = { "petition_signature": _.omitBy(action, _.isNil) };
+  const signature: Signature = { "petition_signature": action };
 
   return signature;
   }

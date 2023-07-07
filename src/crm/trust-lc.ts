@@ -17,6 +17,10 @@ import { postAction, verification} from "./trust-lc/client";
 
 class TrustCRM extends CRM {
 
+  constructor() {
+    super();
+    this.crmType = CRMType.OptIn;
+  }
 
   handleContact = async (
     message: ActionMessage
