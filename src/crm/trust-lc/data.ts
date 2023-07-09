@@ -1,5 +1,4 @@
-
-import type { ActionMessageV2 } from '@proca/queue'
+import type { ActionMessageV2 } from "@proca/queue";
 
 interface AditionalAttributes {
   name: string;
@@ -20,25 +19,30 @@ export interface TrustAction {
   data_handling_consent: boolean;
   move_code: string;
   origin: string | null;
+  created_at: string;
+  confirmed_at: string;
   additional_attributes_attributes: AditionalAttributes[];
 }
 
 export interface Signature {
-  "petition_signature": TrustAction;
+  petition_signature: TrustAction;
 }
 
 export interface Verification {
-  "petition_signature": VerificationParams;
+  petition_signature: VerificationParams;
 }
 
 interface VerificationParams {
-  "subscribe_newsletter": boolean;
-  "data_handling_consent": boolean;
+  subscribe_newsletter: boolean;
+  data_handling_consent: boolean;
 }
 
 export const handleConsent = (action: ActionMessageV2) => {
-  return action.privacy.emailStatus !== 'double_opt_in' && !action.action.customFields.isSubscribed ? false : true
-}
+  return action.privacy.emailStatus !== "double_opt_in" &&
+    !action.action.customFields.isSubscribed
+    ? false
+    : true;
+};
 
 export const formatAction = (queueAction: ActionMessageV2) => {
   const postData = queueAction;
@@ -50,26 +54,31 @@ export const formatAction = (queueAction: ActionMessageV2) => {
     phone: postData.contact.phone,
     country: postData.contact.country,
     message: postData.contact.comment,
-    subscribe_newsletter: postData.privacy.emailStatus === 'double_opt_in',
+    subscribe_newsletter: postData.privacy.emailStatus === "double_opt_in",
     data_handling_consent: handleConsent(queueAction),
     move_code: "AKT" + postData.campaign.externalId,
     origin: postData.tracking?.location,
+    created_at: postData.action.createdAt || "",
+    confirmed_at: postData.privacy.givenAt || "",
     additional_attributes_attributes: [
-      {name: "petition_id", value: postData.actionPage.name},
-      {name: "Aktion",  value: "AKT" + postData.campaign.externalId}
-    ]
-  }
+      { name: "action_id", value: postData.actionId.toString() },
+      { name: "petition_id", value: postData.actionPage.name },
+      { name: "Aktion", value: "AKT" + postData.campaign.externalId },
+    ],
+  };
 
-  if (postData.contact.address?.street) action.address1 = postData.contact.address.street;
-  if (postData.contact.address?.locality) action.location = postData.contact.address.locality;
+  if (postData.contact.address?.street)
+    action.address1 = postData.contact.address.street;
+  if (postData.contact.address?.locality)
+    action.location = postData.contact.address.locality;
 
-    for (const key in action ) {
-      const v = action[key as keyof TrustAction ]
-      if (v === undefined || v === null) {
-        delete action[key as keyof TrustAction];
+  for (const key in action) {
+    const v = action[key as keyof TrustAction];
+    if (v === undefined || v === null) {
+      delete action[key as keyof TrustAction];
     }
   }
-  const signature: Signature = { "petition_signature": action };
+  const signature: Signature = { petition_signature: action };
 
   return signature;
-  }
+};

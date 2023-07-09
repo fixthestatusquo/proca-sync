@@ -96,4 +96,4 @@ class SendInBlueCRM extends CRM {
     }
   };
 }
-export default new SendInBlueCRM();
+export default SendInBlueCRM;

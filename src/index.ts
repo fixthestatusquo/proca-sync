@@ -5,12 +5,30 @@ import { existsSync } from "fs";
 
 import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { listen } from "./listener";
+import { init } from "./crm";
 import * as Sentry from "@sentry/node";
 
-export const main = (argv: string[]) => {
+const clihelp = () => {
+  console.log(
+    [
+      "options",
+      "--help (this command)",
+      "--env (either absolute path to a .env or .env.{env} in the folder)",
+      "--dry-run (don't write)",
+      "--dump (write the messages as file)",
+      "--verbose (show the result)",
+      "--pause (wait between each message)",
+      //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
+    ].join("\n")
+  );
+  process.exit(0);
+
+}
+
+export const main = async (argv: string[]) => {
   const opt = parseArg(argv, {
     alias: { e: "env", v: "verbose" },
-    default: { env: "" },
+    default: { env: "", verbose: false },
     boolean: ["verbose", "dump", "help", "pause"],
     unknown: (param) => {
       if (param[0] === "-") {
@@ -23,7 +41,8 @@ export const main = (argv: string[]) => {
 
   let envConfig = undefined;
   if (opt.help) {
-    //clihelp();
+    clihelp();
+    process.exit(0);
   }
 
   if (opt.env) {
@@ -42,7 +61,7 @@ export const main = (argv: string[]) => {
   }
 
   try {
-    const config = configFromOptions(conf);
+    const config = configFromOptions(conf, opt);
     if (opt.dump) {
       console.warn(
         "saving into data folder instead of using " + process.env.CRM
@@ -50,7 +69,8 @@ export const main = (argv: string[]) => {
       process.env.CRM = "file";
     }
     console.log("listening for messages");
-    listen(config);
+    const crm = await init (config);
+    listen(config, crm);
   } catch (er) {
     console.error(`Problem: ${er}`);
     Sentry.captureException(er);

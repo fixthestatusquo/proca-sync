@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   CRM,
   CRMType,
@@ -8,7 +7,7 @@ import {
 } from "../crm";
 import { writeFileSync } from "fs";
 import { formatAction, handleConsent } from "./trust-lc/data";
-import { postAction, verification} from "./trust-lc/client";
+import { postAction, verification } from "./trust-lc/client";
 
 /*
  * A debug CRM that displays the messages and events in the log
@@ -16,9 +15,8 @@ import { postAction, verification} from "./trust-lc/client";
  */
 
 class TrustCRM extends CRM {
-
-  constructor() {
-    super();
+  constructor(opt: {}) {
+    super(opt);
     this.crmType = CRMType.OptIn;
   }
 
@@ -26,25 +24,30 @@ class TrustCRM extends CRM {
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-        const actionPayload = formatAction(message);
-console.log(actionPayload);
-        const verificationPayload = {
-          petition_signature: {
-            subscribe_newsletter:
-              actionPayload.petition_signature.subscribe_newsletter,
-            data_handling_consent: handleConsent(message),
-          },
-        };
-        const data = await postAction(actionPayload);
-        if (data.petition_signature?.verification_token) {
-          const verified = await verification(
-            data.petition_signature.verification_token,
-            verificationPayload
-          );
-          return false; //true
-        } else {
-          return false;
-        }
+    const actionPayload = formatAction(message);
+    if (this.verbose) {
+      console.log(actionPayload);
+    }
+    const verificationPayload = {
+      petition_signature: {
+        subscribe_newsletter:
+          actionPayload.petition_signature.subscribe_newsletter,
+        data_handling_consent: handleConsent(message),
+      },
+    };
+    const data = await postAction(actionPayload);
+console.log("data",data);
+    if (data.petition_signature?.verification_token) {
+      const verified = await verification(
+        data.petition_signature.verification_token,
+        verificationPayload
+      );
+console.log("verified",verified);
+      return true;
+    } else {
+console.log("error",data);
+      return false;
+    }
 
     return false;
   };
@@ -55,4 +58,4 @@ console.log(actionPayload);
   };
 }
 
-export default new TrustCRM();
+export default TrustCRM;

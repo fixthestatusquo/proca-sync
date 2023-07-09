@@ -7,6 +7,7 @@ export type Configuration = {
   queue: string // the queue name
   pause?: boolean
   concurrency?: number
+  verbose: boolean
 };
 
 export function help() {
@@ -19,7 +20,8 @@ export function help() {
 }
 
 // you can also use env vars, or any other config style
-export function configFromOptions(opt: any): Configuration {
+export function configFromOptions(opt: any, argv: any): Configuration {
+
   if (!process.env.PROCA_QUEUE) throw Error("Provide queue name");
   if (!process.env.PROCA_USERNAME  && !process.env.PROCA_URL) throw Error("Provide queue user");
   if (!process.env.PROCA_PASSWORD && !process.env.PROCA_URL) throw Error("Provide queue password");
@@ -28,7 +30,8 @@ export function configFromOptions(opt: any): Configuration {
   return {
     url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
     queue: process.env.PROCA_QUEUE,
-    pause:!!process.env.pause,
+    pause: argv.pause,
+    verbose: argv.verbose,
     concurrency: parseInt(process.env.concurrency || "1") || 1
   };
 }

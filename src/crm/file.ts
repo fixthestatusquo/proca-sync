@@ -58,4 +58,4 @@ setBounced = async (id : number, bounced:boolean) => {
   };
 }
 
-export default new FileCRM();
+export default FileCRM;

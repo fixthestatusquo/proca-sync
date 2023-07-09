@@ -1,4 +1,6 @@
 import { ActionMessageV2, EventMessageV2 } from "@proca/queue";
+import { Configuration } from "./config";
+
 export type handleResult = {
   processed: boolean; // if the message has been processed or skipped
   // there will likely be more attributes to let the CRM inform the queue processor to pause for instance
@@ -39,15 +41,16 @@ interface CRMInterface {
   handleActionContact: (
     message: ActionMessageV2
   ) => Promise<handleResult | boolean>;
-  // TODO: proca/queue exports Action and ContactType, probably source and ap too?
-  handleContact?: (message: ActionMessageV2) => Promise<handleResult|boolean>,
-  handleEvent?: (message: EventMessageV2) => Promise<handleResult | boolean>; //WIP
-  handleEmailStatusChange?: (
+  handleContact?: (message: ActionMessageV2) => Promise<handleResult | boolean>;
+  handleEvent?: (message: EventMessageV2) => Promise<handleResult | boolean>;
+  handleEmailStatusChange: (
     message: EventMessageV2
-  ) => Promise<handleResult | void>; //WIP
+  ) => Promise<handleResult | boolean>;
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
   fetchContact?: (email: string) => Promise<any>; // fetch the contact, mostly for debug
+  setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
+  setBounce: (id: any, bounced: boolean) => Promise<boolean>;
 }
 
 export enum CRMType {
@@ -57,10 +60,14 @@ export enum CRMType {
   //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
 }
 export abstract class CRM implements CRMInterface {
-  public campaigns: Record<string,any>;
+  public campaigns: Record<string, any>;
   public crmType: CRMType;
+  public verbose: false;
+  public pause: false;
 
-  constructor() {
+  constructor(opt: any) {
+    this.verbose = opt?.verbose || false;
+    this.pause = opt?.pause || false;
     this.campaigns = {};
     this.crmType = CRMType.ActionContact;
   }
@@ -75,43 +82,115 @@ export abstract class CRM implements CRMInterface {
 
   fetchContact = async (email: string): Promise<any> => {
     throw new Error("you need to implement fetchContact in your CRM");
-  }
+  };
 
-  handleContact= async (
+  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+    throw new Error("you need to implement setSubscribed in your CRM");
+  };
+  setBounce = async (id: any, bounced: boolean): Promise<boolean> => {
+    throw new Error("you need to implement setBounce in your CRM");
+  };
+
+  handleContact = async (
     message: ActionMessageV2
   ): Promise<handleResult | boolean> => {
-      throw new Error("you need to implement handleContact in your CRM");
-  }
+    throw new Error("you need to implement handleContact in your CRM");
+  };
 
-
-  formatResult = (result: handleResult | boolean) : boolean => {
-    if (typeof result === 'boolean') return result;
+  formatResult = (result: handleResult | boolean): boolean => {
+    if (typeof result === "boolean") return result;
     return result.processed;
   };
 
   handleActionContact = async (
     message: ActionMessageV2
   ): Promise<handleResult | boolean> => {
-    if (message.privacy.withConsent && this.crmType === CRMType.Contact) {
-      return this.formatResult(await this.handleContact(message));
+    switch (this.crmType) {
+      case CRMType.Contact:
+        if (message.privacy.withConsent)
+          return this.formatResult(await this.handleContact(message));
+        console.error ("don't know how to process", message);
+        break;
+      case CRMType.OptIn:
+        if (message.privacy.optIn) {
+          return this.formatResult(await this.handleContact(message));
+        }
+        if (message.privacy.optIn === false) {
+          this.verbose && console.log('opt-out',message.actionId);
+          return true; //OptOut contact, we don't need to process
+        }
+        console.error ("don't know how to process - optin", message);
+        break;
+      case CRMType.ActionContact:
+        throw new Error(
+          "You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn"
+        );
+      default:
+        throw new Error(
+          "unexpected crmType " + this.crmType
+        );
     }
-    if (message.privacy.optIn && this.crmType === CRMType.OptIn) {
-      return this.formatResult(await this.handleContact(message));
-    }
-    if (this.crmType === CRMType.ActionContact) {
-      throw new Error(
-        "You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn"
-      );
-    }
-    return true;
+    console.error ("need, because ts wants a return boolean");
+    return false;
   };
 
-  campaign = async (campaign: ProcaCampaign): Promise<Record<string,any>> => {
+  campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
     const name: string = campaign.name;
     if (!this.campaigns[name]) {
       this.campaigns[name] = await this.fetchCampaign(campaign);
     }
     return Promise.resolve(this.campaigns[name]);
+  };
+
+  handleEmailStatusChange = async (
+    event: EventMessageV2
+  ): Promise<handleResult | boolean> => {
+    // If we want to detect supporter clicking on opt in link in email, we can do this here
+    // this happens after the action was done, timeline:
+    //
+    // 1. Supporter signs form
+    // 2. Action message arrives, Signature is added
+    // 3. Supporter receives an email (click button to subscribe)
+    // 4. Supporter clicks this link
+    // 5. Event message arrives, We set them as subscribed
+    // OR:
+    // 3. Supporter email bounces (invalid email)
+    // 4. Event message arrives, We set Contact as bounced
+
+    if (event.eventType === "email_status") {
+      // handle only email status updates
+      // check if we have that contact in CRM
+      const cont = await this.fetchContact(event.supporter.contact.email);
+
+      // if not, ignore the event about non-existing contact
+      if (!cont) return true;
+
+      switch (event.supporter.privacy.emailStatus) {
+        // do this if you want to change the subscription based on opt in in email
+        // the timestamp of this opt in is in event.supporter.privacy.emailStatusChanged
+        case "double_opt_in": {
+          console.log(`Double opt in from ${event.supporter.contact.email}`);
+
+          await this.setSubscribed(cont.id, true);
+          break;
+        }
+
+        // Different kinds of problems with email delivery:
+        case "bounce": // bounce
+        case "blocked": // pre-blocked by our transactional email provider (malformed etc)
+        case "spam": // supporter clicked "this is spam" on our email
+        case "unsub": {
+          // supporter clicked "unsubscribe" on our email (if provided by Gmail etc)
+          console.log(
+            `${event.supporter.privacy.emailStatus} from ${event.supporter.contact.email}`
+          );
+
+          await this.setBounce(cont.id, true);
+          break;
+        }
+      }
+    }
+    return true;
   };
 
   handleEvent = async (
@@ -121,3 +200,18 @@ export abstract class CRM implements CRMInterface {
   };
 }
 
+export const init = async (config: Configuration): Promise<CRM> => {
+  if (!process.env.CRM) {
+    console.error(
+      "you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts"
+    );
+    throw new Error("missing process.env.CRM");
+  }
+
+  const crm = await import("./crm/" + process.env.CRM);
+  if (crm.default) {
+    return new crm.default(config);
+  } else {
+    throw new Error(process.env.CRM + " missing export default YourCRM");
+  }
+};

@@ -31,4 +31,4 @@ console.log("process X",r);
   };
 }
 
-export default new DebugCRM();
+export default DebugCRM;
