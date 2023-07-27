@@ -25,7 +25,10 @@ const pause = (time) => {
 };
 exports.pause = pause;
 const listen = (config, crm) => {
-    const opts = { tag: process.env.npm_package_name + "." + process.env.CRM };
+    const opts = { tag: "proca-sync." + process.env.CRM };
+    if (config.concurrency) {
+        opts.concurrency = config.concurrency;
+    }
     return (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(void 0, void 0, void 0, function* () {
         //export type SyncCallback = (action: ActionMessageV2 | EventMessageV2) => Promise<SyncResult | boolean>;
         //export type SyncResult = {processed: boolean;}

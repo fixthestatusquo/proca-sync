@@ -65,7 +65,7 @@ class MailchimpCRM extends CRM {
   ): Promise<handleResult | boolean> => {
     //const response = await this.client.ping.get();
     if (this.list === "") {
-      //
+      console.log("fetching exisiting lists");
       const r = await allLists(this.client);
       const lists = r.lists || [];
       lists &&

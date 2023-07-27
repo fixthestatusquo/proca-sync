@@ -36,51 +36,80 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
-const fs_1 = require("fs");
+// to parse options
 const minimist_1 = __importDefault(require("minimist"));
 const dotenv_1 = __importDefault(require("dotenv"));
+const fs_1 = require("fs");
 const config_1 = require("./config");
+const crm_1 = require("./crm");
+const Sentry = __importStar(require("@sentry/node"));
+const clihelp = () => {
+    console.log([
+        "options",
+        "--help (this command)",
+        "--env (either absolute path to a .env or .env.{env} in the folder)",
+        "--dry-run (don't write)",
+        "--dump (write the messages as file)",
+        "--verbose (show the result)",
+        "--pause (wait between each message)",
+        //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
+    ].join("\n"));
+    process.exit(0);
+};
 const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const opt = (0, minimist_1.default)(argv, {
-        default: { env: "" },
+        alias: { e: "env", v: "verbose" },
+        default: { env: "", verbose: false },
+        boolean: ["verbose", "dump", "help", "pause"],
+        unknown: (param) => {
+            if (param[0] === "-") {
+                console.error("invalid parameter", param);
+                process.exit(1);
+            }
+            return true;
+        },
     });
     let envConfig = undefined;
-    if (!opt._[0]) {
-        console.error("missing file(s) to process, eg. yarn test data/petition_optin.json [data/share_twitter.json ...]");
-        process.exit(1);
+    if (opt.help) {
+        clihelp();
+        process.exit(0);
     }
     if (opt.env) {
+        if (!(0, fs_1.existsSync)(opt.env)) {
+            const env = ".env." + opt.env;
+            if ((0, fs_1.existsSync)(env))
+                opt.env = env;
+        }
+        else {
+            console.error("missing env", opt.env);
+            process.exit(1);
+        }
         envConfig = { path: opt.env };
-        console.log("using configuration " + opt.env);
-    }
-    else {
-        console.log("using default config .env (tip:' --env .env.yourconfig' to overwrite)");
     }
     const conf = dotenv_1.default.config(envConfig);
-    const config = (0, config_1.configFromOptions)(conf, opt);
-    if (!process.env.CRM) {
-        console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
-        throw new Error("missing process.env.CRM");
+    if (process.env.SENTRY_URL) {
+        Sentry.init({ dsn: process.env.SENTRY_URL });
     }
-    else {
-        console.log("using CRM " + process.env.CRM);
-    }
-    let crm = yield Promise.resolve().then(() => __importStar(require("./crm/" + process.env.CRM)));
-    if (crm.default) {
-        crm = crm.default;
-    }
-    else {
-        throw new Error(process.env.CRM + " missing export default new YourCRM()");
-    }
-    for (const file of opt._) {
-        try {
+    try {
+        const config = (0, config_1.configFromOptions)(conf, opt);
+        if (opt.dump) {
+            console.warn("saving into data folder instead of using " + process.env.CRM);
+            process.env.CRM = "file";
+        }
+        console.log("reading messages");
+        const crm = yield (0, crm_1.init)(config);
+        for (const file of opt._) {
             const message = JSON.parse((0, fs_1.readFileSync)(file, "utf8"));
-            crm.handleActionContact(message);
+            const r = yield crm.handleActionContact(message);
+            if ((_a = message === null || message === void 0 ? void 0 : message.contact) === null || _a === void 0 ? void 0 : _a.email)
+                console.log(yield crm.fetchContact(message.contact.email));
         }
-        catch (er) {
-            console.error(`Problem: ${er}`);
-            (0, config_1.help)();
-        }
+    }
+    catch (er) {
+        console.error(`Problem: ${er}`);
+        Sentry.captureException(er);
+        (0, config_1.help)();
     }
 });
 exports.main = main;

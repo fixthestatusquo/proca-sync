@@ -18,7 +18,8 @@ export const pause = (time: number | undefined): Promise<any> => {
 
 
 export const listen = (config: Configuration, crm: CRM) => {
-  const opts : ConsumerOpts = {tag: process.env.npm_package_name +"."+process.env.CRM};
+  let tag = "proca-sync."+process.env.CRM +"."+process.env.PROCA_ENV;
+  const opts : ConsumerOpts = {tag: tag};
   if (config.concurrency) {
      opts.concurrency = config.concurrency;
   }

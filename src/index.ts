@@ -48,6 +48,7 @@ export const main = async (argv: string[]) => {
   if (opt.env) {
     if (!existsSync(opt.env)) {
       const env = ".env." + opt.env;
+      process.env.PROCA_ENV = opt.env;
       if (existsSync(env)) opt.env = env;
     } else {
       console.error("missing env", opt.env);

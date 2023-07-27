@@ -5,7 +5,7 @@ const isActionSyncable = (action, onlyOptIn) => {
     return (action.privacy.withConsent) && (action.privacy.optIn || !onlyOptIn);
 };
 exports.isActionSyncable = isActionSyncable;
-const listName = (action, listPerLang) => {
+const listName = (action, listPerLang = false) => {
     let c = action.campaign.name;
     if (listPerLang)
         c = c + ` ${action.actionPage.locale}`;
@@ -17,8 +17,8 @@ const listName = (action, listPerLang) => {
     }
 };
 exports.listName = listName;
-const actionToContactRecord = (action, doubleOptIn, optOutAsTransactional) => {
-    var _a, _b, _c, _d;
+const actionToContactRecord = (action, mergeFields, doubleOptIn = false, optOutAsTransactional = false) => {
+    var _a;
     const r = {
         email_address: action.contact.email,
         language: action.actionPage.locale,
@@ -26,7 +26,7 @@ const actionToContactRecord = (action, doubleOptIn, optOutAsTransactional) => {
         merge_fields: {
             FNAME: action.contact.firstName
         },
-        tags: [action.campaign.name]
+        tags: ["proca"]
     };
     if (action.contact.lastName)
         r.merge_fields.LNAME = action.contact.lastName;
@@ -36,12 +36,28 @@ const actionToContactRecord = (action, doubleOptIn, optOutAsTransactional) => {
             country: action.contact.country || '',
             state: ((_a = action.contact.address) === null || _a === void 0 ? void 0 : _a.region) || '',
             zip: action.contact.postcode || '',
-            city: ((_b = action.contact.address) === null || _b === void 0 ? void 0 : _b.locality) || '',
-            addr1: ((_c = action.contact.address) === null || _c === void 0 ? void 0 : _c.street) || ''
+            city: action.contact.locality || '',
+            addr1: action.contact.street || ''
         };
-        if ((_d = action.contact.address) === null || _d === void 0 ? void 0 : _d.street_number)
-            r.merge_fields.ADDRESS.addr1 += ' ' + action.contact.address.street_number;
     }
+    if (mergeFields) { // custom naming of mergefields, so set in the environment MERGE_FIELDS=...
+        for (const key in mergeFields) {
+            if (action.contact[key])
+                r.merge_fields[mergeFields[key]] = action.contact[key];
+        }
+    }
+    if (Boolean(action.campaign.externalId)) {
+        r.tags.push(action.campaign.externalId.toString());
+        r.tags.push(action.actionPage.name);
+        r.merge_fields.SOURCE = action.campaign.externalId;
+    }
+    else {
+        r.tags.push(action.campaign.name);
+        r.merge_fields.SOURCE = action.actionPage.name;
+    }
+    // HACK; TO FIX
+    if (action.campaign.name === "bazas")
+        r.merge_fields.SOURCE = "petition-proca-2023/07-abattoir-bazas";
     // consents
     // explicit DOI = must be subscribe
     if (action.privacy.emailStatus === "double_opt_in") {
