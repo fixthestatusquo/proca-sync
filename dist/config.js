@@ -5,7 +5,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_URL = exports.configFromOptions = exports.help = void 0;
 function help() {
-    console.error(`edit .env or set --env=path/to/.env:
+    console.error(`set --env=path/to/.env and at minima
+  CRM
   PROCA_USERNAME=
   PROCA_PASSWORD=
   PROCA_QUEUE= [eg: cus.123.deliver]
@@ -13,7 +14,7 @@ function help() {
 }
 exports.help = help;
 // you can also use env vars, or any other config style
-function configFromOptions(opt) {
+function configFromOptions(opt, argv) {
     if (!process.env.PROCA_QUEUE)
         throw Error("Provide queue name");
     if (!process.env.PROCA_USERNAME && !process.env.PROCA_URL)
@@ -24,6 +25,9 @@ function configFromOptions(opt) {
     return {
         url: process.env.PROCA_URL || `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@api.proca.app/proca_live`,
         queue: process.env.PROCA_QUEUE,
+        pause: argv.pause,
+        verbose: argv.verbose,
+        concurrency: parseInt(process.env.concurrency || "1") || 1
     };
 }
 exports.configFromOptions = configFromOptions;

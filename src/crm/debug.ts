@@ -21,7 +21,6 @@ class DebugCRM extends CRM {
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
     console.log("message",message.actionId, message.campaign?.title);
-console.log("process X",r);
     return false;
   };
 

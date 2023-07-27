@@ -21,8 +21,8 @@ class SendInBlueCRM extends CRM {
   apiInstance = new SibApiV3Sdk.ContactsApi();
   folderId = 0;
 
-  constructor() {
-    super();
+  constructor(opt: {}) {
+    super(opt);
     this.crmType = CRMType.OptIn;
     this.apiInstance.setApiKey(
       SibApiV3Sdk.AccountApiApiKeys.apiKey,
@@ -32,7 +32,7 @@ class SendInBlueCRM extends CRM {
 
   handleContact = async (
     message: ActionMessage
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
     console.log(camp.id, message.contact.email);
     let createContact = new SibApiV3Sdk.CreateContact();

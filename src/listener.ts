@@ -16,8 +16,12 @@ export const pause = (time: number | undefined): Promise<any> => {
   return new Promise((resolve) => setTimeout(() => resolve(time), time));
 };
 
+
 export const listen = (config: Configuration, crm: CRM) => {
   const opts : ConsumerOpts = {tag: process.env.npm_package_name +"."+process.env.CRM};
+  if (config.concurrency) {
+     opts.concurrency = config.concurrency;
+  }
 
   return syncQueue(config.url, config.queue, async (actionOrEvent) => {
     //export type SyncCallback = (action: ActionMessageV2 | EventMessageV2) => Promise<SyncResult | boolean>;

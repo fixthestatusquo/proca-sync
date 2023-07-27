@@ -19,8 +19,8 @@ interface CRM {
 }
 */
 class SendInBlueCRM extends crm_1.CRM {
-    constructor() {
-        super();
+    constructor(opt) {
+        super(opt);
         this.apiInstance = new SibApiV3Sdk.ContactsApi();
         this.folderId = 0;
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
@@ -83,4 +83,4 @@ class SendInBlueCRM extends crm_1.CRM {
         this.apiInstance.setApiKey(SibApiV3Sdk.AccountApiApiKeys.apiKey, process.env.SENDINBLUE_KEY);
     }
 }
-exports.default = new SendInBlueCRM();
+exports.default = SendInBlueCRM;

@@ -18,7 +18,8 @@ const writeJson = (data, name, folder) => {
     (0, fs_1.writeFileSync)(path + name + ".json", JSON.stringify(data, null, 2));
 };
 class FileCRM extends crm_1.CRM {
-    constructor() {
+    constructor(opt) {
+        super(opt);
         /*
       getContactByEmail = async (email : string) : Promise<Contact | undefined> => {
         return undefined;
@@ -39,7 +40,6 @@ class FileCRM extends crm_1.CRM {
         console.log(id,bounced);
       }
       */
-        super(...arguments);
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
             const camp = yield this.campaign(message.campaign);
             writeJson(message, message.action.actionType + "_" + message.actionId);
@@ -51,4 +51,4 @@ class FileCRM extends crm_1.CRM {
         });
     }
 }
-exports.default = new FileCRM();
+exports.default = FileCRM;

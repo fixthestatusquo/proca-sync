@@ -19,7 +19,7 @@
   "actionPageId": 2466,
   "campaign": {
     "contactSchema": "basic",
-    "externalId": null,
+    "externalId": 1984,
     "name": "test",
     "title": "Pineapple doesn’t belong on pizza!"
   },
@@ -27,12 +27,15 @@
   "contact": {
     "area": "BE",
     "contactRef": "MDWJu2fbogTgTHgLTLl-OFvRII63xZE76i7w3qHfbbE",
-    "country": "BE",
+    "country": "FR",
     "dupeRank": 0,
-    "email": "test@example.org",
-    "firstName": "alonso",
-    "lastName": "Bistro",
-    "postcode": "1234"
+    "email": "sync+2@proca.app",
+    "street": "42 rue de la paix",
+    "locality": "the city",
+    "firstName": "Simone",
+    "lastName": "de Beauvoir - test",
+    "postcode": "75001",
+    "phone": "+42 123456789"
   },
   "org": {
     "name": "your_org",

@@ -36,16 +36,14 @@ class TrustCRM extends CRM {
       },
     };
     const data = await postAction(actionPayload);
-console.log("data",data);
     if (data.petition_signature?.verification_token) {
       const verified = await verification(
         data.petition_signature.verification_token,
         verificationPayload
       );
-console.log("verified",verified);
       return true;
     } else {
-console.log("error",data);
+      console.error("error", data);
       return false;
     }
 

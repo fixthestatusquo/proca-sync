@@ -29,8 +29,8 @@ class MagNewsCRM extends CRM {
   public idnewsletter: number;
   public audience: string;
 
-  constructor() {
-    super();
+  constructor(opt: {}) {
+    super(opt);
     this.crmType = CRMType.OptIn; // will only process opt-in contacts, the other events are filtered before the class
     this.clientToken = setClientToken();
     this.iddatabase = 6;
@@ -40,7 +40,7 @@ class MagNewsCRM extends CRM {
 
   handleContact = async (
     message: ActionMessage
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
 
     const member = this.actionToContactRecord(message, camp);
@@ -96,4 +96,4 @@ class MagNewsCRM extends CRM {
     }
   };
 }
-export default new MagNewsCRM();
+export default MagNewsCRM;

@@ -1,51 +1,84 @@
-import { readFileSync } from "fs";
+// to parse options
 import parseArg from "minimist";
 import dotenv from "dotenv";
-import { Configuration, help, configFromOptions } from "./config";
+import { existsSync, readFileSync } from "fs";
+
+import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
+import { init } from "./crm";
+import * as Sentry from "@sentry/node";
+
+const clihelp = () => {
+  console.log(
+    [
+      "options",
+      "--help (this command)",
+      "--env (either absolute path to a .env or .env.{env} in the folder)",
+      "--dry-run (don't write)",
+      "--dump (write the messages as file)",
+      "--verbose (show the result)",
+      "--pause (wait between each message)",
+      //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
+    ].join("\n")
+  );
+  process.exit(0);
+
+}
 
 export const main = async (argv: string[]) => {
   const opt = parseArg(argv, {
-    default: { env: "" },
+    alias: { e: "env", v: "verbose" },
+    default: { env: "", verbose: false },
+    boolean: ["verbose", "dump", "help", "pause"],
+    unknown: (param) => {
+      if (param[0] === "-") {
+        console.error("invalid parameter", param);
+        process.exit(1);
+      }
+      return true;
+    },
   });
-  let envConfig = undefined;
 
-  if (!opt._[0]) {
-    console.error(
-      "missing file(s) to process, eg. yarn test data/petition_optin.json [data/share_twitter.json ...]"
-    );
-    process.exit(1);
+  let envConfig = undefined;
+  if (opt.help) {
+    clihelp();
+    process.exit(0);
   }
 
   if (opt.env) {
+    if (!existsSync(opt.env)) {
+      const env = ".env." + opt.env;
+      if (existsSync(env)) opt.env = env;
+    } else {
+      console.error("missing env", opt.env);
+      process.exit(1);
+    }
     envConfig = { path: opt.env };
-    console.log ("using configuration " + opt.env);
-  } else {
-    console.log ("using default config .env (tip:' --env .env.yourconfig' to overwrite)");
   }
   const conf = dotenv.config(envConfig);
+  if (process.env.SENTRY_URL) {
+    Sentry.init({ dsn: process.env.SENTRY_URL });
+  }
 
-  const config = configFromOptions(conf);
-    if (!process.env.CRM) {
-      console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts")
-      throw new Error ("missing process.env.CRM");
-    } else {
-      console.log("using CRM " +process.env.CRM);
+  try {
+    const config = configFromOptions(conf, opt);
+    if (opt.dump) {
+      console.warn(
+        "saving into data folder instead of using " + process.env.CRM
+      );
+      process.env.CRM = "file";
     }
-    let crm = await import("./crm/"+process.env.CRM);
-    if (crm.default) {
-      crm = crm.default;
-    } else {
-      throw new Error (process.env.CRM +" missing export default new YourCRM()");
-    }
-
+    console.log("reading messages");
+    const crm = await init (config);
   for (const file of opt._) {
-    try {
       const message = JSON.parse(readFileSync(file, "utf8"));
-      crm.handleActionContact(message);
-    } catch (er) {
-      console.error(`Problem: ${er}`);
-      help();
-    }
+      const r = await crm.handleActionContact(message);
+      if (message?.contact?.email)
+        console.log(await crm.fetchContact(message.contact.email));
+  }
+  } catch (er) {
+    console.error(`Problem: ${er}`);
+    Sentry.captureException(er);
+    help();
   }
 };
 

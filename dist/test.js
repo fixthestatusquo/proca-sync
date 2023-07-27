@@ -51,12 +51,19 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     }
     if (opt.env) {
         envConfig = { path: opt.env };
+        console.log("using configuration " + opt.env);
+    }
+    else {
+        console.log("using default config .env (tip:' --env .env.yourconfig' to overwrite)");
     }
     const conf = dotenv_1.default.config(envConfig);
-    const config = (0, config_1.configFromOptions)(conf);
+    const config = (0, config_1.configFromOptions)(conf, opt);
     if (!process.env.CRM) {
         console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
         throw new Error("missing process.env.CRM");
+    }
+    else {
+        console.log("using CRM " + process.env.CRM);
     }
     let crm = yield Promise.resolve().then(() => __importStar(require("./crm/" + process.env.CRM)));
     if (crm.default) {

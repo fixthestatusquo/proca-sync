@@ -23,6 +23,9 @@ const writeJson = (data: object, name: string, folder?: string) => {
 };
 
 class FileCRM extends CRM {
+  constructor(opt: {}) {
+    super(opt);
+  }
   /*
 getContactByEmail = async (email : string) : Promise<Contact | undefined> => {
   return undefined;
@@ -46,7 +49,7 @@ setBounced = async (id : number, bounced:boolean) => {
 
   handleActionContact = async (
     message: ActionMessage
-  ): Promise<handleResult | void> => {
+  ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
     writeJson(message, message.action.actionType + "_" + message.actionId);
     return { processed: true };
