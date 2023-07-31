@@ -31,8 +31,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = exports.CRM = exports.CRMType = void 0;
+exports.init = exports.CRM = exports.CRMType = exports.ProcessStatus = void 0;
+const cli_color_1 = __importDefault(require("cli-color"));
+const spinner_1 = require("./spinner");
+var ProcessStatus;
+(function (ProcessStatus) {
+    ProcessStatus[ProcessStatus["unknown"] = 0] = "unknown";
+    ProcessStatus[ProcessStatus["processed"] = 1] = "processed";
+    ProcessStatus[ProcessStatus["skipped"] = 2] = "skipped";
+    ProcessStatus[ProcessStatus["ignored"] = 3] = "ignored";
+    ProcessStatus[ProcessStatus["error"] = 4] = "error";
+})(ProcessStatus = exports.ProcessStatus || (exports.ProcessStatus = {}));
 var CRMType;
 (function (CRMType) {
     CRMType[CRMType["ActionContact"] = 0] = "ActionContact";
@@ -42,6 +55,22 @@ var CRMType;
 })(CRMType = exports.CRMType || (exports.CRMType = {}));
 class CRM {
     constructor(opt) {
+        this.colorStatus = (status) => {
+            switch (status) {
+                case ProcessStatus.processed: return cli_color_1.default.green;
+                case ProcessStatus.skipped: return cli_color_1.default.blue;
+                case ProcessStatus.ignored: return cli_color_1.default.magenta;
+                case ProcessStatus.error: return cli_color_1.default.red;
+            }
+            return ((d) => d);
+        };
+        this.log = (text, status) => {
+            //  progress: (count: number; suffix: string; color:string);
+            const newline = this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
+            (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", { wrapper: this.colorStatus(status), newline: newline });
+            if (status)
+                this.lastStatus = status;
+        };
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
             // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist
@@ -145,6 +174,8 @@ class CRM {
         this.pause = (opt === null || opt === void 0 ? void 0 : opt.pause) || false;
         this.campaigns = {};
         this.crmType = CRMType.ActionContact;
+        this.count = opt.count;
+        this.lastStatus = ProcessStatus.unknown;
     }
 }
 exports.CRM = CRM;

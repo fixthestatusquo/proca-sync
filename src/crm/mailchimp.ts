@@ -4,6 +4,7 @@ import {
   ActionMessage,
   handleResult,
   ProcaCampaign,
+  ProcessStatus,
 } from "../crm";
 import { actionToContactRecord as formatAction, Contact, ContactSubscription } from "./mailchimp/contact";
 import {
@@ -121,9 +122,6 @@ console.error("error fetching campaign",e.error); throw (e);
   member: Contact | ContactSubscription,
   verbose= false
 ): Promise<boolean> => {
-  //  const existing = await client.searchMembers.search(member.email_address);
-  //  console.log(existing);
-  //  const hash = memberHash(member.email_address.toLowerCase())
   if (!member.status) {
     member.status = member.status_if_new;
   }
@@ -132,24 +130,24 @@ console.error("error fetching campaign",e.error); throw (e);
       skipMergeValidation: true,
     });
     if (response.errors?.length) {
-      console.log("aaaaaa"); //response.errors.body);
       throw new Error(response.errors);
     }
     if (verbose) {
       delete response._links;
       console.log(response);
     }
+    this.log("adding " + member.email_address, ProcessStatus.processed);
     return true;
   } catch (e: any) {
     const b = e?.response?.body || e;
     switch (b?.title) {
       case "Member Exists":
-        this.log("all good, already subscribed");
+        this.log("", ProcessStatus.skipped);
         return true;
       case "Forgotten Email Not Subscribed":
       case "Member In Compliance State":
       case "Invalid Resource":
-        this.log (b?.detail || b.title);
+        this.log (b?.detail || b.title, ProcessStatus.ignored);
         return true;
       default:
       console.log("unexpected error", b);

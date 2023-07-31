@@ -20,15 +20,17 @@ const pause = (time) => {
     const min = !time || time >= 7 ? 7 : time / 2;
     const max = time || 42; // wait between min and max
     time = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-    console.log("waiting", time / 1000);
+    //  console.log("waiting", time / 1000);
     return new Promise((resolve) => setTimeout(() => resolve(time), time));
 };
 exports.pause = pause;
 const listen = (config, crm) => {
-    const opts = { tag: "proca-sync." + process.env.CRM };
+    let tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
+    const opts = { tag: tag };
     if (config.concurrency) {
         opts.concurrency = config.concurrency;
     }
+    crm.count = queue_1.count;
     return (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(void 0, void 0, void 0, function* () {
         //export type SyncCallback = (action: ActionMessageV2 | EventMessageV2) => Promise<SyncResult | boolean>;
         //export type SyncResult = {processed: boolean;}
@@ -45,12 +47,14 @@ const listen = (config, crm) => {
                 const action = actionOrEvent;
                 const r = yield crm.handleActionContact(action);
                 if (crm.pause) {
-                    console.log("pause action...");
+                    //          console.log("pause action...");
                     yield (0, exports.pause)(10);
                 }
                 if (typeof r === "object" && "processed" in r) {
+                    //          spin (count.ack + count.nack, "processed");
                     return !!r.processed;
                 }
+                //        spin (count.ack + count.nack, "bool processed");
                 return !!r;
             }
             case "proca:event:2":
@@ -62,7 +66,7 @@ const listen = (config, crm) => {
                         case "email_status": {
                             // An email status update such as Double opt in or bounce
                             if (crm.pause) {
-                                console.log("pause email status...");
+                                //                console.log("pause email status...");
                                 yield (0, exports.pause)(3);
                             }
                             const r = yield crm.handleEmailStatusChange(event);

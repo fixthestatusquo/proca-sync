@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findMember = exports.addContactToList = exports.memberHash = exports.upsertList = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
+exports.findMember = exports.memberHash = exports.upsertList = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const mailchimp_marketing_1 = __importDefault(require("@mailchimp/mailchimp_marketing"));
 const makeClient = () => {
@@ -81,52 +81,11 @@ const memberHash = (email) => {
     return hash;
 };
 exports.memberHash = memberHash;
-const addContactToList = (client, list_id, member, verbose = false) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
-    //  const existing = await client.searchMembers.search(member.email_address);
-    //  console.log(existing);
-    //  const hash = memberHash(member.email_address.toLowerCase())
-    if (!member.status) {
-        member.status = member.status_if_new;
-    }
-    try {
-        const response = yield client.lists.addListMember(list_id, member, {
-            skipMergeValidation: true,
-        });
-        if ((_a = response.errors) === null || _a === void 0 ? void 0 : _a.length) {
-            console.log("aaaaaa"); //response.errors.body);
-            throw new Error(response.errors);
-        }
-        if (verbose) {
-            delete response._links;
-            console.log(response);
-        }
-        return true;
-    }
-    catch (e) {
-        const b = ((_b = e === null || e === void 0 ? void 0 : e.response) === null || _b === void 0 ? void 0 : _b.body) || e;
-        switch (b === null || b === void 0 ? void 0 : b.title) {
-            case "Member Exists":
-                console.log("all good, already subscribed");
-                return true;
-            case "Forgotten Email Not Subscribed":
-            case "Member In Compliance State":
-            case "Invalid Resource":
-                console.log((b === null || b === void 0 ? void 0 : b.detail) || b.title);
-                return true;
-            default:
-                console.log("unexpected error", b);
-        }
-        return false;
-    }
-    return true;
-});
-exports.addContactToList = addContactToList;
 const findMember = (client, email) => __awaiter(void 0, void 0, void 0, function* () {
-    var _c;
+    var _a;
     const result = yield client.searchMembers.search(email);
     //  exact_matches: { members: [ [Object] ], total_items: 1 },
-    if (!(((_c = result === null || result === void 0 ? void 0 : result.exact_matches) === null || _c === void 0 ? void 0 : _c.total_items) === 1))
+    if (!(((_a = result === null || result === void 0 ? void 0 : result.exact_matches) === null || _a === void 0 ? void 0 : _a.total_items) === 1))
         return false;
     return result.exact_matches.members;
 });

@@ -8,6 +8,13 @@ export type handleResult = {
   // there will likely be more attributes to let the CRM inform the queue processor to pause for instance
 };
 
+export enum ProcessStatus {
+  unknown = 0,
+  processed = 1,
+  skipped = 2,
+  ignored = 3,
+  error = 4,
+}
 export { ActionMessageV2 as ActionMessage };
 export { EventMessageV2 as EventMessage };
 
@@ -53,7 +60,7 @@ interface CRMInterface {
   fetchContact?: (email: string) => Promise<any>; // fetch the contact, mostly for debug
   setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
-  log: (text: string | void, color:string | void) => void;
+  log: (text: string | void, color:ProcessStatus | void) => void;
   count: Counters;
 }
 
@@ -69,6 +76,7 @@ export abstract class CRM implements CRMInterface {
   public verbose: false;
   public pause: false;
   public count: Counters;
+  private lastStatus : ProcessStatus;
 
   constructor(opt: any) {
     this.verbose = opt?.verbose || false;
@@ -76,11 +84,25 @@ export abstract class CRM implements CRMInterface {
     this.campaigns = {};
     this.crmType = CRMType.ActionContact;
     this.count = opt.count;
+    this.lastStatus = ProcessStatus.unknown;
   }
 
-  log = (text:string | void, color:string | void) => {
+  colorStatus = (status: ProcessStatus | void): Function => {
+    switch (status) {
+      case ProcessStatus.processed: return color.green;
+      case ProcessStatus.skipped: return color.blue;
+      case ProcessStatus.ignored: return color.magenta;
+      case ProcessStatus.error: return color.red;
+    }
+    return ((d: string) => d);
+  }
+
+  log = (text:string | void, status:ProcessStatus | void) => {
      //  progress: (count: number; suffix: string; color:string);
-    spin(this.count.ack + this.count.nack, text?.substring(0, 77) || "");
+    const newline = this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
+    spin(this.count.ack +this.count.nack , text || "",{wrapper:this.colorStatus(status), newline: newline});
+    if (status)
+      this.lastStatus = status;
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {

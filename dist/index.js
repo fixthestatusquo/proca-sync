@@ -59,7 +59,7 @@ const clihelp = () => {
 };
 const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     const opt = (0, minimist_1.default)(argv, {
-        alias: { e: "env", v: "verbose" },
+        alias: { e: "env", v: "verbose", p: "pause" },
         default: { env: "", verbose: false },
         boolean: ["verbose", "dump", "help", "pause"],
         unknown: (param) => {
@@ -78,6 +78,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     if (opt.env) {
         if (!(0, fs_1.existsSync)(opt.env)) {
             const env = ".env." + opt.env;
+            process.env.PROCA_ENV = opt.env;
             if ((0, fs_1.existsSync)(env))
                 opt.env = env;
         }

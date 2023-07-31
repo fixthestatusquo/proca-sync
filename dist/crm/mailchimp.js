@@ -19,7 +19,7 @@ class MailchimpCRM extends crm_1.CRM {
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             //const response = await this.client.ping.get();
             if (this.list === "") {
-                //
+                console.log("fetching exisiting lists");
                 const r = yield (0, client_1.allLists)(this.client);
                 const lists = r.lists || [];
                 lists &&
@@ -33,7 +33,7 @@ class MailchimpCRM extends crm_1.CRM {
                 console.log(actionPayload);
             }
             try {
-                const r = yield (0, client_1.addContactToList)(this.client, this.list, actionPayload, this.verbose);
+                const r = yield this.addContactToList(this.client, this.list, actionPayload, this.verbose);
                 if (Boolean(r)) {
                     return r;
                 }
@@ -67,6 +67,43 @@ class MailchimpCRM extends crm_1.CRM {
           */
             }
             return campaign;
+        });
+        this.addContactToList = (client, list_id, member, verbose = false) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            if (!member.status) {
+                member.status = member.status_if_new;
+            }
+            try {
+                const response = yield client.lists.addListMember(list_id, member, {
+                    skipMergeValidation: true,
+                });
+                if ((_a = response.errors) === null || _a === void 0 ? void 0 : _a.length) {
+                    throw new Error(response.errors);
+                }
+                if (verbose) {
+                    delete response._links;
+                    console.log(response);
+                }
+                this.log("adding " + member.email_address, crm_1.ProcessStatus.processed);
+                return true;
+            }
+            catch (e) {
+                const b = ((_b = e === null || e === void 0 ? void 0 : e.response) === null || _b === void 0 ? void 0 : _b.body) || e;
+                switch (b === null || b === void 0 ? void 0 : b.title) {
+                    case "Member Exists":
+                        this.log("", crm_1.ProcessStatus.skipped);
+                        return true;
+                    case "Forgotten Email Not Subscribed":
+                    case "Member In Compliance State":
+                    case "Invalid Resource":
+                        this.log((b === null || b === void 0 ? void 0 : b.detail) || b.title, crm_1.ProcessStatus.ignored);
+                        return true;
+                    default:
+                        console.log("unexpected error", b);
+                }
+                return false;
+            }
+            return true;
         });
         this.crmType = crm_1.CRMType.OptIn;
         if (!process.env.AUTH_TOKEN) {
