@@ -1,6 +1,7 @@
-import { syncQueue, ActionMessageV2, EventMessageV2, ConsumerOpts } from "@proca/queue";
+import { syncQueue, ActionMessageV2, EventMessageV2, ConsumerOpts, count } from "@proca/queue";
 import { Configuration } from "./config";
 import { CRM } from "./crm";
+import {spin} from "./spinner";
 
 //import * as crm from './crm.debug';
 let crm: any = {};
@@ -12,7 +13,7 @@ export const pause = (time: number | undefined): Promise<any> => {
   const min = !time || time >= 7 ? 7 : time / 2;
   const max = time || 42; // wait between min and max
   time = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-  console.log("waiting", time / 1000);
+//  console.log("waiting", time / 1000);
   return new Promise((resolve) => setTimeout(() => resolve(time), time));
 };
 
@@ -23,6 +24,8 @@ export const listen = (config: Configuration, crm: CRM) => {
   if (config.concurrency) {
      opts.concurrency = config.concurrency;
   }
+
+  crm.count = count;
 
   return syncQueue(config.url, config.queue, async (actionOrEvent) => {
     //export type SyncCallback = (action: ActionMessageV2 | EventMessageV2) => Promise<SyncResult | boolean>;
@@ -41,13 +44,15 @@ export const listen = (config: Configuration, crm: CRM) => {
         const action: ActionMessageV2 = actionOrEvent;
         const r = await crm.handleActionContact(action);
         if (crm.pause) {
-          console.log("pause action...");
+//          console.log("pause action...");
           await pause(10);
         }
         if (typeof r === "object" && "processed" in r) {
+//          spin (count.ack + count.nack, "processed");
           return !!r.processed;
         }
 
+//        spin (count.ack + count.nack, "bool processed");
         return !!r;
       }
 
@@ -61,7 +66,7 @@ export const listen = (config: Configuration, crm: CRM) => {
             case "email_status": {
               // An email status update such as Double opt in or bounce
               if (crm.pause) {
-                console.log("pause email status...");
+//                console.log("pause email status...");
                 await pause(3);
               }
               const r = await crm.handleEmailStatusChange(event);

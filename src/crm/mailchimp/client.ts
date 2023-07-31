@@ -94,49 +94,6 @@ export const memberHash = (email: string) => {
   return hash;
 };
 
-export const addContactToList = async (
-  client: any,
-  list_id: string,
-  member: Contact | ContactSubscription,
-  verbose= false
-): Promise<boolean> => {
-  //  const existing = await client.searchMembers.search(member.email_address);
-  //  console.log(existing);
-  //  const hash = memberHash(member.email_address.toLowerCase())
-  if (!member.status) {
-    member.status = member.status_if_new;
-  }
-  try {
-    const response = await client.lists.addListMember(list_id, member, {
-      skipMergeValidation: true,
-    });
-    if (response.errors?.length) {
-      console.log("aaaaaa"); //response.errors.body);
-      throw new Error(response.errors);
-    }
-    if (verbose) {
-      delete response._links;
-      console.log(response);
-    }
-    return true;
-  } catch (e: any) {
-    const b = e?.response?.body || e;
-    switch (b?.title) {
-      case "Member Exists":
-        console.log("all good, already subscribed");
-        return true;
-      case "Forgotten Email Not Subscribed":
-      case "Member In Compliance State":
-      case "Invalid Resource":
-        console.log(b?.detail || b.title);
-        return true;
-      default:
-      console.log("unexpected error", b);
-    }
-    return false;
-  }
-  return true;
-};
 
 export const findMember = async (client: any, email: string) => {
   const result = await client.searchMembers.search(email);

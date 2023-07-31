@@ -1,5 +1,7 @@
-import { ActionMessageV2, EventMessageV2 } from "@proca/queue";
+import { ActionMessageV2, EventMessageV2, Counters } from "@proca/queue";
 import { Configuration } from "./config";
+import color from 'cli-color';
+import {spin} from "./spinner";
 
 export type handleResult = {
   processed: boolean; // if the message has been processed or skipped
@@ -51,6 +53,8 @@ interface CRMInterface {
   fetchContact?: (email: string) => Promise<any>; // fetch the contact, mostly for debug
   setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
+  log: (text: string | void, color:string | void) => void;
+  count: Counters;
 }
 
 export enum CRMType {
@@ -64,12 +68,19 @@ export abstract class CRM implements CRMInterface {
   public crmType: CRMType;
   public verbose: false;
   public pause: false;
+  public count: Counters;
 
   constructor(opt: any) {
     this.verbose = opt?.verbose || false;
     this.pause = opt?.pause || false;
     this.campaigns = {};
     this.crmType = CRMType.ActionContact;
+    this.count = opt.count;
+  }
+
+  log = (text:string | void, color:string | void) => {
+     //  progress: (count: number; suffix: string; color:string);
+    spin(this.count.ack + this.count.nack, text?.substring(0, 77) || "");
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {

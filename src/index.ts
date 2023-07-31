@@ -27,7 +27,7 @@ const clihelp = () => {
 
 export const main = async (argv: string[]) => {
   const opt = parseArg(argv, {
-    alias: { e: "env", v: "verbose" },
+    alias: { e: "env", v: "verbose", p: "pause" },
     default: { env: "", verbose: false },
     boolean: ["verbose", "dump", "help", "pause"],
     unknown: (param) => {
