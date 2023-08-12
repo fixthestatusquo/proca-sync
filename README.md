@@ -21,8 +21,8 @@ if you want to use an existing CRM integration:
 
 - pull this repository
 - check the name of the CRM from /src/crm/{yourcrm}.ts
-- cp .env.example .env
-- modify CRM={yourcrm} in your .env
+- cp .env.example .env.yourorg
+- modify CRM={yourcrm} in your .env.yourorg and add an extra param -e yourorg to all the commands below
 - depending of the CRM: add extra environment variables
 - You need to know queue service credentials (name, username and password) from which to read from.
 
@@ -33,7 +33,7 @@ if you want to create an integration with an new CRM, it's almost the same, gut 
 read the queue and process it
 
 ```
-$ yarn start
+$ npm run start [-e yourorg]
 ```
 
 if you want to save the messages received into the data folder, set CRM=file or yarn start --dump
@@ -44,7 +44,7 @@ Now sign some actions (you can use proca cli `proca action` command to do this f
 _tip: instead of reading from the queue, read the message from a file_
 
 ```
-$yarn test data/petition_optin.json 
+$npm run test data/petition_optin.json  [-e yourorg]
 ```
 
 we provide a some example action/contact into data, however, it would likely be more useful to have your own actions from your widget/campaign coming from your queue
@@ -52,7 +52,7 @@ we provide a some example action/contact into data, however, it would likely be 
 instead of processing the messages, save them into the data folder:
 
 ```
-$yarn start --dump
+$npm run start --dump [-e yourorg]
 ```
 
 by default, the name of the files are not clear, we suggest to rename them based on the type of action/context you want to test (eg an opt-in, opt-out, existing contact, new one...)
@@ -62,16 +62,26 @@ _please do not git add these files, they are likely to contain personal data_
 # build for production
 
 ```
-$ yarn build
+$ npm run build
 ```
 
 # run in production
 
-```
-$ ./proca-sync-template
-```
+put your env file in a path the user can read (we like /etc/proca-sync/[yourorg].env)
+create a /etc/systemd/system/proca-sync.service
 
+git clone proca-sync somewhere (we like /src/proca-sync)
+```
+Type=idle
+Restart=always
+RestartSec=10
+User=proca-sync
+Group=proca-sync
+EnvironmentFile=/etc/proca-sync/[yourorg].env
+WorkingDirectory=/srv/proca-sync
+ExecStart=/srv/proca-sync/bin/sync
 
+```
 
 ## extra configuration/filters
 
