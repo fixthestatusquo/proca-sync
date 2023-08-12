@@ -29,7 +29,7 @@
     "@proca/queue": "^5.1.0",
     "@sendinblue/client": "^3.2.2",
     "@sentry/node": "^7.63.0",
-    "@topcli/spinner": "^2.1.1",
+    "@topcli/spinner": "^2.1.2",
     "cli-color": "^2.0.3",
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21",
