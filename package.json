@@ -27,11 +27,11 @@
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@proca/crypto": "^3.4.0",
     "@proca/queue": "^5.1.0",
-    "@sendinblue/client": "^3.2.2",
+    "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^7.63.0",
-    "@topcli/spinner": "^2.1.1",
+    "@topcli/spinner": "^2.1.2",
     "cli-color": "^2.0.3",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8"
   }
