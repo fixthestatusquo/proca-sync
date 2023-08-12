@@ -35,10 +35,10 @@
     dotenv "^8.2.0"
     superagent "3.8.1"
 
-"@proca/crypto@^3.3.1", "@proca/crypto@^3.3.4":
-  version "3.3.4"
-  resolved "https://registry.npmjs.org/@proca/crypto/-/crypto-3.3.4.tgz"
-  integrity sha512-Xs8xM5rucU0iyiZ5EcrvHUCxJVRUF2vnfavI85VhTAXQ6Q0+ztiAj39Ohz/WCsolOvFk+RmrDkiBgyccWrR/Lg==
+"@proca/crypto@^3.3.1", "@proca/crypto@^3.4.0":
+  version "3.4.0"
+  resolved "https://registry.npmjs.org/@proca/crypto/-/crypto-3.4.0.tgz"
+  integrity sha512-IOsfLJ6xxu9UzeYkW+PrOcusFfGOSrKO5E3Uaio53F6FmI0TC+02ZutfEgWgg1WQ7C04DjDfcdlzoXTpIOE8ww==
   dependencies:
     "@types/lodash" "^4.14.176"
     "@types/node" "^16.11.6"
@@ -47,7 +47,7 @@
     tweetnacl "^1.0.3"
     tweetnacl-util "^0.15.1"
 
-"@proca/queue@^0.2.3":
+"@proca/queue@^0.2.5":
   version "0.2.5"
   resolved "https://registry.npmjs.org/@proca/queue/-/queue-0.2.5.tgz"
   integrity sha512-CNjzSnfQgLy1SSE8yhf4aa9CEGfL15HCB77NBrKFq2oIwsCXVV3NQ4Mt21413rpk0YkMxJYDTdX3VfgiiQM4sw==
@@ -65,45 +65,51 @@
     lodash "^4.17.21"
     request "^2.81.0"
 
-"@sentry/core@7.20.0":
-  version "7.20.0"
-  resolved "https://registry.npmjs.org/@sentry/core/-/core-7.20.0.tgz"
-  integrity sha512-8dIHk8niyEyVayUQpgECHnV2p444nPBjIyuQrtkdTxL7sBLC5+Y0DhRjxg9cJyZe/bZnXVerGkgcA7niKW4W8A==
+"@sentry-internal/tracing@7.63.0":
+  version "7.63.0"
+  resolved "https://registry.npmjs.org/@sentry-internal/tracing/-/tracing-7.63.0.tgz"
+  integrity sha512-Fxpc53p6NGvLSURg3iRvZA0k10K9yfeVhtczvJnpX30POBuV41wxpkLHkb68fjksirjEma1K3Ut1iLOEEDpPQg==
   dependencies:
-    "@sentry/types" "7.20.0"
-    "@sentry/utils" "7.20.0"
-    tslib "^1.9.3"
+    "@sentry/core" "7.63.0"
+    "@sentry/types" "7.63.0"
+    "@sentry/utils" "7.63.0"
+    tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/node@^7.20.0":
-  version "7.20.0"
-  resolved "https://registry.npmjs.org/@sentry/node/-/node-7.20.0.tgz"
-  integrity sha512-aB0VSueCiWPg53DIevnKNYSu2OGsPweWO1eKhMhu1uJNbL+ZYAFRczdcLdkWCqa38X5jjqO82GKuIZYpXUGX+A==
+"@sentry/core@7.63.0":
+  version "7.63.0"
+  resolved "https://registry.npmjs.org/@sentry/core/-/core-7.63.0.tgz"
+  integrity sha512-13Ljiq8hv6ieCkO+Am99/PljYJO5ynKT/hRQrWgGy9IIEgUr8sV3fW+1W6K4/3MCeOJou0HsiGBjOD1mASItVg==
   dependencies:
-    "@sentry/core" "7.20.0"
-    "@sentry/types" "7.20.0"
-    "@sentry/utils" "7.20.0"
+    "@sentry/types" "7.63.0"
+    "@sentry/utils" "7.63.0"
+    tslib "^2.4.1 || ^1.9.3"
+
+"@sentry/node@^7.63.0":
+  version "7.63.0"
+  resolved "https://registry.npmjs.org/@sentry/node/-/node-7.63.0.tgz"
+  integrity sha512-tSMyfQNbfjX1w8vJDZtvWeaD4QQ/Z4zVW/TLXfL/JZFIIksPgDZmqLdF+NJS4bSGTU5JiHiUh4pYhME4mHgNBQ==
+  dependencies:
+    "@sentry-internal/tracing" "7.63.0"
+    "@sentry/core" "7.63.0"
+    "@sentry/types" "7.63.0"
+    "@sentry/utils" "7.63.0"
     cookie "^0.4.1"
     https-proxy-agent "^5.0.0"
     lru_map "^0.3.3"
-    tslib "^1.9.3"
+    tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/types@^7.20.1":
-  version "7.20.1"
-  resolved "https://registry.npmjs.org/@sentry/types/-/types-7.20.1.tgz"
-  integrity sha512-bI4t5IXGLIQYH5MegKRl4x2LDSlPVbQJ5eE6NJCMrCm8PcFUo3WgkwP6toG9ThQwpTx/DhUo1sVNKrr0oW4cpA==
+"@sentry/types@^7.63.0", "@sentry/types@7.63.0":
+  version "7.63.0"
+  resolved "https://registry.npmjs.org/@sentry/types/-/types-7.63.0.tgz"
+  integrity sha512-pZNwJVW7RqNLGuTUAhoygt0c9zmc0js10eANAz0MstygJRhQI1tqPDuiELVdujPrbeL+IFKF+7NvRDAydR2Niw==
 
-"@sentry/types@7.20.0":
-  version "7.20.0"
-  resolved "https://registry.npmjs.org/@sentry/types/-/types-7.20.0.tgz"
-  integrity sha512-x17ddduGWqW95neBFVvxzmInb5WXVw+2PcNASHXpGFhi7v2gz2a7/w2CcIKxsqODNnc+z/k1t0Y+uy9B6aH6ag==
-
-"@sentry/utils@7.20.0":
-  version "7.20.0"
-  resolved "https://registry.npmjs.org/@sentry/utils/-/utils-7.20.0.tgz"
-  integrity sha512-4lc122TFgkaCAvoPRy+uc5vgOCumTa/2nPkzCSxVsezQs+ebHxyMJQK7GWBLI6P+EzKfEjlgyMzRWaPJ3iJatA==
+"@sentry/utils@7.63.0":
+  version "7.63.0"
+  resolved "https://registry.npmjs.org/@sentry/utils/-/utils-7.63.0.tgz"
+  integrity sha512-7FQv1RYAwnuTuarruP+1+Jd6YQuN7i/Y7KltwPMVEwU7j5mzYQaexLr/Jz1XIdR2KYVdkbXQyP8jj8BmA6u9Jw==
   dependencies:
-    "@sentry/types" "7.20.0"
-    tslib "^1.9.3"
+    "@sentry/types" "7.63.0"
+    tslib "^2.4.1 || ^1.9.3"
 
 "@topcli/spinner@^2.1.1":
   version "2.1.1"
@@ -869,10 +875,10 @@ minimatch@^3.1.1:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimist@^1.2.6, minimist@^1.2.7:
-  version "1.2.7"
-  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz"
-  integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
+minimist@^1.2.6, minimist@^1.2.8:
+  version "1.2.8"
+  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.8.tgz"
+  integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
 
 mkdirp@^1.0.4:
   version "1.0.4"
@@ -1255,10 +1261,10 @@ tsconfig@^7.0.0:
     strip-bom "^3.0.0"
     strip-json-comments "^2.0.0"
 
-tslib@^1.9.3:
-  version "1.14.1"
-  resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
-  integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
+"tslib@^2.4.1 || ^1.9.3":
+  version "2.6.1"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.6.1.tgz"
+  integrity sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig==
 
 tunnel-agent@^0.6.0:
   version "0.6.0"
@@ -1292,10 +1298,10 @@ type@^2.7.2:
   resolved "https://registry.npmjs.org/type/-/type-2.7.2.tgz"
   integrity sha512-dzlvlNlt6AXU7EBSfpAscydQ7gXB+pPGsPnfJnZpiNJBDj7IaJzQlBZYGdEi4R9HmPdBv2XmWJ6YUtoTa7lmCw==
 
-typescript@*, typescript@^4.8.4, typescript@>=2.7:
-  version "4.8.4"
-  resolved "https://registry.npmjs.org/typescript/-/typescript-4.8.4.tgz"
-  integrity sha512-QCh+85mCy+h0IGff8r5XWzOVSbBO+KfeYrMQh7NJ58QujwcE22u+NUSmUxqF+un70P9GXKxa2HCNiTTMJknyjQ==
+typescript@*, typescript@^4.9.5, typescript@>=2.7:
+  version "4.9.5"
+  resolved "https://registry.npmjs.org/typescript/-/typescript-4.9.5.tgz"
+  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 uri-js@^4.2.2:
   version "4.4.1"
