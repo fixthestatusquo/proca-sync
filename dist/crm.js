@@ -66,7 +66,7 @@ class CRM {
         };
         this.log = (text, status) => {
             //  progress: (count: number; suffix: string; color:string);
-            const newline = this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
+            const newline = !text ? false : this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
             (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", { wrapper: this.colorStatus(status), newline: newline });
             if (status)
                 this.lastStatus = status;
@@ -180,11 +180,12 @@ class CRM {
 }
 exports.CRM = CRM;
 const init = (config) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     if (!process.env.CRM) {
         console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
         throw new Error("missing process.env.CRM");
     }
-    const crm = yield Promise.resolve().then(() => __importStar(require("./crm/" + process.env.CRM)));
+    const crm = yield (_a = "./crm/" + process.env.CRM, Promise.resolve().then(() => __importStar(require(_a))));
     if (crm.default) {
         return new crm.default(config);
     }
