@@ -99,7 +99,7 @@ export abstract class CRM implements CRMInterface {
 
   log = (text:string | void, status:ProcessStatus | void) => {
      //  progress: (count: number; suffix: string; color:string);
-    const newline = this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
+    const newline = !text ? false : this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
     spin(this.count.ack +this.count.nack , text || "",{wrapper:this.colorStatus(status), newline: newline});
     if (status)
       this.lastStatus = status;
