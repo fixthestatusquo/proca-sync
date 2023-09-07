@@ -68,7 +68,7 @@ export enum CRMType {
   ActionContact, // Process all actions, primary and secondary, optin and optout
   Contact, // Process only the primary actions (eg petition signature, mtt), not the secondary ones (eg share actions)
   OptIn, // Process only the primary actions of the contacts that opted in
-  //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
+  DoubleOptIn, //only if double opt-in
 }
 export abstract class CRM implements CRMInterface {
   public campaigns: Record<string, any>;
@@ -152,7 +152,17 @@ export abstract class CRM implements CRMInterface {
           this.verbose && console.log('opt-out',message.actionId);
           return true; //OptOut contact, we don't need to process
         }
+        if (message.privacy?.emailStatus === 'double_opt_in') { // double opt-in is optin (eg by email)
+          return this.formatResult(await this.handleContact(message));
+        }
         console.error ("don't know how to process - optin", message);
+        break;
+      case CRMType.DoubleOptIn:
+        if (message.privacy?.emailStatus === 'double_opt_in') {
+          return this.formatResult(await this.handleContact(message));
+        }
+        this.verbose && console.log('not double opt in',message.actionId);
+
         break;
       case CRMType.ActionContact:
         throw new Error(

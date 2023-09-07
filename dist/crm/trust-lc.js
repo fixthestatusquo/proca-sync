@@ -47,7 +47,7 @@ class TrustCRM extends crm_1.CRM {
             console.log("fake fetching campaign", campaign.name);
             return campaign;
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_1.CRMType.DoubleOptIn;
     }
 }
 exports.default = TrustCRM;

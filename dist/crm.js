@@ -51,7 +51,7 @@ var CRMType;
     CRMType[CRMType["ActionContact"] = 0] = "ActionContact";
     CRMType[CRMType["Contact"] = 1] = "Contact";
     CRMType[CRMType["OptIn"] = 2] = "OptIn";
-    //  DoubleOptIn, @marcin, can we easily do that? it'd need to memstore temporarily contacts until the doubleoptin arrives, right?
+    CRMType[CRMType["DoubleOptIn"] = 3] = "DoubleOptIn";
 })(CRMType = exports.CRMType || (exports.CRMType = {}));
 class CRM {
     constructor(opt) {
@@ -95,6 +95,7 @@ class CRM {
             return result.processed;
         };
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             switch (this.crmType) {
                 case CRMType.Contact:
                     if (message.privacy.withConsent)
@@ -109,7 +110,16 @@ class CRM {
                         this.verbose && console.log('opt-out', message.actionId);
                         return true; //OptOut contact, we don't need to process
                     }
+                    if (((_a = message.privacy) === null || _a === void 0 ? void 0 : _a.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
+                        return this.formatResult(yield this.handleContact(message));
+                    }
                     console.error("don't know how to process - optin", message);
+                    break;
+                case CRMType.DoubleOptIn:
+                    if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') {
+                        return this.formatResult(yield this.handleContact(message));
+                    }
+                    this.verbose && console.log('not double opt in', message.actionId);
                     break;
                 case CRMType.ActionContact:
                     throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");
