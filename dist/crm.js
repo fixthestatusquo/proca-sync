@@ -119,7 +119,12 @@ class CRM {
                     if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') {
                         return this.formatResult(yield this.handleContact(message));
                     }
-                    this.verbose && console.log('not double opt in', message.actionId);
+                    if (message.privacy.optIn === null) {
+                        return true; //OptOut contact, we don't need to process
+                    }
+                    console.log('not double opt in', message.actionId);
+                    this.verbose && console.log(message);
+                    // not return, it will display an error
                     break;
                 case CRMType.ActionContact:
                     throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");

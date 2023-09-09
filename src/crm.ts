@@ -161,8 +161,12 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy?.emailStatus === 'double_opt_in') {
           return this.formatResult(await this.handleContact(message));
         }
-        this.verbose && console.log('not double opt in',message.actionId);
-
+        if (message.privacy.optIn === null) {
+          return true; //OptOut contact, we don't need to process
+        }
+        console.log('not double opt in',message.actionId);
+        this.verbose && console.log(message);
+        // not return, it will display an error
         break;
       case CRMType.ActionContact:
         throw new Error(
