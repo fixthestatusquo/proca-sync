@@ -170,10 +170,10 @@
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.188.tgz"
   integrity sha512-zmEmF5OIM3rb7SbLCFYoQhO4dGt2FRM9AMkxvA3LaADOF1n8in/zGJlWji9fmafLoNyz+FoL6FE0SLtGIArD7w==
 
-"@types/mailchimp__mailchimp_marketing@^3.0.10":
-  version "3.0.10"
-  resolved "https://registry.npmjs.org/@types/mailchimp__mailchimp_marketing/-/mailchimp__mailchimp_marketing-3.0.10.tgz"
-  integrity sha512-UMeHXH1XQUuj6PBWQzripZhH7ENEFMHiH55aGXKKuqhM29kF//xHWwqazY/zwT8TWKHvXAmIg/MKT8ZM1pFWrw==
+"@types/mailchimp__mailchimp_marketing@^3.0.11":
+  version "3.0.11"
+  resolved "https://registry.yarnpkg.com/@types/mailchimp__mailchimp_marketing/-/mailchimp__mailchimp_marketing-3.0.11.tgz#296e6d48fee975e314f1eafe6574b82e09938566"
+  integrity sha512-LrFftdD6EIJ5JvmfOSKVwJn6Ryg1Etu/81QmExgRROaIG0qYeGdGvFVlYuKPlMd1yTH3kO834ogkoJshIL91zA==
 
 "@types/minimist@^1.2.2":
   version "1.2.2"
