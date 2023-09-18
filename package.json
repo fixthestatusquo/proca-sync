@@ -16,7 +16,7 @@
     "start": "ts-node-dev src/index.ts"
   },
   "devDependencies": {
-    "@sentry/types": "^7.63.0",
+    "@sentry/types": "^7.69.0",
     "@types/cli-color": "^2.0.3",
     "@types/mailchimp__mailchimp_marketing": "^3.0.10",
     "@types/minimist": "^1.2.2",
