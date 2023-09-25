@@ -67,50 +67,50 @@
     lodash "^4.17.21"
     request "^2.81.0"
 
-"@sentry-internal/tracing@7.68.0":
-  version "7.68.0"
-  resolved "https://registry.yarnpkg.com/@sentry-internal/tracing/-/tracing-7.68.0.tgz#cb83a797baa671702cf43caf2280868850a0ef04"
-  integrity sha512-nNKS/q21+Iqzxs2K7T/l3dZi8Z9s/uxsAazpk2AYhFzx9mFnPj1Xfe3dgbFoygNifE+IrpUuldr6D5HQamTDPQ==
+"@sentry-internal/tracing@7.70.0":
+  version "7.70.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/tracing/-/tracing-7.70.0.tgz#00fd30426a6d4737385004434a39cf60736beafc"
+  integrity sha512-SpbE6wZhs6QwG2ORWCt8r28o1T949qkWx/KeRTCdK4Ub95PQ3Y3DgnqD8Wz//3q50Wt6EZDEibmz4t067g6PPg==
   dependencies:
-    "@sentry/core" "7.68.0"
-    "@sentry/types" "7.68.0"
-    "@sentry/utils" "7.68.0"
+    "@sentry/core" "7.70.0"
+    "@sentry/types" "7.70.0"
+    "@sentry/utils" "7.70.0"
     tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/core@7.68.0":
-  version "7.68.0"
-  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-7.68.0.tgz#323817afea06b1fc22db37620bf74f3f8a46dbcf"
-  integrity sha512-mT3ObBWgvAky/QF3dZy4KBoXbRXbNsD6evn+mYi9UEeIZQ5NpnQYDEp78mapiEjI/TAHZIhTIuaBhj1Jk0qUUA==
+"@sentry/core@7.70.0":
+  version "7.70.0"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-7.70.0.tgz#c481ef27cf05293fb681ee4ff4d4b0b1e8664bb5"
+  integrity sha512-voUsGVM+jwRp99AQYFnRvr7sVd2tUhIMj1L6F42LtD3vp7t5ZnKp3NpXagtFW2vWzXESfyJUBhM0qI/bFvn7ZA==
   dependencies:
-    "@sentry/types" "7.68.0"
-    "@sentry/utils" "7.68.0"
+    "@sentry/types" "7.70.0"
+    "@sentry/utils" "7.70.0"
     tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/node@^7.68.0":
-  version "7.68.0"
-  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-7.68.0.tgz#da3407ba7455109cf625c9a134a3f74ec5f5ca6b"
-  integrity sha512-gtcHoi6Xu6Iu8MpPgKJA4E0nozqLvYF0fKtt+27T0QBzWioO6lkxSQkKGWMyJGL0AmpLCex0E28fck/rlbt0LA==
+"@sentry/node@^7.70.0":
+  version "7.70.0"
+  resolved "https://registry.yarnpkg.com/@sentry/node/-/node-7.70.0.tgz#3d62ee1d7c762a3d15ab1967ab8e6acc805a241a"
+  integrity sha512-GeGlnu3QnJX0GN2FvZ3E31e48ZhRzEpREyC0Wa4BRvYHnyiGvsQjo/0RKeq6vvlggRhVnuoMg/jESyUmdntrAA==
   dependencies:
-    "@sentry-internal/tracing" "7.68.0"
-    "@sentry/core" "7.68.0"
-    "@sentry/types" "7.68.0"
-    "@sentry/utils" "7.68.0"
-    cookie "^0.4.1"
+    "@sentry-internal/tracing" "7.70.0"
+    "@sentry/core" "7.70.0"
+    "@sentry/types" "7.70.0"
+    "@sentry/utils" "7.70.0"
+    cookie "^0.5.0"
     https-proxy-agent "^5.0.0"
     lru_map "^0.3.3"
     tslib "^2.4.1 || ^1.9.3"
 
-"@sentry/types@7.68.0", "@sentry/types@^7.63.0":
-  version "7.68.0"
-  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.68.0.tgz#6134511106eed90bf033dc2ce76955f61582b48f"
-  integrity sha512-5J2pH1Pjx/029zTm3CNY9MaE8Aui81nG7JCtlMp7uEfQ//9Ja4d4Sliz/kV4ARbkIKUZerSgaRAm3xCy5XOXLg==
+"@sentry/types@7.70.0", "@sentry/types@^7.63.0":
+  version "7.70.0"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.70.0.tgz#c7b533bb18144e3b020550b38cf4812c32d05ffe"
+  integrity sha512-rY4DqpiDBtXSk4MDNBH3dwWqfPbNBI/9GA7Y5WJSIcObBtfBKp0fzYliHJZD0pgM7d4DPFrDn42K9Iiumgymkw==
 
-"@sentry/utils@7.68.0":
-  version "7.68.0"
-  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-7.68.0.tgz#e9fd33f4e856cf6ef3843ae11af3c836d88cbb88"
-  integrity sha512-NecnQegvKARyeFmBx7mYmbI17mTvjARWs1nfzY5jhPyNc3Zk4M3bQsgIdnJ1t+jo93UYudlNND7hxhDzjcBAVg==
+"@sentry/utils@7.70.0":
+  version "7.70.0"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-7.70.0.tgz#825387ceb10cbb1e145357394b697a1a6d60eb74"
+  integrity sha512-0cChMH0lsGp+5I3D4wOHWwjFN19HVrGUs7iWTLTO5St3EaVbdeLbI1vFXHxMxvopbwgpeZafbreHw/loIdZKpw==
   dependencies:
-    "@sentry/types" "7.68.0"
+    "@sentry/types" "7.70.0"
     tslib "^2.4.1 || ^1.9.3"
 
 "@topcli/spinner@^2.1.2":
@@ -402,10 +402,10 @@ concat-map@0.0.1:
   resolved "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz"
   integrity sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==
 
-cookie@^0.4.1:
-  version "0.4.2"
-  resolved "https://registry.npmjs.org/cookie/-/cookie-0.4.2.tgz"
-  integrity sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==
+cookie@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/cookie/-/cookie-0.5.0.tgz#d1f5d71adec6558c58f389987c366aa47e994f8b"
+  integrity sha512-YZ3GUyn/o8gfKJlnlX7g7xq4gyO6OSuhGPKaaGssGB2qgDUS0gPgtTvoyZLTt9Ab6dC4hfc9dV5arkvc/OCmrw==
 
 cookiejar@^2.1.0:
   version "2.1.4"
