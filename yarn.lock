@@ -160,10 +160,10 @@
   resolved "https://registry.yarnpkg.com/@types/caseless/-/caseless-0.12.2.tgz#f65d3d6389e01eeb458bd54dc8f52b95a9463bc8"
   integrity sha512-6ckxMjBBD8URvjB6J3NcnuAn5Pkl7t3TizAg+xdlzzQGSPSmBcXf8KoIH0ua/i+tio+ZRUHEXp0HEmvaR4kt0w==
 
-"@types/cli-color@^2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@types/cli-color/-/cli-color-2.0.3.tgz#2e9f8d171a19ba6daf2458affac4397a3cb848bd"
-  integrity sha512-JcGK/IFNVt5a99Xsz4wMCK8jfylpZ5E9AxzGcTVLD5nNYPYxXkylTRV7mcqA324rKLfqT3juU5KjQbI9CAV3SA==
+"@types/cli-color@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/cli-color/-/cli-color-2.0.5.tgz#ef561afe744f28a28d972f05339a27a24db1b4d7"
+  integrity sha512-7GTI5GNi37HHQ3BEbT64tstsEeNmw8yix3vwVlFEB0EFO8U5vIcPzKbnAjoLnlIfQ7afq5Ol5eM4RCqEJdcK4g==
 
 "@types/lodash@^4.14.176":
   version "4.14.188"
