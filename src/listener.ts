@@ -2,20 +2,11 @@ import { syncQueue, ActionMessageV2, EventMessageV2, ConsumerOpts, count } from 
 import { Configuration } from "./config";
 import { CRM } from "./crm";
 import {spin} from "./spinner";
-
+import {pause} from "./utils";
 //import * as crm from './crm.debug';
 let crm: any = {};
 // TODO: set type
 //
-
-// Main listen loop which waits on new messages and handles them
-export const pause = (time: number | undefined): Promise<any> => {
-  const min = !time || time >= 7 ? 7 : time / 2;
-  const max = time || 42; // wait between min and max
-  time = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-//  console.log("waiting", time / 1000);
-  return new Promise((resolve) => setTimeout(() => resolve(time), time));
-};
 
 
 export const listen = (config: Configuration, crm: CRM) => {

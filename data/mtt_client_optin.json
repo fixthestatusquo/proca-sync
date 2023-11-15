@@ -1,0 +1,57 @@
+{
+  "action": {
+    "actionType": "register",
+    "createdAt": "2023-11-15T16:47:53Z",
+    "customFields": {
+      "language": "fr",
+      "message": "ici la france",
+      "selection": 2,
+      "subject": "hello paris"
+    },
+    "testing": false
+  },
+  "actionId": 3126702,
+  "actionPage": {
+    "locale": "fr",
+    "name": "stopscanningme/fixthestatusquo/fr",
+    "supporterConfirmTemplate": null,
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 3178,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "stopscanningme",
+    "title": "Stop Scanning Me"
+  },
+  "campaignId": 557,
+  "contact": {
+    "area": "GR",
+    "contactRef": "XRfpedl-TCN0SD7BK4gjBbbDij_rlzdHOpQlRVudXMY",
+    "country": "GR",
+    "dupeRank": 3,
+    "email": "test@test.be",
+    "firstName": "test",
+    "postcode": "1234"
+  },
+  "org": { "name": "fixthestatusquo", "title": "Fix the Status Quo" },
+  "orgId": 766,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": null,
+    "emailStatusChanged": null,
+    "givenAt": "2023-11-15T16:47:53Z",
+    "optIn": true,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "http://0.0.0.0:8000/",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}

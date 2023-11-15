@@ -1,0 +1,352 @@
+import {
+  CRM,
+  CRMType,
+  ActionMessage,
+  handleResult,
+  ProcaCampaign,
+  ProcessStatus,
+} from "../crm";
+
+import { string2map } from "../utils";
+
+const civicrm = require("civicrm");
+
+type CivicrmConfig = {
+  server: string;
+  path?: string;
+  api_key: string;
+  key?: string;
+};
+
+class CiviCRM extends CRM {
+  client: any;
+  group: string;
+  groups: [] | undefined;
+  customFields: any;
+  crmAPI: any;
+  countries: Record<string, number>;
+
+  constructor(opt: {}) {
+    super(opt);
+    this.countries = {};
+    this.crmType = CRMType.OptIn;
+    if (!process.env.CIVICRM_API_KEY) {
+      console.error(
+        "you need to set the CIVICRM_API_KEY from CiviCRM in the .env.xx"
+      );
+      process.exit(1);
+    }
+    if (!process.env.CIVICRM_URL) {
+      console.error(
+        "you need to set the url of your api4 endpoint from CiviCRM in the .env.xx"
+      );
+      process.exit(1);
+    }
+    let config: CivicrmConfig = {
+      server: process.env.CIVICRM_URL,
+      api_key: process.env.CIVICRM_API_KEY,
+    };
+    if (process.env.CIVICRM_PATH) {
+      config.path = process.env.CIVICRM_PATH;
+    }
+    if (process.env.CIVICRM_KEY) {
+      config.key = process.env.CIVICRM_KEY;
+    }
+    this.crmAPI = civicrm(config);
+    if (this.verbose) {
+      this.crmAPI.debug(true);
+    }
+
+    if (!process.env.GROUP) {
+      console.error(
+        "you need to set the GROUP (usually your newsletter group) from CiviCRM in the .env.xx"
+      );
+    }
+    this.group = process.env.GROUP || "";
+    if (typeof process.env.CUSTOM_FIELDS === "string") {
+      // get query format, key = contact field, value = merge field in CiviCRM
+      // eg. MERGE_FIELDS="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
+      this.customFields = string2map(process.env.CUSTOM_FIELDS);
+      console.log("custom mergeFields", this.customFields);
+    }
+  }
+
+  init = async (): Promise<boolean> => {
+    if (!this.group) {
+      // it will not work without a group, suggesting some
+      console.warn("missing group id, some");
+      const r = await this.crmAPI.get("Group", { limit: 200 });
+
+      r.values.forEach((g: any) => {
+        console.log(g.id, g.name, g.description);
+      });
+    }
+    const countries = await this.crmAPI.get(
+      "Country",
+      {
+        select: ["id", "iso_code", "row_count"],
+        limit: 9999,
+      },
+      { iso_code: "id" }
+    );
+
+    this.countries = countries.values;
+    return true;
+  };
+
+  handleContact = async (
+    message: ActionMessage
+  ): Promise<handleResult | boolean> => {
+    const camp = await this.campaign(message.campaign);
+    if (this.verbose) {
+      console.log("processing...", message);
+    }
+    let source =
+      "proca " + message.action.actionType + " @" + message.actionPage.name;
+    if (message.action.testing) source = "testing " + source;
+    //    customFields: { comment: 'This is a comment', emailProvider: 'gmail.com' },
+    const action: any = message.action;
+    action.id = message.actionId;
+    const existing = await this.fetchContact(message.contact.email, {
+      action: action,
+      campaign_id: camp.id,
+    });
+    if (existing === false) {
+      return this.createContact(message.contact, action, camp.id, source);
+    } else {
+      return this.updateContact(existing, message.contact, action, camp.id, source);
+    }
+    return false;
+  };
+
+  getParams = (
+    contact: any,
+    action: any,
+    campaign_id: number,
+    source?: string
+  ): Record<string, any> => {
+    let params: Record<string, any> = {
+      values: {
+        first_name: contact.firstName,
+        last_name: contact.lastName || null,
+        //        external_identifier: "proca_" + contact.contactRef, // creates problems if the contact exists in trash
+        source: source,
+      },
+      chain: {
+        email: [
+          "Email",
+          "create",
+          {
+            values: {
+              contact_id: "$id",
+              email: contact.email,
+              is_primary: true,
+            },
+          },
+        ],
+        address: [
+          "Address",
+          "create",
+          {
+            values: {
+              contact_id: "$id",
+              street_address: contact.street || null,
+              city: contact.locality || null,
+              postal_code: contact.postcode || null,
+              country_id: this.countries[contact.area], // test if country? option?
+              is_primary: true,
+            },
+          },
+        ],
+        activity: [
+          "Activity",
+          "create",
+          {
+            values: {
+              activity_type_id: 32,
+              source_contact_id: "$id",
+              subject: action.customFields?.subject ? action.customFields.subject :
+                (contact.dupeRank === 0
+                  ? source
+                  : source + " #" + contact.dupeRank),
+              location: "action_" + action.id,
+              activity_date_time: action.createdAt,
+              //              location: action.,
+              campaign_id: campaign_id,
+              details: action?.customFields?.message || action?.customFields?.comment,
+            },
+          },
+        ],
+      },
+    };
+
+    if (contact.phone) {
+      params.chain.phone = [
+        "Phone",
+        "create",
+        {
+          values: {
+            contact_id: "$id",
+            is_primary: true,
+            phone: contact.phone,
+          },
+        },
+      ];
+    }
+    if (this.group) {
+      params.chain.group = [
+        "GroupContact",
+        "create",
+        {
+          values: {
+            contact_id: "$id",
+            group_id: this.group,
+          },
+        },
+      ];
+    }
+
+    return params;
+  };
+
+  updateContact = async (
+    crmContact: any,
+    contact: any,
+    action: any,
+    campaign_id: number,
+    source?: string
+  ): Promise<boolean> => {
+    const params = this.getParams(contact, action, campaign_id, source);
+    params.where = [["id", "=", crmContact.id]];
+
+    // we do not overwrite existing contact data, we do not set the source
+    delete params.values.source;
+    delete params.chain.email;
+    params.values["is_opt_out"] = false;
+    ["first_name", "last_name"].forEach((d) => {
+      if (crmContact[d]) {
+        delete params.values[d];
+      }
+    });
+
+    if (crmContact["address.id"]) {
+      ["street_address", "country_id", "city", "postal_code"].forEach((d) => {
+        if (crmContact["address." + d])
+          delete params.chain.address[2].values[d];
+      });
+      params.chain.address[1] = "update";
+      params.chain.address[2].where = [["id", "=", crmContact["address.id"]]];
+    }
+    if (crmContact["phone.id"]) delete params.chain.phone;
+    if (crmContact["activity.id"]) delete params.chain.activity;
+    if (crmContact["group.id"]) {
+      params.chain.group[1] = "update";
+      params.chain.group[2].where = [
+        ["group_id", "=", this.group],
+        ["contact_id", "=", crmContact["id"]],
+      ];
+      params.chain.group[2].values = { status: "Added" };
+    }
+    const r = await this.crmAPI.update("Contact", params);
+    //    console.dir(r, { depth: null });
+    if (!r.error_message) return true;
+    console.error ("createContact",r.error_message);
+    return false;
+  };
+
+  createContact = async (
+    contact: any,
+    action: any,
+    campaign_id: number,
+    source?: string
+  ): Promise<boolean> => {
+    const params = this.getParams(contact, action, campaign_id, source);
+
+    const r = await this.crmAPI.create("Contact", params);
+    if (!r.error_message) return true;
+    console.error ("createContact",r.error_message);
+    return false;
+  };
+
+  fetchContact = async (email: string, context: any): Promise<any> => {
+    const results = await this.crmAPI.get("Contact", {
+      select: [
+        "first_name",
+        "last_name",
+        "email.email",
+        "email.on_hold",
+        "email.is_primary",
+        "phone.id",
+        "phone.phone",
+        "address.id",
+        "address.street_address",
+        "address.postal_code",
+        "address.city",
+        "address.country_id",
+        "source",
+        "group.id",
+        "group.status",
+        "activity.id",
+      ],
+      join: [
+        ["Email AS email", "INNER"],
+        ["Phone AS phone", "LEFT", ["phone.is_primary", "=", true]],
+        ["Address AS address", "LEFT", ["address.is_primary", "=", true]],
+        [
+          "Group AS group",
+          "LEFT",
+          "GroupContact",
+          ["group.id", "=", this.group],
+        ],
+        [
+          "Activity AS activity",
+          "LEFT",
+          "ActivityContact",
+          ["activity.campaign_id", "=", context.campaign_id],
+          [
+            "activity.activity_date_time",
+            "=",
+            '"' + context.action.createdAt + '"',
+          ],
+          ["activity.location", "=", '"action_' + context.action.id + '"'],
+        ],
+      ],
+      where: [["email.email", "=", email]],
+
+      limit: 2,
+    });
+
+
+    if (results.count === 0) return false;
+    console.log("fetching", results.count, "contacts");
+    if (this.verbose) {
+      console.log(results.values);
+    }
+
+    return results.values[0];
+    //    return findMember(this.client, email);
+  };
+
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r = await this.crmAPI.get("Campaign", {
+      select: ["id", "name"],
+      limit: 1,
+      where: [["name", "=", campaign.name]],
+    });
+    if (r.count === 0) {
+      console.log("let's create the campaign", campaign.name);
+      const now = new Date();
+      const r = await this.crmAPI.create("Campaign", {
+        values: {
+          name: campaign.name,
+          title: campaign.name,
+          description: "campaign on proca",
+          start_date: now.toISOString(),
+        },
+      });
+    }
+    return r;
+  };
+}
+
+export default CiviCRM;

@@ -47,6 +47,7 @@ export type Action = {
 };
 
 interface CRMInterface {
+  init: () => Promise<boolean>;
   handleActionContact: (
     message: ActionMessageV2
   ) => Promise<handleResult | boolean>;
@@ -57,7 +58,7 @@ interface CRMInterface {
   ) => Promise<handleResult | boolean>;
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
-  fetchContact?: (email: string) => Promise<any>; // fetch the contact, mostly for debug
+  fetchContact?: (email: string, context?: any) => Promise<any>; // fetch the contact, mostly for debug
   setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
   log: (text: string | void, color:ProcessStatus | void) => void;
@@ -105,6 +106,12 @@ export abstract class CRM implements CRMInterface {
       this.lastStatus = status;
   }
 
+  init = async (): Promise<boolean> => {
+console.log("init");
+     //optional async init for extran fetch and setup that can't be done in the constructor
+     return true;
+  }
+
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
     // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist
@@ -113,7 +120,7 @@ export abstract class CRM implements CRMInterface {
     return Promise.resolve(campaign);
   };
 
-  fetchContact = async (email: string): Promise<any> => {
+  fetchContact = async (email: string, context?: any): Promise<any> => {
     throw new Error("you need to implement fetchContact in your CRM");
   };
 
@@ -257,7 +264,13 @@ export const init = async (config: Configuration): Promise<CRM> => {
 
   const crm = await import("./crm/" + process.env.CRM);
   if (crm.default) {
-    return new crm.default(config);
+    const instance= new crm.default(config);
+    const success = await instance.init();
+    if (!success) {
+      console.error ("can't initialise the crm, we stop");
+      process.exit(1);
+    }
+    return instance;
   } else {
     throw new Error(process.env.CRM + " missing export default YourCRM");
   }

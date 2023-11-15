@@ -69,8 +69,8 @@ export const main = async (argv: string[]) => {
       );
       process.env.CRM = "file";
     }
-    console.log("listening for messages");
     const crm = await init (config);
+    console.log("listening for messages");
     listen(config, crm);
   } catch (er) {
     console.error(`Problem: ${er}`);

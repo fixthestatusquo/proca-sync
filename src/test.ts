@@ -2,6 +2,7 @@
 import parseArg from "minimist";
 import dotenv from "dotenv";
 import { existsSync, readFileSync } from "fs";
+import {pause} from "./utils";
 
 import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { init } from "./crm";
@@ -67,13 +68,28 @@ export const main = async (argv: string[]) => {
       );
       process.env.CRM = "file";
     }
-    console.log("reading messages");
     const crm = await init (config);
+    console.log("reading files", opt._);
+    if (opt._.length ===0) {
+      console.warn("missing file(s) to process, defaulting to data/petition_optin.json");
+      opt._.push("data/petition_optin.json");
+    }
   for (const file of opt._) {
       const message = JSON.parse(readFileSync(file, "utf8"));
       const r = await crm.handleActionContact(message);
-      if (message?.contact?.email)
-        console.log(await crm.fetchContact(message.contact.email));
+      if (crm.pause) {
+          console.log("pause action...");
+          await pause(10);
+        }
+        if (typeof r === "object" && "processed" in r) {
+//          spin (count.ack + count.nack, "processed");
+          return !!r.processed;
+        }
+
+//        spin (count.ack + count.nack, "bool processed");
+//      if (message?.contact?.email)
+//        console.log(await crm.fetchContact(message.contact.email));
+        return !!r;
   }
   } catch (er) {
     console.error(`Problem: ${er}`);
