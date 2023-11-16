@@ -17,20 +17,20 @@
   },
   "devDependencies": {
     "@sentry/types": "^7.63.0",
-    "@types/cli-color": "^2.0.2",
-    "@types/mailchimp__mailchimp_marketing": "^3.0.10",
+    "@types/cli-color": "^2.0.3",
+    "@types/mailchimp__mailchimp_marketing": "^3.0.13",
     "@types/minimist": "^1.2.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@proca/crypto": "^3.4.0",
     "@proca/queue": "^5.1.0",
     "@sendinblue/client": "^3.3.1",
-    "@sentry/node": "^7.66.0",
+    "@sentry/node": "^7.72.0",
     "@topcli/spinner": "^2.1.2",
-    "civicrm": "^2.2.2",
+    "civicrm": "^3.1.0",
     "cli-color": "^2.0.3",
     "dotenv": "^16.3.1",
     "lodash": "^4.17.21",
