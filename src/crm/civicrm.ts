@@ -81,7 +81,9 @@ class CiviCRM extends CRM {
         console.log(g.id, g.name, g.description);
       });
     }
-    const countries = await this.crmAPI.get(
+    let countries:any = undefined;
+    try { 
+    countries = await this.crmAPI.get(
       "Country",
       {
         select: ["id", "iso_code", "row_count"],
@@ -89,7 +91,9 @@ class CiviCRM extends CRM {
       },
       { iso_code: "id" }
     );
-
+    } catch (e) {
+      console.error (e,"problem accessing civicrm REST API"); process.exit(1);
+    }
     this.countries = countries.values;
     return true;
   };
@@ -98,6 +102,7 @@ class CiviCRM extends CRM {
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
+
     if (this.verbose) {
       console.log("processing...", message);
     }
@@ -216,6 +221,10 @@ class CiviCRM extends CRM {
     campaign_id: number,
     source?: string
   ): Promise<boolean> => {
+    if (campaign_id === null) {
+      throw new Error ("missing campaign id"); 
+    }
+
     const params = this.getParams(contact, action, campaign_id, source);
     params.where = [["id", "=", crmContact.id]];
 
@@ -260,8 +269,11 @@ class CiviCRM extends CRM {
     campaign_id: number,
     source?: string
   ): Promise<boolean> => {
-    const params = this.getParams(contact, action, campaign_id, source);
 
+    if (campaign_id === null) {
+      throw new Error ("missing campaign id"); 
+    }
+    const params = this.getParams(contact, action, campaign_id, source);
     const r = await this.crmAPI.create("Contact", params);
     if (!r.error_message) return true;
     console.error ("createContact",r.error_message);
@@ -316,9 +328,7 @@ class CiviCRM extends CRM {
       limit: 2,
     });
 
-
     if (results.count === 0) return false;
-    console.log("fetching", results.count, "contacts");
     if (this.verbose) {
       console.log(results.values);
     }
@@ -328,24 +338,27 @@ class CiviCRM extends CRM {
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    const r = await this.crmAPI.get("Campaign", {
-      select: ["id", "name"],
+    let r = await this.crmAPI.get("Campaign", {
+      select: ["id", "name","title"],
       limit: 1,
       where: [["name", "=", campaign.name]],
-    });
+    },0);
     if (r.count === 0) {
       console.log("let's create the campaign", campaign.name);
       const now = new Date();
-      const r = await this.crmAPI.create("Campaign", {
+      r = await this.crmAPI.create("Campaign", {
         values: {
           name: campaign.name,
-          title: campaign.name,
+          title: campaign.title,
           description: "campaign on proca",
           start_date: now.toISOString(),
         },
-      });
+      },0);
     }
-    return r;
+    if (!r.values.id) {
+      throw new Error ("can't get or create campaign "+campaign.name);
+    }
+    return r.values;
   };
 }
 
