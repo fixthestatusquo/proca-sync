@@ -45,14 +45,14 @@ var ProcessStatus;
     ProcessStatus[ProcessStatus["skipped"] = 2] = "skipped";
     ProcessStatus[ProcessStatus["ignored"] = 3] = "ignored";
     ProcessStatus[ProcessStatus["error"] = 4] = "error";
-})(ProcessStatus = exports.ProcessStatus || (exports.ProcessStatus = {}));
+})(ProcessStatus || (exports.ProcessStatus = ProcessStatus = {}));
 var CRMType;
 (function (CRMType) {
     CRMType[CRMType["ActionContact"] = 0] = "ActionContact";
     CRMType[CRMType["Contact"] = 1] = "Contact";
     CRMType[CRMType["OptIn"] = 2] = "OptIn";
     CRMType[CRMType["DoubleOptIn"] = 3] = "DoubleOptIn";
-})(CRMType = exports.CRMType || (exports.CRMType = {}));
+})(CRMType || (exports.CRMType = CRMType = {}));
 class CRM {
     constructor(opt) {
         this.colorStatus = (status) => {
@@ -71,13 +71,18 @@ class CRM {
             if (status)
                 this.lastStatus = status;
         };
+        this.init = () => __awaiter(this, void 0, void 0, function* () {
+            console.log("init");
+            //optional async init for extran fetch and setup that can't be done in the constructor
+            return true;
+        });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
             // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist
             // by campaign, we mean whatever your CRM uses to segment contacts and actions, it might be named list, segment...
             return Promise.resolve(campaign);
         });
-        this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
+        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement fetchContact in your CRM");
         });
         this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
@@ -195,14 +200,19 @@ class CRM {
 }
 exports.CRM = CRM;
 const init = (config) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     if (!process.env.CRM) {
         console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
         throw new Error("missing process.env.CRM");
     }
-    const crm = yield (_a = "./crm/" + process.env.CRM, Promise.resolve().then(() => __importStar(require(_a))));
+    const crm = yield Promise.resolve(`${"./crm/" + process.env.CRM}`).then(s => __importStar(require(s)));
     if (crm.default) {
-        return new crm.default(config);
+        const instance = new crm.default(config);
+        const success = yield instance.init();
+        if (!success) {
+            console.error("can't initialise the crm, we stop");
+            process.exit(1);
+        }
+        return instance;
     }
     else {
         throw new Error(process.env.CRM + " missing export default YourCRM");

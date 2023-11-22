@@ -9,21 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.listen = exports.pause = void 0;
+exports.listen = void 0;
 const queue_1 = require("@proca/queue");
+const utils_1 = require("./utils");
 //import * as crm from './crm.debug';
 let crm = {};
 // TODO: set type
 //
-// Main listen loop which waits on new messages and handles them
-const pause = (time) => {
-    const min = !time || time >= 7 ? 7 : time / 2;
-    const max = time || 42; // wait between min and max
-    time = Math.floor(Math.random() * (max - min + 1) + min) * 1000;
-    //  console.log("waiting", time / 1000);
-    return new Promise((resolve) => setTimeout(() => resolve(time), time));
-};
-exports.pause = pause;
 const listen = (config, crm) => {
     let tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
     const opts = { tag: tag };
@@ -48,7 +40,7 @@ const listen = (config, crm) => {
                 const r = yield crm.handleActionContact(action);
                 if (crm.pause) {
                     //          console.log("pause action...");
-                    yield (0, exports.pause)(10);
+                    yield (0, utils_1.pause)(10);
                 }
                 if (typeof r === "object" && "processed" in r) {
                     //          spin (count.ack + count.nack, "processed");
@@ -67,7 +59,7 @@ const listen = (config, crm) => {
                             // An email status update such as Double opt in or bounce
                             if (crm.pause) {
                                 //                console.log("pause email status...");
-                                yield (0, exports.pause)(3);
+                                yield (0, utils_1.pause)(3);
                             }
                             const r = yield crm.handleEmailStatusChange(event);
                             if (typeof r === "object" && "processed" in r)
@@ -80,7 +72,7 @@ const listen = (config, crm) => {
                     }
                     if (crm.pause) {
                         console.log("pause event...");
-                        yield (0, exports.pause)(3);
+                        yield (0, utils_1.pause)(3);
                     }
                     return false;
                 }
@@ -89,7 +81,7 @@ const listen = (config, crm) => {
         }
         if (crm.pause) {
             console.log("pause...");
-            yield (0, exports.pause)(10);
+            yield (0, utils_1.pause)(10);
         }
         return false;
     }), opts);

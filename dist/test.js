@@ -40,6 +40,7 @@ exports.main = void 0;
 const minimist_1 = __importDefault(require("minimist"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = require("fs");
+const utils_1 = require("./utils");
 const config_1 = require("./config");
 const crm_1 = require("./crm");
 const Sentry = __importStar(require("@sentry/node"));
@@ -57,7 +58,6 @@ const clihelp = () => {
     process.exit(0);
 };
 const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
     const opt = (0, minimist_1.default)(argv, {
         alias: { e: "env", v: "verbose" },
         default: { env: "", verbose: false },
@@ -97,13 +97,27 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             console.warn("saving into data folder instead of using " + process.env.CRM);
             process.env.CRM = "file";
         }
-        console.log("reading messages");
         const crm = yield (0, crm_1.init)(config);
+        console.log("reading files", opt._);
+        if (opt._.length === 0) {
+            console.warn("missing file(s) to process, defaulting to data/petition_optin.json");
+            opt._.push("data/petition_optin.json");
+        }
         for (const file of opt._) {
             const message = JSON.parse((0, fs_1.readFileSync)(file, "utf8"));
             const r = yield crm.handleActionContact(message);
-            if ((_a = message === null || message === void 0 ? void 0 : message.contact) === null || _a === void 0 ? void 0 : _a.email)
-                console.log(yield crm.fetchContact(message.contact.email));
+            if (crm.pause) {
+                console.log("pause action...");
+                yield (0, utils_1.pause)(10);
+            }
+            if (typeof r === "object" && "processed" in r) {
+                //          spin (count.ack + count.nack, "processed");
+                return !!r.processed;
+            }
+            //        spin (count.ack + count.nack, "bool processed");
+            //      if (message?.contact?.email)
+            //        console.log(await crm.fetchContact(message.contact.email));
+            return !!r;
         }
     }
     catch (er) {

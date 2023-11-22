@@ -80,6 +80,7 @@ class CiviCRM extends CRM {
       r.values.forEach((g: any) => {
         console.log(g.id, g.name, g.description);
       });
+      process.exit(1); // should we create the contacts without putting them in a group?
     }
     let countries:any = undefined;
     try { 

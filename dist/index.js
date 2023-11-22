@@ -98,8 +98,8 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             console.warn("saving into data folder instead of using " + process.env.CRM);
             process.env.CRM = "file";
         }
-        console.log("listening for messages");
         const crm = yield (0, crm_1.init)(config);
+        console.log("listening for messages");
         (0, listener_1.listen)(config, crm);
     }
     catch (er) {
