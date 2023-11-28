@@ -154,10 +154,10 @@
   resolved "https://registry.npmjs.org/@types/caseless/-/caseless-0.12.5.tgz"
   integrity sha512-hWtVTC2q7hc7xZ/RLbxapMvDMgUnDvKvMOpKal4DrMyfGBUfB1oKaZlIRr6mJL+If3bAP6sV/QneGzF6tJjZDg==
 
-"@types/cli-color@^2.0.3":
-  version "2.0.5"
-  resolved "https://registry.npmjs.org/@types/cli-color/-/cli-color-2.0.5.tgz"
-  integrity sha512-7GTI5GNi37HHQ3BEbT64tstsEeNmw8yix3vwVlFEB0EFO8U5vIcPzKbnAjoLnlIfQ7afq5Ol5eM4RCqEJdcK4g==
+"@types/cli-color@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@types/cli-color/-/cli-color-2.0.6.tgz#becc4b0c8509bbc938e7c3b2b7a0a8dd64691d08"
+  integrity sha512-uLK0/0dOYdkX8hNsezpYh1gc8eerbhf9bOKZ3e24sP67703mw9S14/yW6mSTatiaKO9v+mU/a1EVy4rOXXeZTA==
 
 "@types/lodash@^4.14.176":
   version "4.14.201"
