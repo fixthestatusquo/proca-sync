@@ -30,7 +30,7 @@
     "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^7.72.0",
     "@topcli/spinner": "^2.1.2",
-    "civicrm": "^3.1.0",
+    "civicrm": "^3.1.1",
     "cli-color": "^2.0.3",
     "dotenv": "^16.3.1",
     "lodash": "^4.17.21",
