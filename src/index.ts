@@ -60,7 +60,9 @@ console.log("trying with",opt.env);
     }
     envConfig = { path: opt.env };
   } else {
-console.error("missing -e or --env params"); process.exit(1);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error("missing -e or --env params"); process.exit(1);
+    }
 
   }
   const conf = dotenv.config(envConfig);
