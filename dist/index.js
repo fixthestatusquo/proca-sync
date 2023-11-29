@@ -75,7 +75,11 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         clihelp();
         process.exit(0);
     }
+    if (opt._[0]) {
+        opt.env = opt._[0];
+    }
     if (opt.env) {
+        console.log("trying with", opt.env);
         if (!(0, fs_1.existsSync)(opt.env)) {
             const env = ".env." + opt.env;
             process.env.PROCA_ENV = opt.env;
@@ -87,6 +91,10 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             process.exit(1);
         }
         envConfig = { path: opt.env };
+    }
+    else {
+        console.error("missing -e or --env params");
+        process.exit(1);
     }
     const conf = dotenv_1.default.config(envConfig);
     if (process.env.SENTRY_URL) {
