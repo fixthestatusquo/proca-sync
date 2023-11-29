@@ -45,7 +45,11 @@ export const main = async (argv: string[]) => {
     process.exit(0);
   }
 
+  if (opt._[0]) {
+    opt.env = opt._[0];
+  }
   if (opt.env) {
+console.log("trying with",opt.env);
     if (!existsSync(opt.env)) {
       const env = ".env." + opt.env;
       process.env.PROCA_ENV = opt.env;
@@ -55,6 +59,9 @@ export const main = async (argv: string[]) => {
       process.exit(1);
     }
     envConfig = { path: opt.env };
+  } else {
+console.error("missing -e or --env params"); process.exit(1);
+
   }
   const conf = dotenv.config(envConfig);
   if (process.env.SENTRY_URL) {
