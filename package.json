@@ -32,7 +32,7 @@
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.1.1",
     "cli-color": "^2.0.3",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.3.2",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "node-mailjet": "^6.0.5"
