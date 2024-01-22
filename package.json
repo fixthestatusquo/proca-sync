@@ -28,7 +28,7 @@
     "@proca/crypto": "^3.4.0",
     "@proca/queue": "^5.1.0",
     "@sendinblue/client": "^3.3.1",
-    "@sentry/node": "^7.72.0",
+    "@sentry/node": "^7.94.1",
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.1.1",
     "cli-color": "^2.0.3",
