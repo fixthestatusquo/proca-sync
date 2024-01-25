@@ -74,13 +74,25 @@ class CiviCRM extends CRM {
   init = async (): Promise<boolean> => {
     if (!this.group) {
       // it will not work without a group, suggesting some
-      console.warn("missing group id, some");
       const r = await this.crmAPI.get("Group", { limit: 200 });
 
+      if (r.count === 0) {
+        console.error ("can't access groups, possible missing permission");
+      } else {
+        console.warn("missing group id, some options:");
+      }
       r.values.forEach((g: any) => {
         console.log(g.id, g.name, g.description);
       });
       process.exit(1); // should we create the contacts without putting them in a group?
+    } else {
+      const r = await this.crmAPI.get("Group", { 
+      limit:1, where: [["id", "=", this.group]]});
+
+      if (r.count === 0) {
+        console.error ("can't access the group, possible missing permission",this.group);
+        process.exit(1); // should we create the contacts without putting them in a group?
+      }
     }
     let countries:any = undefined;
     try { 
@@ -92,6 +104,9 @@ class CiviCRM extends CRM {
       },
       { iso_code: "id" }
     );
+    if (countries.error_code) {
+      console.error (countries,"problem accessing civicrm REST API"); process.exit(1);
+    }
     } catch (e) {
       console.error (e,"problem accessing civicrm REST API"); process.exit(1);
     }
@@ -260,7 +275,7 @@ class CiviCRM extends CRM {
     const r = await this.crmAPI.update("Contact", params);
     //    console.dir(r, { depth: null });
     if (!r.error_message) return true;
-    console.error ("createContact",r.error_message);
+    console.error ("updateContact",r.error_message,params);
     return false;
   };
 
@@ -277,7 +292,10 @@ class CiviCRM extends CRM {
     const params = this.getParams(contact, action, campaign_id, source);
     const r = await this.crmAPI.create("Contact", params);
     if (!r.error_message) return true;
-    console.error ("createContact",r.error_message);
+    console.error ("createContact",r.error_message, params, r);
+    if (r.status === 403) {
+      console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+    }
     return false;
   };
 
@@ -344,6 +362,10 @@ class CiviCRM extends CRM {
       limit: 1,
       where: [["name", "=", campaign.name]],
     },0);
+    if (r.error_code) {
+
+      throw new Error ("can't read campaign "+campaign.name + ':' + r.error_message +". CHeck your permission on civicampaign");
+    }
     if (r.count === 0) {
       console.log("let's create the campaign", campaign.name);
       const now = new Date();
@@ -355,6 +377,7 @@ class CiviCRM extends CRM {
           start_date: now.toISOString(),
         },
       },0);
+
     }
     if (!r.values.id) {
       throw new Error ("can't get or create campaign "+campaign.name);
