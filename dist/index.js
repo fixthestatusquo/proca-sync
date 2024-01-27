@@ -93,8 +93,10 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         envConfig = { path: opt.env };
     }
     else {
-        console.error("missing -e or --env params");
-        process.exit(1);
+        if (process.env.NODE_ENV !== 'production') {
+            console.error("missing -e or --env params");
+            process.exit(1);
+        }
     }
     const conf = dotenv_1.default.config(envConfig);
     if (process.env.SENTRY_URL) {
