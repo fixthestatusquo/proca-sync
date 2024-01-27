@@ -1,4 +1,4 @@
-import { ActionMessageV2, EventMessageV2, Counters } from "@proca/queue";
+import { Campaign, ActionMessageV2, EventMessageV2, Counters } from "@proca/queue";
 import { Configuration } from "./config";
 import color from 'cli-color';
 import {spin} from "./spinner";
@@ -17,8 +17,29 @@ export enum ProcessStatus {
 }
 export { ActionMessageV2 as ActionMessage };
 export { EventMessageV2 as EventMessage };
+export { Campaign as ProcaCampaign };
 
-export type ProcaCampaign = { [key: string]: any }; // TODO export from proca/queue
+type ProcaCampaign = Campaign;
+
+//export type ProcaCampaign = { [key: string]: any }; // TODO export from proca queue
+/*export type ProcaCampaign = { 
+    contactSchema: string,
+    externalId?: number,
+    name: string,
+    title: string,
+    id?: number,
+};
+*/
+
+/*
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": 1984,
+    "name": "test-proca",
+    "title": "Pineapple doesn’t belong on pizza!"
+  },
+  "campaignId": 9,
+*/
 
 export type Contact = {
   area: string;
