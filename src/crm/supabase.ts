@@ -103,7 +103,7 @@ class SupabaseCRM extends CRM {
 
   dispatchEvent = async (status: string, data) => {
     if (status !== "approved") {
-      console.log("ignoring status", status);
+      console.log("ignoring status:", status, data.actionId);
       return false;
     }
 
