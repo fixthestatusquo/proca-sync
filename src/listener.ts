@@ -35,8 +35,12 @@ export const listen = (config: Configuration, crm: CRM) => {
         const action: ActionMessageV2 = actionOrEvent;
         const r = await crm.handleActionContact(action);
         if (crm.pause) {
-//          console.log("pause action...");
+          console.log("pause action...");
           await pause(10);
+        }
+
+        if (config.dryRun) {
+          return false;
         }
         if (typeof r === "object" && "processed" in r) {
 //          spin (count.ack + count.nack, "processed");

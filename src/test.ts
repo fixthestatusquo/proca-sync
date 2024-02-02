@@ -105,5 +105,5 @@ export const main = async (argv: string[]) => {
 };
 
 if (require.main === module) {
-  main(process.argv.slice(2));
+  (async () => {await main(process.argv.slice(2));console.log("")})();
 }

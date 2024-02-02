@@ -6,8 +6,10 @@ export type Configuration = {
   url: string  // the URL of queue server
   queue: string // the queue name
   pause?: boolean
+  dryRun?: boolean
   concurrency?: number
   verbose: boolean
+  interactive: boolean
 };
 
 export function help() {
@@ -32,6 +34,8 @@ export function configFromOptions(opt: any, argv: any): Configuration {
     queue: process.env.PROCA_QUEUE,
     pause: argv.pause,
     verbose: argv.verbose,
+    interactive: argv.interactive,
+    dryRun: argv['dry-run'],
     concurrency: parseInt(process.env.concurrency || "1") || 1
   };
 }

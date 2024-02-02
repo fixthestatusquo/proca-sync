@@ -37,7 +37,7 @@ class SalesforceCRM extends CRM {
     super(opt);
     this.crmType = CRMType.OptIn;
     if (!process.env.SALESFORCE_URL) {
-      console.error(
+      this.error(
         "you need to set the url of your api4 endpoint in the .env.xx"
       );
       process.exit(1);
@@ -65,14 +65,12 @@ class SalesforceCRM extends CRM {
 
     if (process.env.CAMPAIGN_RECORD_TYPE) {
       config.campaignType = process.env.CAMPAIGN_RECORD_TYPE;
-      console.log("setting CAMPAIGN_RECORD_TYPE", config.campaignType);
     }
     this.config = config;
   }
 
   init = async (): Promise<boolean> => {
     const { userInfo, conn } = await makeClient(this.config);
-    console.log(`Signed in`, userInfo);
     this.crmAPI = conn;
     return true;
   };
@@ -90,7 +88,7 @@ class SalesforceCRM extends CRM {
     }
     try {
       const camp = await this.campaign(message.campaign);
-      const defaultLastName = "unknown";
+      const defaultLastName = "[not provided]";
       //#ExecStart=/opt/nvm/nvm-exec salesforce-sync -q cus... -l -O Opt_In__c -D -T
       if (this.config.lead) {
         const record = actionToLeadRecord(message, {
@@ -101,13 +99,17 @@ class SalesforceCRM extends CRM {
         });
         const LeadId = await upsertLead(this.crmAPI, record);
         if (!LeadId) throw Error(`Could not upsert lead`);
+        try {
         const r = await addCampaignContact(
           this.crmAPI,
           camp.Id,
           { LeadId },
           message
         );
-        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
+        } catch (e) {
+          return true;
+        }
+//        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
       } else {
         const record = actionToContactRecord(message, {
           language: this.config.fieldLanguage,
@@ -123,20 +125,21 @@ class SalesforceCRM extends CRM {
           { ContactId },
           message
         );
-        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
+//        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
       }
+      return true;
     } catch (er) {
       if (er.errorCode === "DUPLICATE_VALUE") {
         // already in campaign
         return true;
       }
-      console.error(
-        `tried to add ${message.contact.email} but error happened`,
-        er,
-        JSON.stringify(er),
-        `CODE>${er.errorCode}<`
+console.log(message);
+      this.error(
+        `tried to add ${message.contact.email} but error happened `+
+        JSON.stringify(er) + 
+        ` CODE>${er.errorCode}<`
       );
-      throw er;
+      return false;
     }
     return false;
   };
