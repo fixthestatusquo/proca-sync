@@ -39,8 +39,11 @@ const listen = (config, crm) => {
                 const action = actionOrEvent;
                 const r = yield crm.handleActionContact(action);
                 if (crm.pause) {
-                    //          console.log("pause action...");
+                    console.log("pause action...");
                     yield (0, utils_1.pause)(10);
+                }
+                if (config.dryRun) {
+                    return false;
                 }
                 if (typeof r === "object" && "processed" in r) {
                     //          spin (count.ack + count.nack, "processed");

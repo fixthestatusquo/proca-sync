@@ -18,7 +18,6 @@ class SalesforceCRM extends crm_1.CRM {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
             const { userInfo, conn } = yield (0, client_1.makeClient)(this.config);
-            console.log(`Signed in`, userInfo);
             this.crmAPI = conn;
             return true;
         });
@@ -32,7 +31,7 @@ class SalesforceCRM extends crm_1.CRM {
             }
             try {
                 const camp = yield this.campaign(message.campaign);
-                const defaultLastName = "unknown";
+                const defaultLastName = "[not provided]";
                 //#ExecStart=/opt/nvm/nvm-exec salesforce-sync -q cus... -l -O Opt_In__c -D -T
                 if (this.config.lead) {
                     const record = (0, contact_1.actionToLeadRecord)(message, {
@@ -44,8 +43,13 @@ class SalesforceCRM extends crm_1.CRM {
                     const LeadId = yield (0, client_1.upsertLead)(this.crmAPI, record);
                     if (!LeadId)
                         throw Error(`Could not upsert lead`);
-                    const r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
-                    console.log(`Added lead to campaign ${JSON.stringify(r)}`);
+                    try {
+                        const r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
+                    }
+                    catch (e) {
+                        return true;
+                    }
+                    //        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
                 }
                 else {
                     const record = (0, contact_1.actionToContactRecord)(message, {
@@ -58,22 +62,26 @@ class SalesforceCRM extends crm_1.CRM {
                     if (!ContactId)
                         throw Error(`Could not upsert contact`);
                     const r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { ContactId }, message);
-                    console.log(`Added contact to campaign ${JSON.stringify(r)}`);
+                    //        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
                 }
+                return true;
             }
             catch (er) {
                 if (er.errorCode === "DUPLICATE_VALUE") {
                     // already in campaign
                     return true;
                 }
-                console.error(`tried to add ${message.contact.email} but error happened`, er, JSON.stringify(er), `CODE>${er.errorCode}<`);
-                throw er;
+                console.log(message);
+                this.error(`tried to add ${message.contact.email} but error happened ` +
+                    JSON.stringify(er) +
+                    ` CODE>${er.errorCode}<`);
+                return false;
             }
             return false;
         });
         this.crmType = crm_1.CRMType.OptIn;
         if (!process.env.SALESFORCE_URL) {
-            console.error("you need to set the url of your api4 endpoint in the .env.xx");
+            this.error("you need to set the url of your api4 endpoint in the .env.xx");
             process.exit(1);
         }
         let config = {
@@ -98,7 +106,6 @@ class SalesforceCRM extends crm_1.CRM {
         }
         if (process.env.CAMPAIGN_RECORD_TYPE) {
             config.campaignType = process.env.CAMPAIGN_RECORD_TYPE;
-            console.log("setting CAMPAIGN_RECORD_TYPE", config.campaignType);
         }
         this.config = config;
     }

@@ -9,7 +9,7 @@ import {
 
 import { createClient } from "@supabase/supabase-js";
 
-import { listenConnection } from '@proca/queue';
+import { listenConnection } from "@proca/queue";
 
 export type CrmConfigType = {
   server: string;
@@ -45,16 +45,16 @@ class SupabaseCRM extends CRM {
   }
 
   openPublishChannel = (rabbit) => {
-console.log("ready to republish");
-     this.pub = rabbit.createPublisher({
-  // Enable publish confirmations, similar to consumer acknowledgements
-  confirm: true,
-  // Enable retries
-  maxAttempts: 2,
-  // Optionally ensure the existence of an exchange before we use it
-  //exchanges: [{exchange: 'my-events', type: 'topic'}]
-})
-  }
+    console.log("ready to republish");
+    this.pub = rabbit.createPublisher({
+      // Enable publish confirmations, similar to consumer acknowledgements
+      confirm: true,
+      // Enable retries
+      maxAttempts: 2,
+      // Optionally ensure the existence of an exchange before we use it
+      //exchanges: [{exchange: 'my-events', type: 'topic'}]
+    });
+  };
 
   init = async (): Promise<boolean> => {
     // build the api connection, potentially load some constant or extra data you might need
@@ -62,7 +62,6 @@ console.log("ready to republish");
       email: this.config.user,
       password: this.config.password,
     });
-
 
     listenConnection(this.openPublishChannel);
 
@@ -75,7 +74,6 @@ console.log("ready to republish");
           schema: "public",
         },
         async (payload: any) => {
-
           if (
             payload.table === "actions" &&
             payload.eventType === "UPDATE" &&
@@ -89,7 +87,7 @@ console.log("ready to republish");
       )
       .subscribe();
 
-    console.log(data, error);
+    console.log("receive notifications", data, error);
     if (error) {
       console.log(error);
       return false;
@@ -98,18 +96,21 @@ console.log("ready to republish");
   };
 
   dispatchEvent = async (status: string, data) => {
-    if (status !== 'approved') {
-console.log("ignoring, but not");
-//      return false;
+    if (status !== "approved") {
+      console.log("ignoring status rejected");
+      return false;
     }
 
-console.log(this.pub,data);
+    console.log(this.pub, data);
     try {
-    const r = await this.pub.send ('cus.320.deliver',JSON.stringify(data.data));
-    console.log("send to SF", data);
+      const r = await this.pub.send(
+        "cus.320.deliver",
+        JSON.stringify(data.data)
+      );
+      console.log("send to SF", data);
     } catch (e) {
-console.log(e);
-   }
+      console.log(e);
+    }
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {

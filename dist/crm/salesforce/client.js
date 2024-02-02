@@ -23,17 +23,17 @@ const campaignByName = (conn, name, opt) => __awaiter(void 0, void 0, void 0, fu
     let campaign;
     const campaignTypeId = opt.campaignType;
     // fetch
-    const r = yield conn.sobject('Campaign').find({ name: name });
+    const r = yield conn.sobject("Campaign").find({ name: name });
     // fail hard on missing campaign
     if (r.length === 0) {
-        console.log('will try to create ' + name);
-        const cattr = { name: name, Type: 'Proca' };
+        console.log("will try to create " + name);
+        const cattr = { name: name, Type: "Proca" };
         if (campaignTypeId)
-            cattr['RecordTypeId'] = campaignTypeId;
-        const n = yield conn.sobject('Campaign').create(cattr); //  'Proca online campaign'
+            cattr["RecordTypeId"] = campaignTypeId;
+        const n = yield conn.sobject("Campaign").create(cattr); //  'Proca online campaign'
         if (!n.success)
             throw Error(`Cannot create campaign ${name}: ${n.errors}`);
-        campaign = yield conn.sobject('Campaign').retrieve(n.id);
+        campaign = yield conn.sobject("Campaign").retrieve(n.id);
     }
     else {
         campaign = r[0];
@@ -43,74 +43,69 @@ const campaignByName = (conn, name, opt) => __awaiter(void 0, void 0, void 0, fu
 exports.campaignByName = campaignByName;
 const fields = (conn, name) => __awaiter(void 0, void 0, void 0, function* () {
     const r = yield conn.sobject(name).describe();
-    const f = r.fields.map(d => d.name);
+    const f = r.fields.map((d) => d.name);
     console.log(name, "fields", f);
     return r;
 });
 exports.fields = fields;
 const addCampaignContact = (conn, CampaignId, memberId, _action) => __awaiter(void 0, void 0, void 0, function* () {
     // const _addedDate = action.action.createdAt.split("T")[0]
-    return new Promise((ok) => {
-        // for chained call promise api does not work any more :/
-        conn.sobject('CampaignMember').find(Object.assign({ CampaignId }, memberId)).update({ Status: 'Responded' }, (err, resp) => {
-            if (err)
-                throw err;
-            // console.log(`finding campaign membership  ${ContactId} -> ${CampaignId} = `, resp)
-            if (resp.length !== 0)
-                return ok(resp[0]);
-            // console.log(`creating campaign membership  ${ContactId} -> ${CampaignId}`)
-            return conn.sobject('CampaignMember').create(Object.assign({ CampaignId, Status: 'Responded' }, memberId), (err, resp) => {
-                if (err)
-                    throw err;
-                return ok(resp);
-            });
-        });
-    });
+    const resp = yield conn
+        .sobject("CampaignMember")
+        .find(Object.assign({ CampaignId }, memberId))
+        .update({ Status: "Responded" });
+    if (resp.length !== 0)
+        return resp[0];
+    // console.log(`creating campaign membership  ${ContactId} -> ${CampaignId}`)
+    const r2 = yield conn
+        .sobject("CampaignMember")
+        .create(Object.assign({ CampaignId, Status: "Responded" }, memberId));
+    return r2;
 });
 exports.addCampaignContact = addCampaignContact;
 const contactByEmail = (conn, Email) => __awaiter(void 0, void 0, void 0, function* () {
     // return await conn.query(`SELECT id, firstname, lastname, email, phone FROM Contact WHERE email =  '${email}'`)
-    const r = yield conn.sobject('Contact').find({ Email });
+    const r = yield conn.sobject("Contact").find({ Email });
     return r[0];
 });
 exports.contactByEmail = contactByEmail;
 const leadByEmail = (conn, Email) => __awaiter(void 0, void 0, void 0, function* () {
     // return await conn.query(`SELECT id, firstname, lastname, email, phone FROM Contact WHERE email =  '${email}'`)
     const IsConverted = false;
-    const r = yield conn.sobject('Lead').find({ Email, IsConverted });
+    const r = yield conn.sobject("Lead").find({ Email, IsConverted });
     return r[0];
 });
 exports.leadByEmail = leadByEmail;
 const upsertLead = (conn, contact) => __awaiter(void 0, void 0, void 0, function* () {
     let r;
     try {
-        r = yield conn.sobject('Lead').upsert(contact, 'Email');
+        r = yield conn.sobject("Lead").upsert(contact, "Email");
     }
     catch (er) {
-        yield (0, exports.fields)(conn, 'Lead'); // trying to help here and show available fields
-        if (er.name === 'MULTIPLE_CHOICES') {
-            const idPath = er.content[er.content.length - 1].split('/');
+        if (er.name === "MULTIPLE_CHOICES") {
+            const idPath = er.content[er.content.length - 1].split("/");
             console.warn(`Duplicate records for ${contact.Email}:  ${er.content}, returning last one`);
             return idPath[idPath.length - 1];
         }
-        else if (er.name === 'CANNOT_UPDATE_CONVERTED_LEAD') {
-            r = yield conn.sobject('Lead').create(contact);
+        else if (er.name === "CANNOT_UPDATE_CONVERTED_LEAD") {
+            r = yield conn.sobject("Lead").create(contact);
             // returns id: ... success: true
         }
         else {
             console.log(`LEAD UPSERT ERROR, unhandled er.name='${er.name}'`);
+            yield (0, exports.fields)(conn, "Lead"); // trying to help here and show available fields
             throw er;
         }
     }
     // for success value, id can be there
-    if (r && 'id' in r && r.id)
+    if (r && "id" in r && r.id)
         return r.id; // I just can't.... id vs Id sometimes returned
     const e = yield (0, exports.leadByEmail)(conn, contact.Email);
     return e.Id;
 });
 exports.upsertLead = upsertLead;
 const upsertContact = (conn, contact) => __awaiter(void 0, void 0, void 0, function* () {
-    const r = yield conn.sobject('Contact').upsert(contact, 'Email');
+    const r = yield conn.sobject("Contact").upsert(contact, "Email");
     if (!r.success)
         throw Error(`Error upserting contact: ${r.errors}`);
     if (r.id)
@@ -121,6 +116,6 @@ const upsertContact = (conn, contact) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.upsertContact = upsertContact;
 const foo = (conn) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield conn.sobject('CampaignMember').select().offset(0).limit(10);
+    return yield conn.sobject("CampaignMember").select().offset(0).limit(10);
 });
 exports.foo = foo;

@@ -66,13 +66,13 @@ class CRM {
         };
         this.log = (text, status) => {
             //  progress: (count: number; suffix: string; color:string);
-            const newline = !text ? false : this.lastStatus !== ProcessStatus.unknown && status !== this.lastStatus;
+            const newline = status == ProcessStatus.error || !this.interactive || !text;
             (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", { wrapper: this.colorStatus(status), newline: newline });
             if (status)
                 this.lastStatus = status;
         };
+        this.error = (text) => this.log(text, ProcessStatus.error);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
-            console.log("init");
             //optional async init for extran fetch and setup that can't be done in the constructor
             return true;
         });
@@ -103,32 +103,62 @@ class CRM {
             var _a, _b;
             switch (this.crmType) {
                 case CRMType.Contact:
-                    if (message.privacy.withConsent)
-                        return this.formatResult(yield this.handleContact(message));
-                    console.error("don't know how to process", message);
+                    if (message.privacy.withConsent) {
+                        const r = this.formatResult(yield this.handleContact(message));
+                        if (r) {
+                            this.log("added " + message.contact.email + " " + message.action.createdAt, ProcessStatus.processed);
+                        }
+                        else {
+                            this.log("failed " + message.contact.email + " " + message.action.createdAt, ProcessStatus.error);
+                        }
+                        return r;
+                    }
+                    this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
                     break;
                 case CRMType.OptIn:
                     if (message.privacy.optIn) {
-                        return this.formatResult(yield this.handleContact(message));
+                        const r = this.formatResult(yield this.handleContact(message));
+                        if (r) {
+                            this.log("added " + message.contact.email + " " + message.action.createdAt, ProcessStatus.processed);
+                        }
+                        else {
+                            this.log("failed " + message.contact.email + " " + message.action.createdAt, ProcessStatus.error);
+                        }
+                        return r;
                     }
                     if (message.privacy.optIn === false) {
-                        this.verbose && console.log('opt-out', message.actionId);
+                        this.log("opt-out " + message.actionId, ProcessStatus.skipped);
+                        //          this.verbose && console.log('opt-out',message.actionId);
                         return true; //OptOut contact, we don't need to process
                     }
                     if (((_a = message.privacy) === null || _a === void 0 ? void 0 : _a.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
-                        return this.formatResult(yield this.handleContact(message));
+                        const r = this.formatResult(yield this.handleContact(message));
+                        if (r) {
+                            this.log("added doi" + message.contact.email, ProcessStatus.processed);
+                        }
+                        else {
+                            this.log("failed doi" + message.contact.email, ProcessStatus.error);
+                        }
+                        return r;
                     }
-                    console.error("don't know how to process - optin", message);
+                    console.log(message);
+                    this.log("don't know how to process -optin " + message.actionId, ProcessStatus.error);
                     break;
                 case CRMType.DoubleOptIn:
                     if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') {
-                        return this.formatResult(yield this.handleContact(message));
+                        const r = this.formatResult(yield this.handleContact(message));
+                        if (r) {
+                            this.log("added doi" + message.contact.email, ProcessStatus.processed);
+                        }
+                        else {
+                            this.log("failed doi" + message.contact.email, ProcessStatus.error);
+                        }
                     }
                     if (message.privacy.optIn === null) {
-                        return true; //OptOut contact, we don't need to process
+                        this.log("opt-in not given (optIn null, no double optin) " + message.actionId, ProcessStatus.skipped);
+                        return true; //OptOut contact, we don't process
                     }
-                    console.log('not double opt in', message.actionId);
-                    this.verbose && console.log(message);
+                    this.log("no double optin" + message.actionId, ProcessStatus.skipped);
                     // not return, it will display an error
                     break;
                 case CRMType.ActionContact:
@@ -192,9 +222,10 @@ class CRM {
         });
         this.verbose = (opt === null || opt === void 0 ? void 0 : opt.verbose) || false;
         this.pause = (opt === null || opt === void 0 ? void 0 : opt.pause) || false;
+        this.interactive = (opt === null || opt === void 0 ? void 0 : opt.interactive) || false;
         this.campaigns = {};
         this.crmType = CRMType.ActionContact;
-        this.count = opt.count;
+        this.count = opt.count || { ack: 0, nack: 0 };
         this.lastStatus = ProcessStatus.unknown;
     }
 }

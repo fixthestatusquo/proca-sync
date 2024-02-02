@@ -11,20 +11,64 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const supabase_js_1 = require("@supabase/supabase-js");
+const queue_1 = require("@proca/queue");
 class SupabaseCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
+        this.openPublishChannel = (rabbit) => {
+            console.log("ready to republish");
+            this.pub = rabbit.createPublisher({
+                // Enable publish confirmations, similar to consumer acknowledgements
+                confirm: true,
+                // Enable retries
+                maxAttempts: 2,
+                // Optionally ensure the existence of an exchange before we use it
+                //exchanges: [{exchange: 'my-events', type: 'topic'}]
+            });
+        };
         this.init = () => __awaiter(this, void 0, void 0, function* () {
+            // build the api connection, potentially load some constant or extra data you might need
             const { data, error } = yield this.crmAPI.auth.signInWithPassword({
                 email: this.config.user,
                 password: this.config.password,
             });
-            console.log(data, error);
+            (0, queue_1.listenConnection)(this.openPublishChannel);
+            const channel = this.crmAPI
+                .channel("schema-db-changes")
+                .on("postgres_changes", {
+                event: "UPDATE",
+                schema: "public",
+            }, (payload) => __awaiter(this, void 0, void 0, function* () {
+                if (payload.table === "actions" &&
+                    payload.eventType === "UPDATE" &&
+                    payload.new.campaign_id === 608) {
+                    yield this.dispatchEvent(payload.status, payload.new);
+                }
+                else {
+                    console.log("update", payload);
+                }
+            }))
+                .subscribe();
+            console.log("receive notifications", data, error);
             if (error) {
                 console.log(error);
                 return false;
             }
             return true;
+        });
+        this.dispatchEvent = (status, data) => __awaiter(this, void 0, void 0, function* () {
+            if (status !== "approved") {
+                console.log("ignoring status rejected");
+                return false;
+            }
+            console.log(this.pub, data);
+            try {
+                const r = yield this.pub.send("cus.320.deliver", JSON.stringify(data.data));
+                console.log("send to SF", data);
+            }
+            catch (e) {
+                console.log(e);
+            }
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             // usually, fetch the campaign id as set on the CRM (based on the name of proca)
@@ -45,9 +89,7 @@ class SupabaseCRM extends crm_1.CRM {
                 org_id: message.orgId,
                 contact_ref: message.contact.contactRef,
             };
-            const { error } = yield this.crmAPI
-                .from('actions')
-                .insert(data);
+            const { error } = yield this.crmAPI.from("actions").insert(data);
             console.log(error);
             return false;
         });
@@ -57,10 +99,10 @@ class SupabaseCRM extends crm_1.CRM {
             process.exit(1);
         }
         let config = {
-            server: process.env.CRM_URL || 'missing',
-            user: process.env.AUTH_USER || 'missing',
-            publicKey: process.env.AUTH_ANON_KEY || 'missing',
-            password: process.env.AUTH_PASS || 'missing',
+            server: process.env.CRM_URL || "missing",
+            user: process.env.AUTH_USER || "missing",
+            publicKey: process.env.AUTH_ANON_KEY || "missing",
+            password: process.env.AUTH_PASS || "missing",
         };
         this.crmAPI = (0, supabase_js_1.createClient)(config.server, config.publicKey);
         this.config = config;

@@ -39,7 +39,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig = undefined;
+  let envConfig: any = undefined;
   if (opt.help) {
     clihelp();
     process.exit(0);

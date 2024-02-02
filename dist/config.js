@@ -27,6 +27,8 @@ function configFromOptions(opt, argv) {
         queue: process.env.PROCA_QUEUE,
         pause: argv.pause,
         verbose: argv.verbose,
+        interactive: argv.interactive,
+        dryRun: argv['dry-run'],
         concurrency: parseInt(process.env.concurrency || "1") || 1
     };
 }

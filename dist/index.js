@@ -49,9 +49,10 @@ const clihelp = () => {
         "options",
         "--help (this command)",
         "--env (either absolute path to a .env or .env.{env} in the folder)",
-        "--dry-run (don't write)",
+        "--dry-run (keep the message in the queue)",
         "--dump (write the messages as file)",
         "--verbose (show the result)",
+        "--interactive(overwrite the output and spinner)",
         "--pause (wait between each message)",
         //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
     ].join("\n"));
@@ -59,9 +60,9 @@ const clihelp = () => {
 };
 const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     const opt = (0, minimist_1.default)(argv, {
-        alias: { e: "env", v: "verbose", p: "pause" },
-        default: { env: "", verbose: false },
-        boolean: ["verbose", "dump", "help", "pause"],
+        alias: { e: "env", v: "verbose", i: "interactive", p: "pause" },
+        default: { env: "", interactive: false, verbose: false, "dry-run": false },
+        boolean: ["verbose", "dump", "help", "pause", "dry-run"],
         unknown: (param) => {
             if (param[0] === "-") {
                 console.error("invalid parameter", param);
@@ -75,7 +76,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         clihelp();
         process.exit(0);
     }
-    if (opt._[0]) {
+    if (!opt.env && opt._[0]) {
         opt.env = opt._[0];
     }
     if (opt.env) {

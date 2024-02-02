@@ -134,5 +134,5 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.main = main;
 if (require.main === module) {
-    (0, exports.main)(process.argv.slice(2));
+    (() => __awaiter(void 0, void 0, void 0, function* () { yield (0, exports.main)(process.argv.slice(2)); console.log(""); }))();
 }
