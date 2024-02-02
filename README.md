@@ -1,4 +1,3 @@
- 
 proca is the most advanced opensource campaign tool (petition, twitterstorm, mailtotarget...).
 
 Even if you use our SaaS services, you will want to automatically push supporters and actions into your CRM or mailinglist tool.
@@ -28,16 +27,15 @@ if you want to use an existing CRM integration:
 
 if you want to create an integration with an new CRM, it's almost the same, gut please clone and PR.
 
-
 # test and develop
+
 read the queue and process it
 
 ```
-$ npm run start [-e yourorg]
+$ npm run start -- [-e yourorg]
 ```
 
 if you want to save the messages received into the data folder, set CRM=file or yarn start --dump
-
 
 Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `pip install proca` as root.
 
@@ -58,7 +56,7 @@ $npm run start --dump [-e yourorg]
 by default, the name of the files are not clear, we suggest to rename them based on the type of action/context you want to test (eg an opt-in, opt-out, existing contact, new one...)
 
 _please do not git add these files, they are likely to contain personal data_
- 
+
 # build for production
 
 ```
@@ -71,6 +69,7 @@ put your env file in a path the user can read (we like /etc/proca-sync/[yourorg]
 create a /etc/systemd/system/proca-sync.service
 
 git clone proca-sync somewhere (we like /src/proca-sync)
+
 ```
 Type=idle
 Restart=always
