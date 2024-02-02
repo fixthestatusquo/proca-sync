@@ -100,7 +100,7 @@ class CRM {
             return result.processed;
         };
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
+            var _a, _b, _c;
             switch (this.crmType) {
                 case CRMType.Contact:
                     if (message.privacy.withConsent) {
@@ -116,7 +116,7 @@ class CRM {
                     this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
                     break;
                 case CRMType.OptIn:
-                    if (message.privacy.optIn) {
+                    if (message.privacy.withConsent && message.privacy.optIn) {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
                             this.log("added " + message.contact.email + " " + message.action.createdAt, ProcessStatus.processed);
@@ -131,7 +131,12 @@ class CRM {
                         //          this.verbose && console.log('opt-out',message.actionId);
                         return true; //OptOut contact, we don't need to process
                     }
-                    if (((_a = message.privacy) === null || _a === void 0 ? void 0 : _a.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
+                    if (message.privacy.optIn === true) {
+                        this.log("opt-in, but no withConsent " + message.actionId + ' ' + ((_a = message.action) === null || _a === void 0 ? void 0 : _a.actionType), ProcessStatus.skipped);
+                        //          this.verbose && console.log('opt-out',message.actionId);
+                        return true; //OptOut contact, we don't need to process
+                    }
+                    if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
                             this.log("added doi" + message.contact.email, ProcessStatus.processed);
@@ -145,7 +150,7 @@ class CRM {
                     this.log("don't know how to process -optin " + message.actionId, ProcessStatus.error);
                     break;
                 case CRMType.DoubleOptIn:
-                    if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') {
+                    if (((_c = message.privacy) === null || _c === void 0 ? void 0 : _c.emailStatus) === 'double_opt_in') {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
                             this.log("added doi" + message.contact.email, ProcessStatus.processed);

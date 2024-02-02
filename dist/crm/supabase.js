@@ -16,7 +16,7 @@ class SupabaseCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.openPublishChannel = (rabbit) => {
-            console.log("ready to republish");
+            console.log("ready to redispatch approved candidates");
             this.pub = rabbit.createPublisher({
                 // Enable publish confirmations, similar to consumer acknowledgements
                 confirm: true,
@@ -32,6 +32,7 @@ class SupabaseCRM extends crm_1.CRM {
                 email: this.config.user,
                 password: this.config.password,
             });
+            this.crmAPI.auth.startAutoRefresh();
             (0, queue_1.listenConnection)(this.openPublishChannel);
             const channel = this.crmAPI
                 .channel("schema-db-changes")
@@ -42,10 +43,16 @@ class SupabaseCRM extends crm_1.CRM {
                 if (payload.table === "actions" &&
                     payload.eventType === "UPDATE" &&
                     payload.new.campaign_id === 608) {
-                    yield this.dispatchEvent(payload.status, payload.new);
+                    try {
+                        console.log(payload.new.status, payload.new.data);
+                        yield this.dispatchEvent(payload.new.status, payload.new.data);
+                    }
+                    catch (e) {
+                        console.log(e);
+                    }
                 }
                 else {
-                    console.log("update", payload);
+                    console.log("skipping", payload);
                 }
             }))
                 .subscribe();
@@ -58,12 +65,12 @@ class SupabaseCRM extends crm_1.CRM {
         });
         this.dispatchEvent = (status, data) => __awaiter(this, void 0, void 0, function* () {
             if (status !== "approved") {
-                console.log("ignoring status rejected");
+                console.log("ignoring status:", status, data.actionId);
                 return false;
             }
-            console.log(this.pub, data);
+            console.log(data);
             try {
-                const r = yield this.pub.send("cus.320.deliver", JSON.stringify(data.data));
+                const r = yield this.pub.send("cus.320.deliver", JSON.stringify(data));
                 console.log("send to SF", data);
             }
             catch (e) {
@@ -90,6 +97,11 @@ class SupabaseCRM extends crm_1.CRM {
                 contact_ref: message.contact.contactRef,
             };
             const { error } = yield this.crmAPI.from("actions").insert(data);
+            if (!error)
+                return true;
+            if (error.code === "23505")
+                //ack already processed 'duplicate key value violates unique constraint "actions_proca_id_key"'
+                return true;
             console.log(error);
             return false;
         });
