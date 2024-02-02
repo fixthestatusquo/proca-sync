@@ -45,7 +45,7 @@ class SupabaseCRM extends CRM {
   }
 
   openPublishChannel = (rabbit) => {
-    console.log("ready to republish");
+    console.log("ready to redispatch approved candidates");
     this.pub = rabbit.createPublisher({
       // Enable publish confirmations, similar to consumer acknowledgements
       confirm: true,
@@ -62,6 +62,7 @@ class SupabaseCRM extends CRM {
       email: this.config.user,
       password: this.config.password,
     });
+    this.crmAPI.auth.startAutoRefresh();
 
     listenConnection(this.openPublishChannel);
 
@@ -79,9 +80,14 @@ class SupabaseCRM extends CRM {
             payload.eventType === "UPDATE" &&
             payload.new.campaign_id === 608
           ) {
-            await this.dispatchEvent(payload.status, payload.new);
+            try {
+              console.log(payload.new.status, payload.new.data);
+              await this.dispatchEvent(payload.new.status, payload.new.data);
+            } catch (e) {
+              console.log(e);
+            }
           } else {
-            console.log("update", payload);
+            console.log("skipping", payload);
           }
         }
       )
@@ -97,16 +103,13 @@ class SupabaseCRM extends CRM {
 
   dispatchEvent = async (status: string, data) => {
     if (status !== "approved") {
-      console.log("ignoring status rejected");
+      console.log("ignoring status", status);
       return false;
     }
 
-    console.log(this.pub, data);
+    console.log(data);
     try {
-      const r = await this.pub.send(
-        "cus.320.deliver",
-        JSON.stringify(data.data)
-      );
+      const r = await this.pub.send("cus.320.deliver", JSON.stringify(data));
       console.log("send to SF", data);
     } catch (e) {
       console.log(e);
@@ -138,6 +141,12 @@ class SupabaseCRM extends CRM {
     };
 
     const { error } = await this.crmAPI.from("actions").insert(data);
+
+    if (!error) return true;
+
+    if (error.code === "23505")
+      //ack already processed 'duplicate key value violates unique constraint "actions_proca_id_key"'
+      return true;
 
     console.log(error);
 

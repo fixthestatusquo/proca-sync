@@ -183,7 +183,7 @@ export abstract class CRM implements CRMInterface {
         this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
         break;
       case CRMType.OptIn:
-        if (message.privacy.optIn) {
+        if (message.privacy.withConsent && message.privacy.optIn) {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
             this.log("added " + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed); 
@@ -194,6 +194,11 @@ export abstract class CRM implements CRMInterface {
         }
         if (message.privacy.optIn === false) {
           this.log("opt-out " + message.actionId, ProcessStatus.skipped); 
+//          this.verbose && console.log('opt-out',message.actionId);
+          return true; //OptOut contact, we don't need to process
+        }
+        if (message.privacy.optIn === true) {
+          this.log("opt-in, but no withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped); 
 //          this.verbose && console.log('opt-out',message.actionId);
           return true; //OptOut contact, we don't need to process
         }
