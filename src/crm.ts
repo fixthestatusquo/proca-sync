@@ -22,7 +22,7 @@ export { Campaign as ProcaCampaign };
 type ProcaCampaign = Campaign;
 
 //export type ProcaCampaign = { [key: string]: any }; // TODO export from proca queue
-/*export type ProcaCampaign = { 
+/*export type ProcaCampaign = {
     contactSchema: string,
     externalId?: number,
     name: string,
@@ -174,9 +174,9 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.withConsent) {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added " + message.contact.email + " "+message.action.createdAt, ProcessStatus.processed); 
+            this.log("added " + message.contact.email + " "+message.action.createdAt, ProcessStatus.processed);
           } else {
-            this.log("failed " + message.contact.email + " "+message.action.createdAt, ProcessStatus.error); 
+            this.log("failed " + message.contact.email + " "+message.action.createdAt, ProcessStatus.error);
           }
           return r;
         }
@@ -186,50 +186,50 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.withConsent && message.privacy.optIn) {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added " + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed); 
+            this.log("added " + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
           } else {
-            this.log("failed " + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error); 
+            this.log("failed " + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
           }
           return r;
         }
         if (message.privacy.optIn === false) {
-          this.log("opt-out " + message.actionId, ProcessStatus.skipped); 
+          this.log("opt-out " + message.actionId, ProcessStatus.skipped);
 //          this.verbose && console.log('opt-out',message.actionId);
           return true; //OptOut contact, we don't need to process
         }
         if (message.privacy.optIn === true) {
-          this.log("opt-in, but no withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped); 
+          this.log("opt-in, but no withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped);
 //          this.verbose && console.log('opt-out',message.actionId);
           return true; //OptOut contact, we don't need to process
         }
         if (message.privacy?.emailStatus === 'double_opt_in') { // double opt-in is optin (eg by email)
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added doi" + message.contact.email, ProcessStatus.processed); 
+            this.log("added doi" + message.contact.email, ProcessStatus.processed);
           } else {
-            this.log("failed doi" + message.contact.email, ProcessStatus.error); 
+            this.log("failed doi" + message.contact.email, ProcessStatus.error);
           }
           return r;
         }
 console.log(message);
         this.log("don't know how to process -optin " + message.actionId, ProcessStatus.error);
         break;
+
       case CRMType.DoubleOptIn:
         if (message.privacy?.emailStatus === 'double_opt_in') {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added doi" + message.contact.email, ProcessStatus.processed); 
+            this.log("added doi" + message.contact.email, ProcessStatus.processed);
+            return true;
           } else {
-            this.log("failed doi" + message.contact.email, ProcessStatus.error); 
+            this.log("failed doi" + message.contact.email, ProcessStatus.error);
+            return false;
           }
-        }
-        if (message.privacy.optIn === null) {
-          this.log("opt-in not given (optIn null, no double optin) " + message.actionId, ProcessStatus.skipped); 
-          return true; //OptOut contact, we don't process
-        }
-        this.log("no double optin" + message.actionId, ProcessStatus.skipped); 
-        // not return, it will display an error
+        };
+        this.log("skip sending, it is not double opt in" + message.contact.email, ProcessStatus.error);
+        return true;
         break;
+
       case CRMType.ActionContact:
         throw new Error(
           "You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn"
