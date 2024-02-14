@@ -225,12 +225,9 @@ console.log(message);
             this.log("failed doi" + message.contact.email, ProcessStatus.error);
             return false;
           }
-        }
-        else {
-          // email status is not double-opt-in, skip sending and return true
-          this.log("return true from CRM because it is not double opt in" + message.contact.email, ProcessStatus.error);
-          return true;
-        }
+        };
+        this.log("skip sending, it is not double opt in" + message.contact.email, ProcessStatus.error);
+        return true;
         break;
 
       case CRMType.ActionContact:
