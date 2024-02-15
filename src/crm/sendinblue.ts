@@ -41,8 +41,12 @@ class SendInBlueCRM extends CRM {
 
     createContact.listIds = [camp.id];
     createContact.updateEnabled = true;
-
-    const contact = await this.apiInstance.createContact(createContact);
+    try {
+      const contact = await this.apiInstance.createContact(createContact);
+    } catch (e) {
+console.log(e); 
+    return { processed: false };
+    }
     return { processed: true };
   };
 
