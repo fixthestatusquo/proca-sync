@@ -219,14 +219,14 @@ console.log(message);
         if (message.privacy?.emailStatus === 'double_opt_in') {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added doi" + message.contact.email, ProcessStatus.processed);
+            this.log("added doi " + message.contact.email, ProcessStatus.processed);
             return true;
           } else {
-            this.log("failed doi" + message.contact.email, ProcessStatus.error);
+            this.log("failed doi " + message.contact.email, ProcessStatus.error);
             return false;
           }
         };
-        this.log("skip sending, it is not double opt in" + message.contact.email, ProcessStatus.error);
+        this.log("skip sending, it is not double opt in " + message.contact.email, ProcessStatus.error);
         return true;
         break;
 
