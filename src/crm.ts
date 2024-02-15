@@ -215,6 +215,18 @@ export abstract class CRM implements CRMInterface {
           }
           return r;
         }
+        if (message.privacy.optIn === null) {
+          this.log("optIn null (implicit) withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped);
+          /eturn true; 
+          /*
+          const r = this.formatResult(await this.handleContact(message));
+          if (r) {
+            this.log("added with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
+          } else {
+            this.log("failed with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
+          }
+          return r; */
+        }
 console.log(message);
         this.log("don't know how to process -optin " + message.actionId, ProcessStatus.error);
         break;
