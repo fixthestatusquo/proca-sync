@@ -31,7 +31,13 @@ class SendInBlueCRM extends crm_1.CRM {
             createContact.attributes = { "LANG": message.actionPage.locale, "FIRSTNAME": message.contact.firstName, "LASTNAME": message.contact.lastName || "" };
             createContact.listIds = [camp.id];
             createContact.updateEnabled = true;
-            const contact = yield this.apiInstance.createContact(createContact);
+            try {
+                const contact = yield this.apiInstance.createContact(createContact);
+            }
+            catch (e) {
+                console.log(e);
+                return { processed: false };
+            }
             return { processed: true };
         });
         this.fetchCampaigns = () => __awaiter(this, void 0, void 0, function* () {
