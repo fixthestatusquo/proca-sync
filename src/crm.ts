@@ -217,7 +217,7 @@ export abstract class CRM implements CRMInterface {
         }
         if (message.privacy.optIn === null) {
           this.log("optIn null (implicit) withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped);
-          /eturn true; 
+          return true; 
           /*
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
