@@ -11,7 +11,6 @@ if (!url || !username || !password) {
   process.exit();
 }
 
-
 const authToken =`${username}:${password}`
 const tokenEncoded = Buffer.from(authToken).toString('base64');
 console.log("token", tokenEncoded);
@@ -22,11 +21,8 @@ const headers = {
   }
 
 export const postAction = async (action: GPAction) => {
-  // console.log("headers:", headers, action)
   const body = JSON.stringify(action)
-  // console.log("body", body);
-
-    try {
+      try {
     const response = await fetch(url, {
       method: "POST",
       headers: {
