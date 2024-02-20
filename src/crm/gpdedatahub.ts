@@ -21,12 +21,15 @@ class gpdedatahubCRM extends CRM {
     if (this.verbose) {
       console.log(actionPayload);
     }
-     const data = await postAction(actionPayload);
-    if (data) {
-      return true;
+
+    const status = await postAction(actionPayload);
+
+   if (status === 200) {
+     console.log(`Action ${message.actionId} sent`)
+     return true;
     } else {
-      console.error("error, no data" );
-      return false;
+      console.log(`Action ${message.actionId} not sent`)
+     return false;
     }
   };
 }

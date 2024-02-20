@@ -11,6 +11,7 @@ if (!url || !username || !password) {
   process.exit();
 }
 
+
 const authToken =`${username}:${password}`
 const tokenEncoded = Buffer.from(authToken).toString('base64');
 console.log("token", tokenEncoded);
@@ -21,23 +22,24 @@ const headers = {
   }
 
 export const postAction = async (action: GPAction) => {
-  console.log("headers:", headers)
-  console.log("body", JSON.stringify(action));
+  // console.log("headers:", headers, action)
+  const body = JSON.stringify(action)
+  // console.log("body", body);
 
     try {
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Authorization": `Basic ${tokenEncoded}`,
+
         "Content-type": "application/json"
     },
-      body: JSON.stringify(action)
+      body: body
     });
 
-      console.log("response status", response.status);
+//we only get status = 200 if everything is fine;
 
-    const data = await response.json();
-    return data;
+      return response.status;
     } catch (error: any) {
       console.error('post error: ', error);
       throw(error);
