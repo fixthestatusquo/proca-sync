@@ -2,15 +2,23 @@ import {
   CRM,
   CRMType,
   ActionMessage,
-  handleResult
+  handleResult,
+  ProcaCampaign
 } from "../crm";
 import { formatAction } from "./gpdedatahub/data";
 import { postAction } from "./gpdedatahub/client";
+import { fetchCampaign as procaCampaign }  from '../proca';
 
 class gpdedatahubCRM extends CRM {
   constructor(opt: {}) {
     super(opt);
     this.crmType = CRMType.DoubleOptIn;
+  }
+
+ fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r= await procaCampaign (campaign.name);
+    console.log("campaign",r);
+    return r;
   }
 
   handleContact = async (
