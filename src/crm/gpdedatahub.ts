@@ -17,15 +17,15 @@ class gpdedatahubCRM extends CRM {
 
  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     const r= await procaCampaign (campaign.name);
-    console.log("campaign",r);
     return r;
   }
 
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-    const camp = await this.campaign(message.campaign);
-    const actionPayload = formatAction(message);
+    const camp = await this.fetchCampaign(message.campaign);
+    const actionPayload = formatAction(message, camp.config);
+
     if (this.verbose) {
       console.log(actionPayload);
     }

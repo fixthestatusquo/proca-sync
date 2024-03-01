@@ -33,8 +33,7 @@ export const postAction = async (action: GPAction) => {
       body: body
     });
 
-//we only get status = 200 if everything is fine;
-
+    //we only get status = 200 if everything is fine;
       return response.status;
     } catch (error: any) {
       console.error('post error: ', error);
