@@ -32,7 +32,7 @@
     "@sentry/node": "^7.107.0",
     "@supabase/supabase-js": "^2.39.3",
     "@topcli/spinner": "^2.1.2",
-    "civicrm": "^3.1.1",
+    "civicrm": "^3.2.2",
     "cli-color": "^2.0.3",
     "dotenv": "^16.4.5",
     "i18n-iso-countries": "^7.10.0",
