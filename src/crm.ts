@@ -217,7 +217,7 @@ export abstract class CRM implements CRMInterface {
         }
         if (message.privacy.optIn === null) {
           this.log("optIn null (implicit) withConsent " + message.actionId +' '+ message.action?.actionType,ProcessStatus.skipped);
-          return true; 
+          return true;
           /*
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
@@ -235,14 +235,14 @@ console.log(message);
         if (message.privacy?.emailStatus === 'double_opt_in') {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added doi " + message.contact.email, ProcessStatus.processed);
+            this.log("added doi " + message.contact.email + " " +  message.actionId, ProcessStatus.processed);
             return true;
           } else {
-            this.log("failed doi " + message.contact.email, ProcessStatus.error);
+            this.log("failed doi " + message.contact.email + " " +  message.actionId, ProcessStatus.error);
             return false;
           }
         };
-        this.log("skip sending, it is not double opt in " + message.contact.email, ProcessStatus.error);
+           this.log("skip sending, it is not double opt in " + message.contact.email + " " +  message.actionId, ProcessStatus.error);
         return true;
         break;
 

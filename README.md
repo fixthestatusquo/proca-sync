@@ -85,3 +85,8 @@ ExecStart=/srv/proca-sync/bin/sync
 ## extra configuration/filters
 
 the construtor of your CRM should set the type of events it want to process (eg only opt-in contacts, all contacts or contacts and events)
+
+## add custom queue
+
+on Proca cli `proca org:set --custom-deliver ORGNAME`
+create user on RabbitMQ, set permissions

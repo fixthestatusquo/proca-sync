@@ -2,10 +2,12 @@ import {
   CRM,
   CRMType,
   ActionMessage,
-  handleResult
+  handleResult,
+  ProcaCampaign
 } from "../crm";
 import { formatAction } from "./gpdedatahub/data";
 import { postAction } from "./gpdedatahub/client";
+import { fetchCampaign as procaCampaign }  from '../proca';
 
 class gpdedatahubCRM extends CRM {
   constructor(opt: {}) {
@@ -13,20 +15,31 @@ class gpdedatahubCRM extends CRM {
     this.crmType = CRMType.DoubleOptIn;
   }
 
+ fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r= await procaCampaign (campaign.name);
+    return r;
+  }
+
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-    const camp = await this.campaign(message.campaign);
-    const actionPayload = formatAction(message);
+    const camp = await this.fetchCampaign(message.campaign);
+    console.log("Taken from the queue", message.action.id);
+    const actionPayload = formatAction(message, camp.config);
+
+
     if (this.verbose) {
       console.log(actionPayload);
     }
-     const data = await postAction(actionPayload);
-    if (data) {
-      return true;
+
+    const status = await postAction(actionPayload);
+
+   if (status === 200) {
+     console.log(`Action ${message.actionId} sent`)
+     return true;
     } else {
-      console.error("error, no data" );
-      return false;
+      console.log(`Action ${message.actionId} not sent`)
+     return false;
     }
   };
 }
