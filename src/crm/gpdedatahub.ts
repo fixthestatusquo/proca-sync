@@ -20,13 +20,13 @@ class gpdedatahubCRM extends CRM {
     return r;
   }
 
+   // CRM will take double actions and respond with 200 status
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     const camp = await this.fetchCampaign(message.campaign);
     console.log("Taken from the queue", message.action.id);
     const actionPayload = formatAction(message, camp.config);
-
 
     if (this.verbose) {
       console.log(actionPayload);

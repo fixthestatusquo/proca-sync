@@ -13,7 +13,6 @@ if (!url || !username || !password) {
 
 const authToken =`${username}:${password}`
 const tokenEncoded = Buffer.from(authToken).toString('base64');
-console.log("token", tokenEncoded);
 
 const headers = {
       "Authorization": `Basic ${tokenEncoded}`,
