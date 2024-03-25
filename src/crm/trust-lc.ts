@@ -23,6 +23,7 @@ class TrustCRM extends CRM {
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
+    console.log("Taken from queue", message.action.id)
     const camp = await this.campaign(message.campaign);
     const actionPayload = formatAction(message);
     if (this.verbose) {
@@ -41,19 +42,19 @@ class TrustCRM extends CRM {
         data.petition_signature.verification_token,
         verificationPayload
       );
+
+      console.log("Verified", verified)
+
+      return true;
+    } else if (data.alreadyProcessed) {
+      console.log("Already processed", "data:", data, "action:", message);
       return true;
     } else {
-      console.error("error", data);
+      console.log("no verification token", "data:", data, "action:", message)
       return false;
     }
-
-    return false;
   };
 
-  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    console.log("fake fetching campaign", campaign.name);
-    return campaign;
-  };
 }
 
 export default TrustCRM;
