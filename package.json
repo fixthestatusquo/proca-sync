@@ -33,7 +33,7 @@
     "@supabase/supabase-js": "^2.39.8",
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
-    "cli-color": "^2.0.3",
+    "cli-color": "^2.0.4",
     "dotenv": "^16.4.5",
     "i18n-iso-countries": "^7.11.0",
     "jsforce": "^1.11.1",
