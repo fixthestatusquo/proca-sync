@@ -21,6 +21,7 @@ class TrustCRM extends crm_1.CRM {
         super(opt);
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a;
+            console.log("Taken from queue", message.action.id);
             const camp = yield this.campaign(message.campaign);
             const actionPayload = (0, data_1.formatAction)(message);
             if (this.verbose) {
@@ -35,17 +36,17 @@ class TrustCRM extends crm_1.CRM {
             const data = yield (0, client_1.postAction)(actionPayload);
             if ((_a = data.petition_signature) === null || _a === void 0 ? void 0 : _a.verification_token) {
                 const verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
+                console.log("Verified", verified);
+                return true;
+            }
+            else if (data.alreadyProcessed) {
+                console.log("Already processed", "data:", data, "action:", message);
                 return true;
             }
             else {
-                console.error("error", data);
+                console.log("no verification token", "data:", data, "action:", message);
                 return false;
             }
-            return false;
-        });
-        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            console.log("fake fetching campaign", campaign.name);
-            return campaign;
         });
         this.crmType = crm_1.CRMType.DoubleOptIn;
     }
