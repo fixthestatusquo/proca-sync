@@ -30,8 +30,7 @@ const headers = {
     "Content-type": "application/json"
 };
 const postAction = (action) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("headers:", headers);
-    console.log("body", JSON.stringify(action));
+    const body = JSON.stringify(action);
     try {
         const response = yield fetch(url, {
             method: "POST",
@@ -39,11 +38,10 @@ const postAction = (action) => __awaiter(void 0, void 0, void 0, function* () {
                 "Authorization": `Basic ${tokenEncoded}`,
                 "Content-type": "application/json"
             },
-            body: JSON.stringify(action)
+            body: body
         });
-        console.log("response status", response.status);
-        const data = yield response.json();
-        return data;
+        //we only get status = 200 if everything is fine;
+        return response.status;
     }
     catch (error) {
         console.error('post error: ', error);

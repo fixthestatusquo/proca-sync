@@ -82,7 +82,7 @@ export async function graphQL (operation, query, options): Promise<ProcaResponse
 export const fetchCampaign = async (name) => {
   const query = `query campaign ($name: String! ) {
   campaign (name:$name) {
-    id, name, title, config
+    id, name, title, config, externalId
   }
 }`;
 
