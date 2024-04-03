@@ -40,6 +40,16 @@ class SendInBlueCRM extends crm_1.CRM {
             }
             return { processed: true };
         });
+        this.campaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            let name = campaign.name;
+            if (campaign.externalId) {
+                name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+            }
+            if (!this.campaigns[name]) {
+                this.campaigns[name] = yield this.fetchCampaign(campaign);
+            }
+            return Promise.resolve(this.campaigns[name]);
+        });
         this.fetchCampaigns = () => __awaiter(this, void 0, void 0, function* () {
             try {
                 let folders = yield this.apiInstance.getFolders(10, 0);
@@ -56,7 +66,7 @@ class SendInBlueCRM extends crm_1.CRM {
                         procaFolder = procaFolder[0];
                     }
                     this.folderId = procaFolder.id;
-                    let lists = yield this.apiInstance.getLists(20, 0);
+                    let lists = yield this.apiInstance.getLists(50, 0);
                     lists = lists.body.lists;
                     if (lists.length) {
                         lists.forEach((d) => this.campaigns[d.name] = d);
@@ -68,6 +78,12 @@ class SendInBlueCRM extends crm_1.CRM {
             }
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            if (campaign.externalId) {
+                const data = yield this.apiInstance.getList(campaign.externalId);
+                console.log(data.body);
+                return data.body;
+            }
+            throw new Error("not handled");
             if (Object.keys(this.campaigns).length === 0) {
                 yield this.fetchCampaigns();
                 if (this.campaigns[campaign.name])

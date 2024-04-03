@@ -90,3 +90,5 @@ the construtor of your CRM should set the type of events it want to process (eg 
 
 on Proca cli `proca org:set --custom-deliver ORGNAME`
 create user on RabbitMQ, set permissions
+
+

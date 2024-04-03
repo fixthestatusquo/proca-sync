@@ -8,6 +8,7 @@ import {
 } from "../crm";
 
 const SibApiV3Sdk = require("@sendinblue/client");
+import { fetchCampaign as procaCampaign }  from '../proca';
 
 /*
  *
@@ -50,6 +51,17 @@ console.log(e);
     return { processed: true };
   };
 
+  campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
+    let name: string = campaign.name;
+    if (campaign.externalId) {
+      name ="proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+    }
+    if (!this.campaigns[name]) {
+      this.campaigns[name] = await this.fetchCampaign(campaign);
+    }
+    return Promise.resolve(this.campaigns[name]);
+  };
+
   fetchCampaigns = async () => {
     try {
       let folders = await this.apiInstance.getFolders(10, 0);
@@ -68,7 +80,7 @@ console.log(e);
         }
         this.folderId = procaFolder.id;
 
-        let lists = await this.apiInstance.getLists(20, 0);
+        let lists = await this.apiInstance.getLists(50, 0);
           lists = lists.body.lists;
         if (lists.length) {
           lists.forEach ( (d:any) => this.campaigns[d.name] = d);
@@ -81,6 +93,13 @@ console.log(e);
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    if (campaign.externalId) {
+      const data = await this.apiInstance.getList(campaign.externalId);
+console.log(data.body);
+      return data.body;
+    }
+throw new Error ("not handled");
+
     if (Object.keys(this.campaigns).length === 0) {
       await this.fetchCampaigns();
       if (this.campaigns[campaign.name])

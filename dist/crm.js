@@ -169,16 +169,16 @@ class CRM {
                     if (((_d = message.privacy) === null || _d === void 0 ? void 0 : _d.emailStatus) === 'double_opt_in') {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added doi " + message.contact.email, ProcessStatus.processed);
+                            this.log("added doi " + message.contact.email + " " + message.actionId, ProcessStatus.processed);
                             return true;
                         }
                         else {
-                            this.log("failed doi " + message.contact.email, ProcessStatus.error);
+                            this.log("failed doi " + message.contact.email + " " + message.actionId, ProcessStatus.error);
                             return false;
                         }
                     }
                     ;
-                    this.log("skip sending, it is not double opt in " + message.contact.email, ProcessStatus.error);
+                    this.log("skip sending, it is not double opt in " + message.contact.email + " " + message.actionId, ProcessStatus.error);
                     return true;
                     break;
                 case CRMType.ActionContact:
