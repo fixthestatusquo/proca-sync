@@ -79,14 +79,17 @@ export async function graphQL (operation, query, options): Promise<ProcaResponse
   return data;
 };
 
-export const fetchCampaign = async (name) => {
-  const query = `query campaign ($name: String! ) {
-  campaign (name:$name) {
+export const fetchCampaign = async (id) => {
+  let variables = {};
+  let query = `query campaign ($id: Int! ) {
+  campaign (id:$id) {
     id, name, title, config, externalId
   }
 }`;
+  
+  const data : any = await graphQL("campaign", query, { variables: { id: id } });
+  if (!data?.campaign) throw new Error(data);
 
-  const data : any = await graphQL("campaign", query, { variables: { name: name } });
   if (data?.campaign?.config)
     data.campaign.config = JSON.parse(data.campaign.config);
   return data?.campaign;

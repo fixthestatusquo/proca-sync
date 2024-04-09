@@ -16,7 +16,7 @@ class gpdedatahubCRM extends CRM {
   }
 
  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    const r= await procaCampaign (campaign.name);
+    const r= await procaCampaign (campaign.id);
     return r;
   }
 

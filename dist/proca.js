@@ -79,14 +79,17 @@ function graphQL(operation, query, options) {
 }
 exports.graphQL = graphQL;
 ;
-const fetchCampaign = (name) => __awaiter(void 0, void 0, void 0, function* () {
+const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const query = `query campaign ($name: String! ) {
-  campaign (name:$name) {
+    let variables = {};
+    let query = `query campaign ($id: Int! ) {
+  campaign (id:$id) {
     id, name, title, config, externalId
   }
 }`;
-    const data = yield graphQL("campaign", query, { variables: { name: name } });
+    const data = yield graphQL("campaign", query, { variables: { id: id } });
+    if (!(data === null || data === void 0 ? void 0 : data.campaign))
+        throw new Error(data);
     if ((_a = data === null || data === void 0 ? void 0 : data.campaign) === null || _a === void 0 ? void 0 : _a.config)
         data.campaign.config = JSON.parse(data.campaign.config);
     return data === null || data === void 0 ? void 0 : data.campaign;
