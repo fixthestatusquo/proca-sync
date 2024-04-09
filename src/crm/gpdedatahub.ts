@@ -24,7 +24,7 @@ class gpdedatahubCRM extends CRM {
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-    const camp = await this.fetchCampaign(message.campaign);
+    const camp = await this.campaign(message.campaign);
     console.log("Taken from the queue", message.action.id);
     const actionPayload = formatAction(message, camp.config);
 
