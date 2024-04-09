@@ -18,6 +18,7 @@
   },
   "actionPageId": 2466,
   "campaign": {
+    "id":"614",
     "contactSchema": "basic",
     "externalId": 237,
     "name": "test-proca",
