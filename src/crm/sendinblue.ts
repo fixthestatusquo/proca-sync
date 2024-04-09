@@ -8,7 +8,6 @@ import {
 } from "../crm";
 
 const SibApiV3Sdk = require("@sendinblue/client");
-import { fetchCampaign as procaCampaign }  from '../proca';
 
 /*
  *
