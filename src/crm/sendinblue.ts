@@ -94,10 +94,8 @@ console.log(e);
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     if (campaign.externalId) {
       const data = await this.apiInstance.getList(campaign.externalId);
-console.log(data.body);
       return data.body;
     }
-throw new Error ("not handled");
 
     if (Object.keys(this.campaigns).length === 0) {
       await this.fetchCampaigns();

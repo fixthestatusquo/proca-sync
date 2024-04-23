@@ -80,10 +80,8 @@ class SendInBlueCRM extends crm_1.CRM {
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             if (campaign.externalId) {
                 const data = yield this.apiInstance.getList(campaign.externalId);
-                console.log(data.body);
                 return data.body;
             }
-            throw new Error("not handled");
             if (Object.keys(this.campaigns).length === 0) {
                 yield this.fetchCampaigns();
                 if (this.campaigns[campaign.name])
