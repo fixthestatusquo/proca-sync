@@ -42,6 +42,7 @@ export const postAction = async (action: GPAction): Promise<number> => {
         });
 
         // We only get status = 200 if everything is fine;
+        console.log(action.actionId, requestUrl)
         return response.status;
     } catch (error: any) {
         console.error('Post error:', error);
