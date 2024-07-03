@@ -20,7 +20,6 @@
   "campaign": {
     "id":"614",
     "contactSchema": "basic",
-    "externalId": 237,
     "name": "test-proca",
     "title": "Pineapple doesn’t belong on pizza!"
   },

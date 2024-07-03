@@ -33,7 +33,13 @@ class SendInBlueCRM extends CRM {
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-    const camp = await this.campaign(message.campaign);
+    let camp;
+    try {
+      camp = await this.campaign(message.campaign);
+    } catch (error) {
+      console.log("failed fetching the campaign", message.campaign);
+      return { processed: false };
+    }
     console.log(camp.id, message.contact.email);
     let createContact = new SibApiV3Sdk.CreateContact();
     createContact.email = message.contact.email;
@@ -44,7 +50,7 @@ class SendInBlueCRM extends CRM {
     try {
       const contact = await this.apiInstance.createContact(createContact);
     } catch (e) {
-console.log(e); 
+    console.log(e); 
     return { processed: false };
     }
     return { processed: true };
@@ -87,14 +93,19 @@ console.log(e);
 
       }
     } catch (e) {
-      console.log(e);
+      console.log("error fetching campaigns",e);
     }
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     if (campaign.externalId) {
-      const data = await this.apiInstance.getList(campaign.externalId);
-      return data.body;
+      try {
+        const data = await this.apiInstance.getList(campaign.externalId);
+        return data.body;
+      } catch (e) {
+         console.error("can't fetch list",campaign.externalId);
+         throw e;
+      }
     }
 
     if (Object.keys(this.campaigns).length === 0) {
