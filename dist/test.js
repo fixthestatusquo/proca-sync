@@ -127,7 +127,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         }
     }
     catch (er) {
-        console.error(`Problem: ${er}`);
+        console.error("Problem", er);
         Sentry.captureException(er);
         (0, config_1.help)();
     }

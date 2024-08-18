@@ -27,6 +27,10 @@ export function configFromOptions(opt: any, argv: any): Configuration {
   if (!process.env.PROCA_QUEUE) throw Error("Provide queue name");
   if (!process.env.PROCA_USERNAME  && !process.env.PROCA_URL) throw Error("Provide queue user");
   if (!process.env.PROCA_PASSWORD && !process.env.PROCA_URL) throw Error("Provide queue password");
+  
+  if (process.env.PROCA_URL && !process.env.PROCA_URL.includes ('://')) {
+    process.env.PROCA_URL = `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@${process.env.PROCA_URL}`
+  } 
 
   // we allow opt.U to override the url
   return {

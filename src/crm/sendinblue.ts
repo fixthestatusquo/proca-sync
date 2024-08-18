@@ -50,8 +50,14 @@ class SendInBlueCRM extends CRM {
     try {
       const contact = await this.apiInstance.createContact(createContact);
     } catch (e) {
-    console.log(e); 
-    return { processed: false };
+      if (e.body) {
+        console.log("error creating",e.body,e.body.code,e.body.message);
+      } else {
+        console.log("error creating no code",e);
+     }
+//      const error = JSON.parse(e.body);
+//      console.log(error.code,error.message); 
+      return { processed: false };
     }
     return { processed: true };
   };

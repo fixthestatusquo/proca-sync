@@ -24,7 +24,14 @@ class SendInBlueCRM extends crm_1.CRM {
         this.apiInstance = new SibApiV3Sdk.ContactsApi();
         this.folderId = 0;
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            const camp = yield this.campaign(message.campaign);
+            let camp;
+            try {
+                camp = yield this.campaign(message.campaign);
+            }
+            catch (error) {
+                console.log("failed fetching the campaign", message.campaign);
+                return { processed: false };
+            }
             console.log(camp.id, message.contact.email);
             let createContact = new SibApiV3Sdk.CreateContact();
             createContact.email = message.contact.email;
@@ -35,7 +42,14 @@ class SendInBlueCRM extends crm_1.CRM {
                 const contact = yield this.apiInstance.createContact(createContact);
             }
             catch (e) {
-                console.log(e);
+                if (e.body) {
+                    console.log("error creating", e.body, e.body.code, e.body.message);
+                }
+                else {
+                    console.log("error creating no code", e);
+                }
+                //      const error = JSON.parse(e.body);
+                //      console.log(error.code,error.message); 
                 return { processed: false };
             }
             return { processed: true };
@@ -74,13 +88,19 @@ class SendInBlueCRM extends crm_1.CRM {
                 }
             }
             catch (e) {
-                console.log(e);
+                console.log("error fetching campaigns", e);
             }
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             if (campaign.externalId) {
-                const data = yield this.apiInstance.getList(campaign.externalId);
-                return data.body;
+                try {
+                    const data = yield this.apiInstance.getList(campaign.externalId);
+                    return data.body;
+                }
+                catch (e) {
+                    console.error("can't fetch list", campaign.externalId);
+                    throw e;
+                }
             }
             if (Object.keys(this.campaigns).length === 0) {
                 yield this.fetchCampaigns();
