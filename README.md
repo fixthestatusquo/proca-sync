@@ -91,4 +91,28 @@ the construtor of your CRM should set the type of events it want to process (eg 
 on Proca cli `proca org:set --custom-deliver ORGNAME`
 create user on RabbitMQ, set permissions
 
+## ssh tunnel for development
+
+if the rabbitmq port is blocked for some reason
+
+1. create a ssh configuration to start the tunnel
+
+    $ vi ~/.ssh/config
+
+    Host rabbitmq
+      HostName api.proca.app
+      LocalForward 5671 localhost:5671
+
+
+2. start the tunnel (once per session)
+
+    $ssh -f -N rabbitmq
+
+3. change your .env to define a different server
+
+   PROCA_URL = localhost/proca_live
+
+4. run with that new configuration
+
+    $NODE_TLS_REJECT_UNAUTHORIZED=0 npm run start -- --e {your.config}
 

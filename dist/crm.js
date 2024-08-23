@@ -245,7 +245,7 @@ class CRM {
         this.interactive = (opt === null || opt === void 0 ? void 0 : opt.interactive) || false;
         this.campaigns = {};
         this.crmType = CRMType.ActionContact;
-        this.count = opt.count || { ack: 0, nack: 0 };
+        this.count = opt.count || { ack: 0, nack: 0, queued: 0 };
         this.lastStatus = ProcessStatus.unknown;
     }
 }

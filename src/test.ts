@@ -98,7 +98,7 @@ export const main = async (argv: string[]) => {
         return !!r;
   }
   } catch (er) {
-    console.error(`Problem: ${er}`);
+    console.error("Problem",er);
     Sentry.captureException(er);
     help();
   }
