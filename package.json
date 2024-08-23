@@ -16,10 +16,10 @@
     "start": "ts-node-dev src/index.ts"
   },
   "devDependencies": {
-    "@sentry/types": "^7.114.0",
+    "@sentry/types": "^8.25.0",
     "@types/cli-color": "^2.0.6",
     "@types/jsforce": "^1.11.5",
-    "@types/mailchimp__mailchimp_marketing": "^3.0.19",
+    "@types/mailchimp__mailchimp_marketing": "^3.0.20",
     "@types/minimist": "^1.2.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"
@@ -29,13 +29,13 @@
     "@proca/crypto": "^3.4.0",
     "@proca/queue": "^5.2.3",
     "@sendinblue/client": "^3.3.1",
-    "@sentry/node": "^7.107.0",
+    "@sentry/node": "^8.25.0",
     "@supabase/supabase-js": "^2.39.8",
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
     "dotenv": "^16.4.5",
-    "i18n-iso-countries": "^7.11.0",
+    "i18n-iso-countries": "^7.11.3",
     "jsforce": "^1.11.1",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
