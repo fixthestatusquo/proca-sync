@@ -7,12 +7,12 @@ const ID = process.env.CRM_ID //letters
 // const username = process.env.CRM_USERNAME; //user_Id
 const password = process.env.CRM_PASSWORD;
 const secret = process.env.CRM_SECRET;
+const apiUrl = process.env.CRM_URL;
 
-if (!authUrl || !ID || !password || !tokenUrl) {
+if (!authUrl || !ID || !password || !tokenUrl || !apiUrl) {
     console.error("No credentials");
     process.exit(1);
 }
-
 export const getToken = async () => {
   const authHeader = 'Basic ' + Buffer.from(`${ID}:${secret}`).toString('base64');
   const bodyParams = new URLSearchParams({
@@ -42,9 +42,6 @@ export const getToken = async () => {
 }
 
 export const apiCall = async (accessToken, postData) => {
-
-    const apiUrl = 'https://rest.cleverreach.com/oauth/authorize.php?client_id=zqgHCPIxGS&grant=basic&response_type=code&redirect_uri=https://www.cleverreach.com'; // Replace with actual endpoint
-
     try {
         const response = await fetch(apiUrl, {
             method: 'POST',
