@@ -4,29 +4,27 @@ dotenv.config();
 const authUrl = process.env.CRM_URL;
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID //letters
-// const username = process.env.CRM_USERNAME; //user_Id
-const password = process.env.CRM_PASSWORD;
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
 
-if (!authUrl || !ID || !password || !tokenUrl || !apiUrl) {
+if (!authUrl || !ID || !tokenUrl || !apiUrl) {
     console.error("No credentials");
     process.exit(1);
 }
+
 export const getToken = async () => {
   const authHeader = 'Basic ' + Buffer.from(`${ID}:${secret}`).toString('base64');
-  const bodyParams = new URLSearchParams({
-      'grant_type': 'client_credentials'
-  }).toString();
 
   try {
       const response = await fetch(tokenUrl, {
           method: 'POST',
           headers: {
               'Authorization': authHeader,
-              'Content-Type': 'application/x-www-form-urlencoded'
+              'Content-Type': 'application/json'
           },
-          body: bodyParams
+          body: JSON.stringify({
+            'grant_type': 'client_credentials'
+        })
       });
 
       if (!response.ok) {
@@ -43,21 +41,22 @@ export const getToken = async () => {
 
 export const apiCall = async (accessToken, postData) => {
     try {
-        const response = await fetch(apiUrl, {
-            method: 'POST',
+        const response = await fetch(apiUrl + '/groups', {
+            method: 'GET',
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(postData)
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`//,
+                //'name':'Proca CR Import Export'
+            }//,
+            //body: JSON.stringify(postData)
         });
 
         if (!response.ok) {
             throw new Error(`API call failed: ${response.statusText}`);
         }
 
-        const data = await response;
-        console.log('API response status:', data.status);
+        const data = await response.text();
+        console.log('API response status:', data);
         return data;
     } catch (error) {
         console.error('API Call Error:', error.message);
