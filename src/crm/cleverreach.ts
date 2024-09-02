@@ -4,7 +4,7 @@ import {
   ActionMessage,
   handleResult
 } from "../crm";
-import { getToken, postContact } from "./cr-hateaid/client";
+import { getToken, postContact } from "./cleverreach/client";
 
 class cleverreachCRM extends CRM {
   constructor(opt: {}) {

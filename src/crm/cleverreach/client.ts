@@ -8,7 +8,7 @@ const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
 const listId = process.env.CRM_LIST_ID;
 
-if (!authUrl || !ID || !tokenUrl || !apiUrl) {
+if (!authUrl || !tokenUrl || !ID || !tokenUrl || !apiUrl) {
     console.error("No credentials");
     process.exit(1);
 }
