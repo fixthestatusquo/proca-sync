@@ -4,7 +4,7 @@ import {
   ActionMessage,
   handleResult
 } from "../crm";
-import { getToken, apiCall } from "./cleverreach/client";
+import { getToken, postContact } from "./cr-hateaid/client";
 
 class cleverreachCRM extends CRM {
   constructor(opt: {}) {
@@ -22,7 +22,7 @@ handleContact = async (
     console.log(message);
   }
   const token = await getToken();
-  const data = await apiCall(token, message);
+  const data = await postContact(token, message);
 
   // if (data?.status === 200) {
   //   console.log(`Action ${message.actionId} sent`)

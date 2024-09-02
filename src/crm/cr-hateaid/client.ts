@@ -6,6 +6,7 @@ const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID //letters
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
+const listId = process.env.CRM_LIST_ID;
 
 if (!authUrl || !ID || !tokenUrl || !apiUrl) {
     console.error("No credentials");
@@ -39,27 +40,49 @@ export const getToken = async () => {
   }
 }
 
-export const apiCall = async (accessToken, postData) => {
+export const getGroups = async (accessToken) => {
     try {
         const response = await fetch(apiUrl + '/groups', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`//,
-                //'name':'Proca CR Import Export'
-            }//,
-            //body: JSON.stringify(postData)
+                'Authorization': `Bearer ${accessToken}`
+            }
         });
 
         if (!response.ok) {
-            throw new Error(`API call failed: ${response.statusText}`);
+            throw new Error(`Get groups failed: ${response.statusText}`);
         }
 
         const data = await response.text();
-        console.log('API response status:', data);
+        console.log('Get groups response status:', data);
         return data;
     } catch (error) {
-        console.error('API Call Error:', error.message);
+        console.error('Get groups contact error:', error.message);
+    }
+}
+
+export const postContact = async (accessToken, postData) => {
+    try {
+        const response = await fetch(apiUrl + '/groups/' + listId + '/receivers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`//,
+                //'name':'Proca CR Import Export'
+            },
+            body: JSON.stringify(postData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Post contact failed: ${response.statusText}`);
+        }
+
+        const data = await response.text();
+        console.log('Post contact response status:', data);
+        return data;
+    } catch (error) {
+        console.error('Post contact error:', error.message);
     }
 }
 
