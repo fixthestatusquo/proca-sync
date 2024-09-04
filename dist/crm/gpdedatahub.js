@@ -23,7 +23,7 @@ class gpdedatahubCRM extends crm_1.CRM {
         // CRM will take double actions and respond with 200 status
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             const camp = yield this.campaign(message.campaign);
-            console.log("Taken from the queue", message.action.id);
+            console.log("Taken from the queue", message.action.id, "test:", message.action.testing);
             const actionPayload = (0, data_1.formatAction)(message, camp.config);
             if (this.verbose) {
                 console.log(actionPayload);
