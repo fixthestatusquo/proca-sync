@@ -36,12 +36,14 @@ export interface Contact {
     [propname:string]: any;
   }
   tags: string[];
+  interests?: any;
 }
 
 export interface ContactSubscription {
   email_address: string;
   status:  'pending' | 'subscribed' | 'unsubscribed' | 'transactional' | 'cleaned';
-  timestamp_opt?: string
+  timestamp_opt?: string;
+  interests?: any;
 }
 
 export const actionToContactRecord = (action : ActionMessageV2, mergeFields: any, doubleOptIn = false, optOutAsTransactional = false): Contact => {
@@ -84,9 +86,6 @@ export const actionToContactRecord = (action : ActionMessageV2, mergeFields: any
     r.tags.push(action.campaign.name);
     r.merge_fields.SOURCE = action.actionPage.name;
   }
-// HACK; TO FIX
-  if (action.campaign.name === "bazas")
-    r.merge_fields.SOURCE = "petition-proca-2023/07-abattoir-bazas";
 
   // consents
   // explicit DOI = must be subscribe
@@ -116,7 +115,6 @@ export const actionToContactRecord = (action : ActionMessageV2, mergeFields: any
       }
     }
   }
-
   return r
 }
 
