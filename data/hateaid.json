@@ -2,7 +2,7 @@
   "action": {
       "actionType": "register",
       "createdAt": "2023-08-29T17:49:58Z",
-      "customFields": {"emailProvider": "icdn.be"},
+      "customFields": {"emailProvider": "icdn.be", "organisation": "Gotham"},
       "testing": false
   },
   "actionId": 1,
@@ -26,7 +26,7 @@
       "contactRef": "IMbguhq5qlyLHwzjxDCsJGGiLs472XUaMiVm2_IoR0E",
       "country": "ME",
       "dupeRank": 0,
-      "email": "vuduzala@tutuapp.bid",
+      "email": "BruceWayne@tutuapp.bid",
       "firstName": "Bruce",
       "lastName": "Wayne"
   },

@@ -4,12 +4,13 @@ import {
   ActionMessage,
   handleResult
 } from "../crm";
-import { getToken, postContact } from "./cleverreach/client";
+import { getToken, postContact, getGroups } from "./cleverreach/client";
+import { formatAction } from "./cleverreach/data";
 
 class cleverreachCRM extends CRM {
   constructor(opt: {}) {
     super(opt);
-    this.crmType = CRMType.OptIn;
+    this.crmType = CRMType.DoubleOptIn;
   }
 
 handleContact = async (
@@ -22,17 +23,16 @@ handleContact = async (
     console.log(message);
   }
   const token = await getToken();
-  const data = await postContact(token, message);
+  const status = await postContact(token, formatAction(message));
+  console.log("status", status)
 
-  // if (data?.status === 200) {
-  //   console.log(`Action ${message.actionId} sent`)
-  //   return true;
-  //   } else {
-  //     console.log(`Action ${message.actionId} not sent`)
-  //   return false;
-  //   }
-
-  return false;
+  if (status === 200) {
+    console.log(`Action ${message.actionId} sent`)
+    return true;
+    } else {
+      console.log(`Action ${message.actionId} not sent`)
+    return false;
+    }
 };
 }
 
