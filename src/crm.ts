@@ -187,6 +187,7 @@ export abstract class CRM implements CRMInterface {
           }
           return r;
         }
+        this.verbose && (console.log(message));
         this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
         break;
       case CRMType.OptIn:
@@ -262,7 +263,7 @@ export abstract class CRM implements CRMInterface {
           "unexpected crmType " + this.crmType
         );
     }
-    console.error("need, because ts wants a return boolean");
+    console.error("need, because ts wants a return boolean", this.crmType);
     return false;
   };
 
