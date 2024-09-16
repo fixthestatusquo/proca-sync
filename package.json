@@ -22,7 +22,7 @@
     "@types/mailchimp__mailchimp_marketing": "^3.0.20",
     "@types/minimist": "^1.2.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.6.2"
   },
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
