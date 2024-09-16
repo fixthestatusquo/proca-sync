@@ -1,13 +1,15 @@
 
+import { create } from "lodash";
 import type { ActionMessage } from "../../crm";
+
+type Attributes = Record<'created_at', string>
 
 type Contact = {
   'email': string;
   'source': string;
+  'attributes': Attributes
   "global_attributes": ContactInfo;
 }
-
-type Attributes = Record<'petition_URL' | 'created_at', string>
 
 type ContactInfo = Record<
   | 'petition'
@@ -41,15 +43,19 @@ export const formatAction = (message: ActionMessage): Contact => {
     "company": message.action.customFields?.organisation
       ? message.action.customFields?.organisation.toString()
       : "",
-    "city": message.contact.locallity || "",
+    "city": message.contact.locality || "",
     "last_changed": message.privacy.emailStatusChanged || ""
   }
 
+  const attributes = {
+    created_at: message.action.createdAt
+  }
 
   return (
     {
       "email": message.contact.email,
       "source": message.tracking.location || "",
+      "attributes": attributes,
       "global_attributes": global
     }
   )

@@ -42,7 +42,7 @@ export const getToken = async () => {
 
 export const getGroups = async (accessToken) => {
     try {
-        const response = await fetch(apiUrl + '/groups', {
+        const response = await fetch(apiUrl + '/v3/groups/' + listId + '/receivers', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -62,27 +62,30 @@ export const getGroups = async (accessToken) => {
     }
 }
 
+// '/receivers' returns Bad request, status 400 if contact already exists and not accepted
+//  using '/receivers/upsert'
+
 export const postContact = async (accessToken, postData) => {
     try {
-        const response = await fetch(apiUrl + '/groups/' + listId + '/receivers', {
+        const response = await fetch(apiUrl + '/v3/groups/' + listId + '/receivers/upsert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`//,
-                //'name':'Proca CR Import Export'
+                'Authorization': `Bearer ${accessToken}`,//,
+                'name':'Proca CR Import Export'
             },
             body: JSON.stringify(postData)
         });
 
         if (!response.ok) {
+            console.error('Post contact errooor:', response)
             throw new Error(`Post contact failed: ${response.statusText}`);
         }
 
-        const data = await response.text();
-        console.log('Post contact response status:', data);
-        return data;
+        const data = await response;
+        return data.status;
     } catch (error) {
-        console.error('Post contact error:', error.message);
+        console.error('Post contact errooor:', error.message);
     }
 }
 
