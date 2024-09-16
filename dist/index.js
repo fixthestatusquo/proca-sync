@@ -54,6 +54,7 @@ const clihelp = () => {
         "--verbose (show the result)",
         "--interactive(overwrite the output and spinner)",
         "--pause (wait between each message)",
+        "[env] alternate way to configure the env to avoid the '-- --env'",
         //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
     ].join("\n"));
     process.exit(0);
@@ -76,8 +77,8 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         clihelp();
         process.exit(0);
     }
-    if (!opt.env && opt._[0]) {
-        opt.env = opt._[0];
+    if (opt._.length && !opt.env) {
+        opt.env = opt._.shift();
     }
     if (opt.env) {
         console.log("trying with", opt.env);
