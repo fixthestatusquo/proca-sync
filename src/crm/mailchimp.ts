@@ -151,7 +151,7 @@ class MailchimpCRM extends CRM {
     if (this.interest) {
       member.interests = {};
       member.interests[this.interest] = true;
-      console.log("add to interest",member); process.exit(1);
+      console.log("add to interest",member); 
         
     }
     try {
