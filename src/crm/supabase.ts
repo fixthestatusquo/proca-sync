@@ -33,17 +33,25 @@ class SupabaseCRM extends CRM {
 
       process.exit(1);
     }
+    if (!process.env.AUTH_USER || !process.env.AUTH_PASS) {
+      console.error(
+        "you need to set the AUTH_USER and AUTH_PASSWORD for your supabase access and  in the .env.xx"
+      );
+
+      process.exit(1);
+    }
 
     let config: CrmConfigType = {
       server: process.env.CRM_URL || "missing",
-      user: process.env.AUTH_USER || "missing",
       publicKey: process.env.AUTH_ANON_KEY || "missing",
-      password: process.env.AUTH_PASS || "missing",
+      user: process.env.AUTH_USER,
+      password: process.env.AUTH_PASS,
     };
     this.crmAPI = createClient(config.server, config.publicKey);
     this.config = config;
   }
 
+  
   openPublishChannel = (rabbit) => {
     console.log("ready to redispatch approved candidates");
     this.pub = rabbit.createPublisher({
@@ -93,7 +101,7 @@ class SupabaseCRM extends CRM {
       )
       .subscribe();
 
-    console.log("receive notifications", data, error);
+    console.log("receive notifications",error);
     if (error) {
       console.log(error);
       return false;
@@ -102,6 +110,8 @@ class SupabaseCRM extends CRM {
   };
 
   dispatchEvent = async (status: string, data) => {
+console.log("not redispatch event");
+
     if (status !== "approved") {
       console.log("ignoring status:", status, data.actionId);
       return false;
@@ -110,7 +120,7 @@ class SupabaseCRM extends CRM {
     console.log(data);
     try {
       const r = await this.pub.send("cus.320.deliver", JSON.stringify(data));
-      console.log("send to SF", data);
+      console.log("send", data);
     } catch (e) {
       console.log(e);
     }
