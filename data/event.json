@@ -1,0 +1,22 @@
+{
+  "eventType": "email_status",
+  "schema": "proca:event:2",
+  "supporter": {
+    "contact": {
+      "area": null,
+      "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
+      "dupeRank": 4,
+      "email": "ivana@fixthestatusquo.org",
+      "firstName": "bruce"
+    },
+    "personalInfo": null,
+    "privacy": {
+      "emailStatus": "double_opt_in",
+      "emailStatusChanged": "2024-09-30T16:17:36Z",
+      "givenAt": "2024-09-30T16:16:56Z",
+      "optIn": true,
+      "withConsent": false
+    }
+  },
+  "timestamp": "2024-09-30T16:17:36Z"
+}
