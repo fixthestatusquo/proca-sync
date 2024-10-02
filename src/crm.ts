@@ -176,6 +176,11 @@ export abstract class CRM implements CRMInterface {
   handleActionContact = async (
     message: ActionMessageV2
   ): Promise<handleResult | boolean> => {
+        console.log(message);
+//TODO DEAL WITH typescript tantrum here 
+//   if (message.eventType) {// we are dealing with an event, not a contact 
+//      const r = await this.handleEvent(message);
+//    }
     switch (this.crmType) {
       case CRMType.Contact:
         if (message.privacy.withConsent) {
