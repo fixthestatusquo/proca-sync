@@ -82,8 +82,8 @@ export const main = async (argv: string[]) => {
     }
   for (const file of opt._) {
       const message = JSON.parse(readFileSync(file, "utf8"));
-      if(!message.campaign.id) { // update to the newer v2 format
-      message.campaign.id=message.campaignId;
+      if(message.campaign && !message.campaign.id) { // update to the newer v2 format
+        message.campaign.id=message.campaignId;
         message.action.id=message.actionId;
         message.org.id=message.orgId;
         message.actionPage.id=message.actionPageId;
