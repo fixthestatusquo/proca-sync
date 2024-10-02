@@ -19,6 +19,7 @@ const clihelp = () => {
       "--verbose (show the result)",
       "--interactive(overwrite the output and spinner)",
       "--pause (wait between each message)",
+      "[env] alternate way to configure the env to avoid the '-- --env'",
       //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
     ].join("\n")
   );
@@ -46,11 +47,11 @@ export const main = async (argv: string[]) => {
     process.exit(0);
   }
 
-  if (!opt.env && opt._[0]) {
-    opt.env = opt._[0];
+  if (opt._.length && !opt.env) {
+    opt.env = opt._.shift();
   }
   if (opt.env) {
-console.log("trying with",opt.env);
+    console.log("trying with",opt.env);
     if (!existsSync(opt.env)) {
       const env = ".env." + opt.env;
       process.env.PROCA_ENV = opt.env;

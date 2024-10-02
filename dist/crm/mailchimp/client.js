@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findMember = exports.memberHash = exports.upsertList = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
+exports.findMember = exports.memberHash = exports.upsertList = exports.allCampaigns = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
 const crypto_1 = __importDefault(require("crypto"));
 const mailchimp_marketing_1 = __importDefault(require("@mailchimp/mailchimp_marketing"));
 const makeClient = () => {
@@ -41,6 +41,21 @@ const allLists = (client) => __awaiter(void 0, void 0, void 0, function* () {
     return client.lists.getAllLists({ count: 30 });
 });
 exports.allLists = allLists;
+const allCampaigns = (client, list, category) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!category) {
+        const r = yield client.lists.getListInterestCategories(list);
+        const categories = r.categories || [];
+        console.log(categories);
+        categories && categories.forEach((d) => {
+            console.log(d.id, d.title);
+        });
+        return { interests: [] };
+    }
+    const response = yield client.lists.listInterestCategoryInterests(list, category);
+    console.log(response);
+    return response;
+});
+exports.allCampaigns = allCampaigns;
 const LIST_CACHE = {};
 const upsertList = (client, name, templateName) => __awaiter(void 0, void 0, void 0, function* () {
     //const ls: Record<string,any>[] = await lists(client)

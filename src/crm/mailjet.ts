@@ -78,7 +78,6 @@ class Mailjet extends CRM {
   ): Promise<handleResult | boolean> => {
 
 
-console.log(message);
 
 try {
     const existing = await this.fetchContact(message.contact.email,{});

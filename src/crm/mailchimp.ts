@@ -14,6 +14,7 @@ import {
 import {
   ping,
   allLists,
+  allCampaigns,
   senders,
   makeClient,
   upsertList,
@@ -32,6 +33,8 @@ class MailchimpCRM extends CRM {
   client: any;
   token: string;
   list: string;
+  group: string;
+  interest: string;
   lists: [] | undefined;
   mergeFields: any;
 
@@ -51,6 +54,18 @@ class MailchimpCRM extends CRM {
       );
     }
     this.list = process.env.LIST || "";
+    if (!process.env.GROUP) {
+      console.warn(
+        "you might want to set interest groups from mailchimp in the .env.xx if you want to use it to store campaigns"
+      );
+    }
+    this.group = process.env.GROUP || "";
+    if (!process.env.INTEREST) {
+      console.warn(
+        "you might want to set interest from mailchimp in the .env.xx if you want to use it to store campaigns"
+      );
+    }
+    this.interest = process.env.INTEREST || "";
     try {
       this.client = makeClient();
     } catch (e: any) {
@@ -65,10 +80,7 @@ class MailchimpCRM extends CRM {
     }
   }
 
-  handleContact = async (
-    message: ActionMessage
-  ): Promise<handleResult | boolean> => {
-    //const response = await this.client.ping.get();
+  init = async (): Promise<boolean> => {
     if (this.list === "") {
       console.log("fetching exisiting lists");
       const r = await allLists(this.client);
@@ -79,6 +91,17 @@ class MailchimpCRM extends CRM {
         });
       return false;
     }
+    const r = await allCampaigns(this.client,this.list,this.group);
+    r.interests?.forEach ( (d:any) => {
+      console.log("campaign?",d.id,d.name,d.subscriber_count);
+    });
+    return true;
+  }
+
+  handleContact = async (
+    message: ActionMessage
+  ): Promise<handleResult | boolean> => {
+    //const response = await this.client.ping.get();
     const actionPayload = formatAction(message, this.mergeFields, false, false);
     if (this.verbose) {
       console.log(actionPayload);
@@ -111,16 +134,7 @@ class MailchimpCRM extends CRM {
     console.log("fetching campaign", campaign.name);
     if (this.lists === undefined) {
       console.log("fetching lists", campaign.name);
-      /*      try {
-        const r = await allLists(this.client);
-        this.lists = r.lists || [];
-        this.lists && this.lists.forEach ( (d:any) => {
-console.log(d.id,d.name);
-        });
-      } catch (e: any) {
-console.error("error fetching campaign",e.error); throw (e);
-      }
-*/
+    } else {
     }
     return campaign;
   };
@@ -134,14 +148,22 @@ console.error("error fetching campaign",e.error); throw (e);
     if (!member.status) {
       member.status = member.status_if_new;
     }
+    if (this.interest) {
+      member.interests = {};
+      member.interests[this.interest] = true;
+      console.log("add to interest",member); 
+        
+    }
     try {
       const response = await client.lists.addListMember(list_id, member, {
         skipMergeValidation: true,
       });
       if (response.errors?.length) {
+        console.error(response);
         throw new Error(response.errors);
       }
       if (verbose) {
+         console.log("verbose addContactToList");
         delete response._links;
         console.log(response);
       }
@@ -151,7 +173,11 @@ console.error("error fetching campaign",e.error); throw (e);
       const b = e?.response?.body || e;
       switch (b?.title) {
         case "Member Exists":
-          this.log("", ProcessStatus.skipped);
+          if (verbose) {
+            this.log("member exists already", b);
+          } else {
+            this.log("", ProcessStatus.skipped);
+          }
           return true;
         case "Forgotten Email Not Subscribed":
         case "Member In Compliance State":

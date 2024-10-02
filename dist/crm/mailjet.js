@@ -27,7 +27,6 @@ class Mailjet extends crm_1.CRM {
             return true;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log(message);
             try {
                 const existing = yield this.fetchContact(message.contact.email, {});
                 const source = "proca";

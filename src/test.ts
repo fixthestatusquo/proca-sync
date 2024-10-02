@@ -18,6 +18,8 @@ const clihelp = () => {
       "--dump (write the messages as file)",
       "--verbose (show the result)",
       "--pause (wait between each message)",
+      "[env] alternate way to configure the env to avoid the '-- --env'",
+      "[data file.json] file containing the message to process'"
       //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
     ].join("\n")
   );
@@ -39,12 +41,16 @@ export const main = async (argv: string[]) => {
     },
   });
 
+
   let envConfig: any = undefined;
   if (opt.help) {
     clihelp();
     process.exit(0);
   }
 
+  if (opt._.length && !opt.env) {
+    opt.env = opt._.shift();
+  }
   if (opt.env) {
     if (!existsSync(opt.env)) {
       const env = ".env." + opt.env;
@@ -76,8 +82,8 @@ export const main = async (argv: string[]) => {
     }
   for (const file of opt._) {
       const message = JSON.parse(readFileSync(file, "utf8"));
-      if(!message.campaign.id) { // update to the newer v2 format
-      message.campaign.id=message.campaignId;
+      if(message.campaign && !message.campaign.id) { // update to the newer v2 format
+        message.campaign.id=message.campaignId;
         message.action.id=message.actionId;
         message.org.id=message.orgId;
         message.actionPage.id=message.actionPageId;

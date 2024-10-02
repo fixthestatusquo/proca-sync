@@ -176,6 +176,11 @@ export abstract class CRM implements CRMInterface {
   handleActionContact = async (
     message: ActionMessageV2
   ): Promise<handleResult | boolean> => {
+        console.log(message);
+//TODO DEAL WITH typescript tantrum here 
+//   if (message.eventType) {// we are dealing with an event, not a contact 
+//      const r = await this.handleEvent(message);
+//    }
     switch (this.crmType) {
       case CRMType.Contact:
         if (message.privacy.withConsent) {
@@ -187,6 +192,7 @@ export abstract class CRM implements CRMInterface {
           }
           return r;
         }
+        this.verbose && (console.log(message));
         this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
         break;
       case CRMType.OptIn:
@@ -262,7 +268,7 @@ export abstract class CRM implements CRMInterface {
           "unexpected crmType " + this.crmType
         );
     }
-    console.error("need, because ts wants a return boolean");
+    console.error("need, because ts wants a return boolean", this.crmType);
     return false;
   };
 
