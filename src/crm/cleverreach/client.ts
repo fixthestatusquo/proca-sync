@@ -6,7 +6,7 @@ const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID //letters
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
-const listId = process.env.CRM_LIST_ID;
+// const listId = process.env.CRM_LIST_ID;
 
 if (!authUrl || !tokenUrl || !ID || !tokenUrl || !apiUrl) {
     console.error("No credentials");
@@ -40,13 +40,35 @@ export const getToken = async () => {
   }
 }
 
-export const getGroups = async (accessToken) => {
+export const getContact = async (email: string, token: string, listId: number): Promise<any> => {
+    try {
+        const response = await fetch(apiUrl + `/v3/receivers.json/${email}?group_id=${listId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Get receiver failed: ${response.statusText}`);
+        }
+
+        const data = await response;
+        if (response.status === 200) return true;
+    } catch (error) {
+        console.error('Get groups contact error:', error.message);
+    }
+    return false;
+}
+
+export const getGroups = async (token: string, listId: number) => {
     try {
         const response = await fetch(apiUrl + '/v3/groups/' + listId + '/receivers', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -65,13 +87,13 @@ export const getGroups = async (accessToken) => {
 // '/receivers' returns Bad request, status 400 if contact already exists and not accepted
 //  using '/receivers/upsert'
 
-export const postContact = async (accessToken, postData) => {
+export const postContact = async (token: string, postData: any, listId: number, update: boolean = false) => {
     try {
-        const response = await fetch(apiUrl + '/v3/groups/' + listId + '/receivers/upsert', {
+        const response = await fetch(apiUrl + '/v3/groups/' + listId + update ? '/receivers/upsert' : '/receivers/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`,//,
+                'Authorization': `Bearer ${token}`,//,
                 'name':'Proca CR Import Export'
             },
             body: JSON.stringify(postData)
