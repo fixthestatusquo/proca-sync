@@ -6,7 +6,6 @@ const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID //letters
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
-// const listId = process.env.CRM_LIST_ID;
 
 if (!authUrl || !tokenUrl || !ID || !tokenUrl || !apiUrl) {
     console.error("No credentials");
@@ -85,7 +84,6 @@ export const getGroups = async (token: string, listId: number) => {
 }
 
 // '/receivers' returns Bad request, status 400 if contact already exists and not accepted
-//  using '/receivers/upsert'
 
 export const postContact = async (token: string, postData: any, listId: number, update: boolean = false) => {
     try {
