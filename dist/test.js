@@ -110,7 +110,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         }
         for (const file of opt._) {
             const message = JSON.parse((0, fs_1.readFileSync)(file, "utf8"));
-            if (!message.campaign.id) { // update to the newer v2 format
+            if (message.campaign && !message.campaign.id) { // update to the newer v2 format
                 message.campaign.id = message.campaignId;
                 message.action.id = message.actionId;
                 message.org.id = message.orgId;

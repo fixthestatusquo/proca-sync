@@ -196,6 +196,7 @@ export abstract class CRM implements CRMInterface {
         this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
         break;
       case CRMType.OptIn:
+console.log(message.privacy, message.privacy.withConsent);
         if (!message.privacy.withConsent) {
           this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
           return true;
