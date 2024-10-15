@@ -319,6 +319,7 @@ export abstract class CRM implements CRMInterface {
           console.log(`Double opt in from ${event.supporter.contact.email}`);
 
           await this.setSubscribed(cont.id, true);
+          await this.handleEvent(event);
           break;
         }
 
