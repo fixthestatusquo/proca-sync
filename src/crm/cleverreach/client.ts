@@ -86,8 +86,9 @@ export const getGroups = async (token: string, listId: number) => {
 // '/receivers' returns Bad request, status 400 if contact already exists and not accepted
 
 export const postContact = async (token: string, postData: any, listId: number, update: boolean = false) => {
+    const group = update ? '/receivers/upsert': '/receivers/';
     try {
-        const response = await fetch(apiUrl + '/v3/groups/' + listId + update ? '/receivers/upsert' : '/receivers/', {
+        const response = await fetch(apiUrl + '/v3/groups/' + listId + group, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -97,6 +98,9 @@ export const postContact = async (token: string, postData: any, listId: number, 
             body: JSON.stringify(postData)
         });
 
+        if (!response.ok && update === false) {
+            return response.status;
+        }
         if (!response.ok) {
             console.error('Post contact errooor:', response)
             throw new Error(`Post contact failed: ${response.statusText}`);
