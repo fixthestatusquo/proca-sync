@@ -33,11 +33,13 @@ class CleverreachCRM extends CRM {
 
     await this.initializeToken();
 
+    const listId =  parseInt(message.campaign.externalId.toString().slice(0, 6), 10);
+
     if (!this.token) {
       throw new Error("Token is not available");
     }
 
-    const status = await postContact(this.token, formatAction(message), message.campaign.externalId);
+    const status = await postContact(this.token, formatAction(message), listId);
     console.log("status", status);
 
     if (status === 200) {
@@ -47,7 +49,7 @@ class CleverreachCRM extends CRM {
       const retryStatus = await postContact(
         this.token,
         formatAction(message, true),
-        message.campaign.externalId,
+        listId,
         true
       );
       if (retryStatus === 200) {
