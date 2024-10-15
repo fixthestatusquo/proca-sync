@@ -1,6 +1,6 @@
+import type { ActionMessage, EventMessage } from "../../crm";
 
-import { create } from "lodash";
-import type { ActionMessage } from "../../crm";
+export type Message = ActionMessage | EventMessage;
 
 type Attributes = Record<'created_at', string>
 
@@ -31,7 +31,7 @@ type ContactInfo = Omit<
   'quelle'
 > & Partial<Record<'quelle', string>>;
 
-export const formatAction = (message: ActionMessage, update: boolean = false): Contact => {
+export const formatAction = (message: Message, update: boolean = false): Contact => {
   const global: ContactInfo = {
     "petition": message.campaign.title,
     "language": message.actionPage.locale,
