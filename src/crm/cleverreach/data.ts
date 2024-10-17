@@ -1,6 +1,4 @@
-import type { ActionMessage, EventMessage } from "../../crm";
-
-export type Message = ActionMessage | EventMessage;
+import type { Message } from "../../crm";
 
 type Attributes = Record<'created_at', string>
 

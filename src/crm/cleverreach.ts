@@ -1,8 +1,6 @@
-import { CRM, CRMType, ActionMessage, EventMessage, handleResult } from "../crm";
+import { CRM, CRMType, ActionMessage, Message, EventMessage, handleResult } from "../crm";
 import { getToken, postContact } from "./cleverreach/client";
-import { formatAction, Message } from "./cleverreach/data";
-
-
+import { formatAction } from "./cleverreach/data";
 
 class CleverreachCRM extends CRM {
   token: string | null = null;
@@ -43,7 +41,7 @@ class CleverreachCRM extends CRM {
     console.log("status", status);
 
     if (status === 200) {
-      console.log(`Action ${message.actionId} sent`);
+      console.log(`Message ${message.actionId} sent`);
       return true;
     } else {
       const retryStatus = await postContact(
@@ -55,46 +53,63 @@ class CleverreachCRM extends CRM {
       if (retryStatus === 200) {
         return true;
       } else {
-        console.log(`Action ${message.actionId} not sent`);
+        console.log(`Message ${message.actionId} not sent`);
         return false;
       }
     }
   }
 
-  fetchContact = async (email: string, context?: any): Promise<any> => {
-    return true;
-  };
-
-  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
-    return true;
-  };
-
-  handleContact = async (
-    message: ActionMessage
+  handleMessage = async (
+    message: ActionMessage | EventMessage
   ): Promise<handleResult | boolean> => {
-    console.log("Action taken from the queue", message.action.id);
+
+    if (message.schema === "proca:action:2") {
+      console.log("Action taken from the queue", message.action.id);
+    } else if (message.schema === "proca:event:2") {
+      console.log("Event taken from queue", message.actionId);
+      message.contact = message.supporter.contact;
+      message.privacy = message.supporter.privacy;
+    }
 
     if (this.verbose) {
       console.log(message);
     }
 
-    return this.processMessage(message);
-  };
+    if (!message.campaign.externalId) {
+      console.error(`List ID missing, set the externalId for the campaign ${message.campaign.name}`);
+      return false;
+    };
 
-  handleEvent = async (
-    message: EventMessage
-  ): Promise<handleResult | boolean> => {
-    console.log("Event taken from queue", message.actionId);
+    await this.initializeToken();
 
-    message.contact = message.supporter.contact;
-    message.privacy = message.supporter.privacy;
+    const listId =  parseInt(message.campaign.externalId.toString().slice(0, 6), 10);
 
-    if (this.verbose) {
-      console.log(message);
+    if (!this.token) {
+      throw new Error("Token is not available");
     }
 
-    return this.processMessage(message);
+    const status = await postContact(this.token, formatAction(message), listId);
+    console.log("status", status);
+
+    if (status === 200) {
+      console.log(`Message ${message.actionId} sent`);
+      return true;
+    } else {
+      const retryStatus = await postContact(
+        this.token,
+        formatAction(message, true),
+        listId,
+        true
+      );
+      if (retryStatus === 200) {
+        return true;
+      } else {
+        console.log(`Message ${message.actionId} not sent`);
+        return false;
+      }
+    }
   };
+
 }
 
 export default CleverreachCRM;
