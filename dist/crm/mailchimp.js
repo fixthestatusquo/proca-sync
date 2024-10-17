@@ -77,7 +77,6 @@ class MailchimpCRM extends crm_1.CRM {
                 member.interests = {};
                 member.interests[this.interest] = true;
                 console.log("add to interest", member);
-                process.exit(1);
             }
             try {
                 const response = yield client.lists.addListMember(list_id, member, {

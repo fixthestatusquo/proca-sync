@@ -101,6 +101,11 @@ class CRM {
         };
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
+            console.log(message);
+            //TODO DEAL WITH typescript tantrum here 
+            //   if (message.eventType) {// we are dealing with an event, not a contact 
+            //      const r = await this.handleEvent(message);
+            //    }
             switch (this.crmType) {
                 case CRMType.Contact:
                     if (message.privacy.withConsent) {
@@ -117,6 +122,7 @@ class CRM {
                     this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
                     break;
                 case CRMType.OptIn:
+                    console.log(message.privacy, message.privacy.withConsent);
                     if (!message.privacy.withConsent) {
                         this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
                         return true;

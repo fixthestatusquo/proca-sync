@@ -56,7 +56,7 @@ class SupabaseCRM extends crm_1.CRM {
                 }
             }))
                 .subscribe();
-            console.log("receive notifications", data, error);
+            console.log("receive notifications", error);
             if (error) {
                 console.log(error);
                 return false;
@@ -64,6 +64,7 @@ class SupabaseCRM extends crm_1.CRM {
             return true;
         });
         this.dispatchEvent = (status, data) => __awaiter(this, void 0, void 0, function* () {
+            console.log("not redispatch event");
             if (status !== "approved") {
                 console.log("ignoring status:", status, data.actionId);
                 return false;
@@ -71,7 +72,7 @@ class SupabaseCRM extends crm_1.CRM {
             console.log(data);
             try {
                 const r = yield this.pub.send("cus.320.deliver", JSON.stringify(data));
-                console.log("send to SF", data);
+                console.log("send", data);
             }
             catch (e) {
                 console.log(e);
@@ -110,11 +111,15 @@ class SupabaseCRM extends crm_1.CRM {
             console.error("you need to set the url of your crm endpoint in the .env.xx");
             process.exit(1);
         }
+        if (!process.env.AUTH_USER || !process.env.AUTH_PASS) {
+            console.error("you need to set the AUTH_USER and AUTH_PASSWORD for your supabase access and  in the .env.xx");
+            process.exit(1);
+        }
         let config = {
             server: process.env.CRM_URL || "missing",
-            user: process.env.AUTH_USER || "missing",
             publicKey: process.env.AUTH_ANON_KEY || "missing",
-            password: process.env.AUTH_PASS || "missing",
+            user: process.env.AUTH_USER,
+            password: process.env.AUTH_PASS,
         };
         this.crmAPI = (0, supabase_js_1.createClient)(config.server, config.publicKey);
         this.config = config;
