@@ -182,8 +182,6 @@ export abstract class CRM implements CRMInterface {
   handleActionContact = async (
     message: ActionMessageV2 | EventMessageV2
   ): Promise<handleResult | boolean> => {
-       // console.log(message);
-
     //DEAL WITH typescript tantrum
     const email = 'privacy' in message ? message.contact?.email : message.supporter.contact.email;
     const actionId = 'privacy' in message ? message.actionId : 'event message';
@@ -251,7 +249,7 @@ export abstract class CRM implements CRMInterface {
             return r; */
           }
         }
-        console.log(message);
+
         this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
         break;
 

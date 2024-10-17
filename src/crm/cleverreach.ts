@@ -19,46 +19,6 @@ class CleverreachCRM extends CRM {
     }
   };
 
-
-  processMessage = async (
-    message: Message
-  ): Promise<boolean> => {
-
-    if (!message.campaign.externalId) {
-      console.error(`List ID missing, set the externalId for the campaign ${message.campaign.name}`);
-      return false;
-    };
-
-    await this.initializeToken();
-
-    const listId =  parseInt(message.campaign.externalId.toString().slice(0, 6), 10);
-
-    if (!this.token) {
-      throw new Error("Token is not available");
-    }
-
-    const status = await postContact(this.token, formatAction(message), listId);
-    console.log("status", status);
-
-    if (status === 200) {
-      console.log(`Message ${message.actionId} sent`);
-      return true;
-    } else {
-      const retryStatus = await postContact(
-        this.token,
-        formatAction(message, true),
-        listId,
-        true
-      );
-      if (retryStatus === 200) {
-        return true;
-      } else {
-        console.log(`Message ${message.actionId} not sent`);
-        return false;
-      }
-    }
-  }
-
   handleMessage = async (
     message: ActionMessage | EventMessage
   ): Promise<handleResult | boolean> => {
