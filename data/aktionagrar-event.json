@@ -11,7 +11,7 @@
 "actionId": 4722132,
 "actionPage": {
   "locale": "de",
-  "name": "petition_xyz/de",
+  "name": "email_test_aktionagrar/de",
   "supporterConfirmTemplate": null,
   "thankYouTemplate": "petition_xyz_de",
   "thankYouTemplateRef": null,
@@ -20,7 +20,7 @@
 "actionPageId": 3120,
 "campaign": {
   "contactSchema": "basic",
-  "externalId": 621987,
+  "externalId": null,
   "name": "petition_x",
   "title": "Petition X",
   "id": 564
@@ -33,8 +33,9 @@
       "area": "DE",
       "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
       "dupeRank": 4,
-      "email": "brucewayne@example.org",
-      "firstName": "bruce"
+      "email": "brucewayne2222268S487@example.org",
+      "firstName": "bruce",
+      "lastName": "Wayne"
     },
     "personalInfo": null,
     "privacy": {
@@ -49,7 +50,7 @@
   "tracking": {
     "campaign": "unknown",
     "content": "",
-    "location": "https://widget.proca.app/d/petition_xyz/de/index.html",
+    "location": "https://widget.proca.app/d/email_test_aktionagrar/de/index.html",
     "medium": "unknown",
     "source": "unknown"
   }
