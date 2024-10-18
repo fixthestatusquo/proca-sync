@@ -16,8 +16,8 @@ const utils_1 = require("../utils");
 class MailchimpCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
-        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            //const response = await this.client.ping.get();
+        this.init = () => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (this.list === "") {
                 console.log("fetching exisiting lists");
                 const r = yield (0, client_1.allLists)(this.client);
@@ -28,6 +28,14 @@ class MailchimpCRM extends crm_1.CRM {
                     });
                 return false;
             }
+            const r = yield (0, client_1.allCampaigns)(this.client, this.list, this.group);
+            (_a = r.interests) === null || _a === void 0 ? void 0 : _a.forEach((d) => {
+                console.log("campaign?", d.id, d.name, d.subscriber_count);
+            });
+            return true;
+        });
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            //const response = await this.client.ping.get();
             const actionPayload = (0, contact_1.actionToContactRecord)(message, this.mergeFields, false, false);
             if (this.verbose) {
                 console.log(actionPayload);
@@ -55,32 +63,31 @@ class MailchimpCRM extends crm_1.CRM {
             console.log("fetching campaign", campaign.name);
             if (this.lists === undefined) {
                 console.log("fetching lists", campaign.name);
-                /*      try {
-                  const r = await allLists(this.client);
-                  this.lists = r.lists || [];
-                  this.lists && this.lists.forEach ( (d:any) => {
-          console.log(d.id,d.name);
-                  });
-                } catch (e: any) {
-          console.error("error fetching campaign",e.error); throw (e);
-                }
-          */
+            }
+            else {
             }
             return campaign;
         });
-        this.addContactToList = (client, list_id, member, verbose = false) => __awaiter(this, void 0, void 0, function* () {
+        this.addContactToList = (client_2, list_id_1, member_1, ...args_1) => __awaiter(this, [client_2, list_id_1, member_1, ...args_1], void 0, function* (client, list_id, member, verbose = false) {
             var _a, _b;
             if (!member.status) {
                 member.status = member.status_if_new;
+            }
+            if (this.interest) {
+                member.interests = {};
+                member.interests[this.interest] = true;
+                console.log("add to interest", member);
             }
             try {
                 const response = yield client.lists.addListMember(list_id, member, {
                     skipMergeValidation: true,
                 });
                 if ((_a = response.errors) === null || _a === void 0 ? void 0 : _a.length) {
+                    console.error(response);
                     throw new Error(response.errors);
                 }
                 if (verbose) {
+                    console.log("verbose addContactToList");
                     delete response._links;
                     console.log(response);
                 }
@@ -91,7 +98,12 @@ class MailchimpCRM extends crm_1.CRM {
                 const b = ((_b = e === null || e === void 0 ? void 0 : e.response) === null || _b === void 0 ? void 0 : _b.body) || e;
                 switch (b === null || b === void 0 ? void 0 : b.title) {
                     case "Member Exists":
-                        this.log("", crm_1.ProcessStatus.skipped);
+                        if (verbose) {
+                            this.log("member exists already", b);
+                        }
+                        else {
+                            this.log("", crm_1.ProcessStatus.skipped);
+                        }
                         return true;
                     case "Forgotten Email Not Subscribed":
                     case "Member In Compliance State":
@@ -115,6 +127,14 @@ class MailchimpCRM extends crm_1.CRM {
             console.error("you need to set the LIST (audience id) from mailchimp in the .env.xx");
         }
         this.list = process.env.LIST || "";
+        if (!process.env.GROUP) {
+            console.warn("you might want to set interest groups from mailchimp in the .env.xx if you want to use it to store campaigns");
+        }
+        this.group = process.env.GROUP || "";
+        if (!process.env.INTEREST) {
+            console.warn("you might want to set interest from mailchimp in the .env.xx if you want to use it to store campaigns");
+        }
+        this.interest = process.env.INTEREST || "";
         try {
             this.client = (0, client_1.makeClient)();
         }

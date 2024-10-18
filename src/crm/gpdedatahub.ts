@@ -25,7 +25,7 @@ class gpdedatahubCRM extends CRM {
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-    console.log("Taken from the queue", message.action.id);
+    console.log("Taken from the queue", message.action.id, "test:", message.action.testing);
     const actionPayload = formatAction(message, camp.config);
 
     if (this.verbose) {

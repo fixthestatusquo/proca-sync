@@ -78,7 +78,6 @@ class Mailjet extends CRM {
   ): Promise<handleResult | boolean> => {
 
 
-console.log(message);
 
 try {
     const existing = await this.fetchContact(message.contact.email,{});
@@ -91,6 +90,7 @@ const action = message.action;
     if (existing === false) {
       return this.createContact(message.contact, action, camp.id, source);
     } else {
+console.log(existing);
       return this.updateContact(existing, message.contact, action, camp.id, source);
     }
     return false;
@@ -141,7 +141,7 @@ console.log(campaign);
   if (result.body.Data.count ===0) 
     return false;
   const contact=result.body.Data[0];
-
+console.log(contact);
   return true;
   }
 

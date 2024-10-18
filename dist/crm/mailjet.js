@@ -27,7 +27,6 @@ class Mailjet extends crm_1.CRM {
             return true;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log(message);
             try {
                 const existing = yield this.fetchContact(message.contact.email, {});
                 const source = "proca";
@@ -37,6 +36,7 @@ class Mailjet extends crm_1.CRM {
                     return this.createContact(message.contact, action, camp.id, source);
                 }
                 else {
+                    console.log(existing);
                     return this.updateContact(existing, message.contact, action, camp.id, source);
                 }
                 return false;
@@ -71,6 +71,7 @@ class Mailjet extends crm_1.CRM {
             if (result.body.Data.count === 0)
                 return false;
             const contact = result.body.Data[0];
+            console.log(contact);
             return true;
         });
         this.crmType = crm_1.CRMType.OptIn;

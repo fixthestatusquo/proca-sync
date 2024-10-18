@@ -30,6 +30,24 @@ export const allLists = async (client: any): Promise<any> => {
   return client.lists.getAllLists({ count: 30 });
 };
 
+export const allCampaigns = async (client: any, list: string, category: string): Promise<any> => {
+  if (!category) {
+    const r = await client.lists.getListInterestCategories(list);
+    const categories = r.categories || [];
+console.log(categories);
+    categories && categories.forEach ((d: any) => {
+      console.log(d.id, d.title);
+    });
+   return {interests:[]};
+  }
+  const response = await client.lists.listInterestCategoryInterests(
+    list,
+    category
+  );
+console.log(response);
+  return response; 
+};
+
 export interface List {
   id: string;
   name: string;
