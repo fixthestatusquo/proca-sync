@@ -3,7 +3,9 @@
  * What info we need to read actions from Proca action queue?
  * */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_URL = exports.configFromOptions = exports.help = void 0;
+exports.DEFAULT_URL = void 0;
+exports.help = help;
+exports.configFromOptions = configFromOptions;
 function help() {
     console.error(`set --env=path/to/.env and at minima
   CRM
@@ -12,7 +14,6 @@ function help() {
   PROCA_QUEUE= [eg: cus.123.deliver]
 `);
 }
-exports.help = help;
 // you can also use env vars, or any other config style
 function configFromOptions(opt, argv) {
     if (!process.env.PROCA_QUEUE)
@@ -37,6 +38,5 @@ function configFromOptions(opt, argv) {
         concurrency: parseInt(process.env.concurrency || "1") || 1
     };
 }
-exports.configFromOptions = configFromOptions;
 // our default queue server
 exports.DEFAULT_URL = "amqps://api.proca.app";
