@@ -35,7 +35,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = exports.CRM = exports.CRMType = exports.ProcessStatus = void 0;
+exports.init = exports.CRM = exports.CRMType = exports.ProcaCampaign = exports.EventMessage = exports.ActionMessage = exports.ProcessStatus = void 0;
+const queue_1 = require("@proca/queue");
+Object.defineProperty(exports, "ProcaCampaign", { enumerable: true, get: function () { return queue_1.Campaign; } });
+Object.defineProperty(exports, "ActionMessage", { enumerable: true, get: function () { return queue_1.ActionMessageV2; } });
+Object.defineProperty(exports, "EventMessage", { enumerable: true, get: function () { return queue_1.EventMessageV2; } });
 const cli_color_1 = __importDefault(require("cli-color"));
 const spinner_1 = require("./spinner");
 var ProcessStatus;
@@ -94,98 +98,102 @@ class CRM {
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement handleContact in your CRM");
         });
+        this.handleMessage = (message) => {
+            throw new Error("handleMessage method not implemented.");
+        };
         this.formatResult = (result) => {
             if (typeof result === "boolean")
                 return result;
             return result.processed;
         };
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d;
-            console.log(message);
-            //TODO DEAL WITH typescript tantrum here 
-            //   if (message.eventType) {// we are dealing with an event, not a contact 
-            //      const r = await this.handleEvent(message);
-            //    }
+            var _a, _b, _c, _d, _e;
+            //DEAL WITH typescript tantrum
+            const email = 'privacy' in message ? (_a = message.contact) === null || _a === void 0 ? void 0 : _a.email : message.supporter.contact.email;
+            const actionId = 'privacy' in message ? message.actionId : 'event message';
             switch (this.crmType) {
                 case CRMType.Contact:
-                    if (message.privacy.withConsent) {
+                    // type guard: 'privacy' in message
+                    if ('privacy' in message && message.privacy.withConsent) {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added " + message.contact.email + " " + message.action.createdAt, ProcessStatus.processed);
+                            this.log("added " + email + " " + message.action.createdAt, ProcessStatus.processed);
                         }
                         else {
-                            this.log("failed " + message.contact.email + " " + message.action.createdAt, ProcessStatus.error);
+                            this.log("failed " + email + " " + message.action.createdAt, ProcessStatus.error);
                         }
                         return r;
                     }
                     this.verbose && (console.log(message));
-                    this.log("don't know how to process " + message.contact.email, ProcessStatus.error);
+                    this.log("don't know how to process " + email + " " + actionId, ProcessStatus.error);
                     break;
                 case CRMType.OptIn:
-                    console.log(message.privacy, message.privacy.withConsent);
-                    if (!message.privacy.withConsent) {
-                        this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
-                        return true;
-                    }
-                    if (message.privacy.withConsent && message.privacy.optIn) {
-                        const r = this.formatResult(yield this.handleContact(message));
-                        if (r) {
-                            this.log("added " + message.contact.email + " " + message.action.createdAt, ProcessStatus.processed);
+                    // type guard: 'privacy' in message
+                    if ('privacy' in message) {
+                        if (!message.privacy.withConsent) {
+                            this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
+                            return true;
                         }
-                        else {
-                            this.log("failed " + message.contact.email + " " + message.action.createdAt, ProcessStatus.error);
+                        if (message.privacy.withConsent && message.privacy.optIn) {
+                            const r = this.formatResult(yield this.handleContact(message));
+                            if (r) {
+                                this.log("added " + email + " " + message.action.createdAt, ProcessStatus.processed);
+                            }
+                            else {
+                                this.log("failed " + email + " " + message.action.createdAt, ProcessStatus.error);
+                            }
+                            return r;
                         }
-                        return r;
-                    }
-                    if (message.privacy.optIn === false) {
-                        this.log("opt-out " + message.actionId, ProcessStatus.skipped);
-                        //          this.verbose && console.log('opt-out',message.actionId);
-                        return true; //OptOut contact, we don't need to process
-                    }
-                    if (message.privacy.optIn === true) {
-                        this.log("opt-in, but no withConsent " + message.actionId + ' ' + ((_a = message.action) === null || _a === void 0 ? void 0 : _a.actionType), ProcessStatus.skipped);
-                        //          this.verbose && console.log('opt-out',message.actionId);
-                        return true; //OptOut contact, we don't need to process
-                    }
-                    if (((_b = message.privacy) === null || _b === void 0 ? void 0 : _b.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
-                        const r = this.formatResult(yield this.handleContact(message));
-                        if (r) {
-                            this.log("added doi" + message.contact.email, ProcessStatus.processed);
+                        if (message.privacy.optIn === false) {
+                            this.log("opt-out " + actionId, ProcessStatus.skipped);
+                            //          this.verbose && console.log('opt-out',message.actionId);
+                            return true; //OptOut contact, we don't need to process
                         }
-                        else {
-                            this.log("failed doi" + message.contact.email, ProcessStatus.error);
+                        if (message.privacy.optIn === true) {
+                            this.log("opt-in, but no withConsent " + actionId + ' ' + ((_b = message.action) === null || _b === void 0 ? void 0 : _b.actionType), ProcessStatus.skipped);
+                            //          this.verbose && console.log('opt-out',message.actionId);
+                            return true; //OptOut contact, we don't need to process
                         }
-                        return r;
-                    }
-                    if (message.privacy.optIn === null) {
-                        this.log("optIn null (implicit) withConsent " + message.actionId + ' ' + ((_c = message.action) === null || _c === void 0 ? void 0 : _c.actionType), ProcessStatus.skipped);
-                        return true;
-                        /*
-                        const r = this.formatResult(await this.handleContact(message));
-                        if (r) {
-                          this.log("added with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
-                        } else {
-                          this.log("failed with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
+                        if (((_c = message.privacy) === null || _c === void 0 ? void 0 : _c.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
+                            const r = this.formatResult(yield this.handleContact(message));
+                            if (r) {
+                                this.log("added doi" + email, ProcessStatus.processed);
+                            }
+                            else {
+                                this.log("failed doi" + email, ProcessStatus.error);
+                            }
+                            return r;
                         }
-                        return r; */
+                        if (message.privacy.optIn === null) {
+                            this.log("optIn null (implicit) withConsent " + actionId + ' ' + ((_d = message.action) === null || _d === void 0 ? void 0 : _d.actionType), ProcessStatus.skipped);
+                            return true;
+                            /*
+                            const r = this.formatResult(await this.handleContact(message));
+                            if (r) {
+                              this.log("added with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
+                            } else {
+                              this.log("failed with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
+                            }
+                            return r; */
+                        }
                     }
-                    console.log(message);
-                    this.log("don't know how to process -optin " + message.actionId, ProcessStatus.error);
+                    this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
                     break;
                 case CRMType.DoubleOptIn:
-                    if (((_d = message.privacy) === null || _d === void 0 ? void 0 : _d.emailStatus) === 'double_opt_in') {
-                        const r = this.formatResult(yield this.handleContact(message));
+                    const emailStatus = 'privacy' in message ? (_e = message.privacy) === null || _e === void 0 ? void 0 : _e.emailStatus : message.supporter.privacy.emailStatus;
+                    if (emailStatus === 'double_opt_in') {
+                        const r = this.formatResult(yield this.handleMessage(message));
                         if (r) {
-                            this.log("added doi " + message.contact.email + " " + message.actionId, ProcessStatus.processed);
+                            this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
                             return true;
                         }
                         else {
-                            this.log("failed doi " + message.contact.email + " " + message.actionId, ProcessStatus.error);
+                            this.log("failed doi " + email + " " + actionId, ProcessStatus.error);
                             return false;
                         }
                     }
                     ;
-                    this.log("skip sending, it is not double opt in " + message.contact.email + " " + message.actionId, ProcessStatus.error);
+                    this.log("skip sending, it is not double opt in " + email + " " + actionId, ProcessStatus.error);
                     return true;
                     break;
                 case CRMType.ActionContact:
@@ -228,6 +236,7 @@ class CRM {
                     case "double_opt_in": {
                         console.log(`Double opt in from ${event.supporter.contact.email}`);
                         yield this.setSubscribed(cont.id, true);
+                        yield this.handleEvent(event);
                         break;
                     }
                     // Different kinds of problems with email delivery:
