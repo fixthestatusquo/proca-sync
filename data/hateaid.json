@@ -1,0 +1,59 @@
+{
+  "action": {
+      "actionType": "register",
+      "createdAt": "2023-08-29T17:49:58Z",
+      "customFields": {"emailProvider": "icdn.be", "organisation": "Gotham"},
+      "testing": false
+  },
+  "actionId": 1,
+  "actionPage": {
+      "locale": "en",
+      "name": "hateaid_test/en",
+      "supporterConfirmTemplate": "confirm",
+      "thankYouTemplate": null,
+      "thankYouTemplateRef": null
+  },
+  "actionPageId": 2508,
+  "campaign": {
+      "contactSchema": "basic",
+      "externalId": 621987,
+      "name": "hateaid_test",
+      "title": "hateaid_test"
+  },
+  "campaignId": 3200,
+  "contact": {
+      "area": "ME",
+      "contactRef": "IMbguhq5qlyLHwzjxDCsJGGiLs472XUaMiVm2_IoR0E",
+      "country": "ME",
+      "dupeRank": 0,
+      "email": "brucewayne@tutussssssapp.bid",
+      "firstName": "Bruce",
+      "lastName": "Wayne",
+      "locality": "Gotham",
+      "street": "Batcave 42",
+      "postcode": "10115",
+      "phone": "555-00000"
+  },
+  "org": {
+      "name": "x",
+      "title": "x"
+  },
+  "orgId": 1720,
+  "personalInfo": null,
+  "privacy": {
+      "emailStatus": "double_opt_in",
+      "emailStatusChanged": "2023-05-24T17:49:58Z",
+      "givenAt": "2023-05-24T17:49:58Z",
+      "optIn": true,
+      "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+      "campaign": "we.fixthestatusquo.org/",
+      "content": "",
+      "location": "https://widget.proca.app/d/petition_xyz/de/index.html?proca_test",
+      "medium": "we.fixthestatusquo.org",
+      "source": "referrer"
+  }
+}
