@@ -1,3 +1,5 @@
+//works for DOI with or without actionconfirm
+
 import {
   CRM,
   CRMType,
@@ -83,7 +85,7 @@ class MailjetDOI extends CRM {
       const { response: { status } } = await this.mailjet
         .post("contact", { 'version': 'v3' })
         .request({
-          "Name": message.contact.firstName + " " + message.contact.lastName || "",
+          "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName,
           "Email": message.contact.email
         });
 
@@ -109,7 +111,7 @@ class MailjetDOI extends CRM {
        .put("contact", { 'version': 'v3' })
        .id(message.contact.email)
        .request({
-         "Name": message.contact.firstName + "x " + message.contact.lastName || ""
+         "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName
        });
 
      return status === 200 ? true : false;
