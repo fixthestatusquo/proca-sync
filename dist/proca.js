@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchCampaign = exports.graphQL = void 0;
+exports.fetchCampaign = void 0;
+exports.graphQL = graphQL;
 //export const graphQL: Promise<ProcaResponse> = async (operation, query, options) => {
 function graphQL(operation, query, options) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -77,7 +78,6 @@ function graphQL(operation, query, options) {
         return data;
     });
 }
-exports.graphQL = graphQL;
 ;
 const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;

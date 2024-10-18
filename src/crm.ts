@@ -204,7 +204,8 @@ export abstract class CRM implements CRMInterface {
       case CRMType.OptIn:
         // type guard: 'privacy' in message
         if ('privacy' in message) {
-          if (!message.privacy.withConsent) {
+
+        if (!message.privacy.withConsent) {
             this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
             return true;
           }

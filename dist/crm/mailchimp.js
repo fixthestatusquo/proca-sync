@@ -69,7 +69,7 @@ class MailchimpCRM extends crm_1.CRM {
             return campaign;
         });
         this.addContactToList = (client_2, list_id_1, member_1, ...args_1) => __awaiter(this, [client_2, list_id_1, member_1, ...args_1], void 0, function* (client, list_id, member, verbose = false) {
-            var _b, _c;
+            var _a, _b;
             if (!member.status) {
                 member.status = member.status_if_new;
             }
@@ -77,13 +77,12 @@ class MailchimpCRM extends crm_1.CRM {
                 member.interests = {};
                 member.interests[this.interest] = true;
                 console.log("add to interest", member);
-                process.exit(1);
             }
             try {
                 const response = yield client.lists.addListMember(list_id, member, {
                     skipMergeValidation: true,
                 });
-                if ((_b = response.errors) === null || _b === void 0 ? void 0 : _b.length) {
+                if ((_a = response.errors) === null || _a === void 0 ? void 0 : _a.length) {
                     console.error(response);
                     throw new Error(response.errors);
                 }
@@ -96,7 +95,7 @@ class MailchimpCRM extends crm_1.CRM {
                 return true;
             }
             catch (e) {
-                const b = ((_c = e === null || e === void 0 ? void 0 : e.response) === null || _c === void 0 ? void 0 : _c.body) || e;
+                const b = ((_b = e === null || e === void 0 ? void 0 : e.response) === null || _b === void 0 ? void 0 : _b.body) || e;
                 switch (b === null || b === void 0 ? void 0 : b.title) {
                     case "Member Exists":
                         if (verbose) {
