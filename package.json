@@ -46,7 +46,7 @@
     "@types/mailchimp__mailchimp_marketing": "^3.0.20",
     "@types/minimist": "^1.2.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.6.3"
   },
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
@@ -54,7 +54,7 @@
     "@proca/queue": "^5.2.7",
     "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^8.25.0",
-    "@supabase/supabase-js": "^2.39.8",
+    "@supabase/supabase-js": "^2.45.4",
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
