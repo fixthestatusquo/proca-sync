@@ -55,9 +55,6 @@ const actionToContactRecord = (action, mergeFields, doubleOptIn = false, optOutA
         r.tags.push(action.campaign.name);
         r.merge_fields.SOURCE = action.actionPage.name;
     }
-    // HACK; TO FIX
-    if (action.campaign.name === "bazas")
-        r.merge_fields.SOURCE = "petition-proca-2023/07-abattoir-bazas";
     // consents
     // explicit DOI = must be subscribe
     if (action.privacy.emailStatus === "double_opt_in") {

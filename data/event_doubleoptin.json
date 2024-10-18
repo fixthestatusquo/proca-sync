@@ -1,0 +1,56 @@
+{
+  "action": {
+  "actionType": "register",
+  "createdAt": "2024-10-14T11:02:24Z",
+  "customFields": {
+    "emailProvider": "fixthestatusquo.org"
+  },
+  "testing": true,
+  "id": 4722132
+},
+"actionId": 4722132,
+"actionPage": {
+  "locale": "de",
+  "name": "petition_xyz/de",
+  "supporterConfirmTemplate": null,
+  "thankYouTemplate": "petition_xyz_de",
+  "thankYouTemplateRef": null,
+  "id": 3120
+},
+"actionPageId": 3120,
+"campaign": {
+  "contactSchema": "basic",
+  "externalId": null,
+  "name": "petition_x",
+  "title": "Petition X",
+  "id": 564
+},
+"campaignId": 564,
+"eventType": "email_status",
+"schema": "proca:event:2",
+"supporter": {
+    "contact": {
+      "area": "DE",
+      "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
+      "dupeRank": 4,
+      "email": "brucewayne@example.org",
+      "firstName": "bruce"
+    },
+    "personalInfo": null,
+    "privacy": {
+      "emailStatus": "double_opt_in",
+      "emailStatusChanged": "2024-09-30T16:17:36Z",
+      "givenAt": "2024-09-30T16:16:56Z",
+      "optIn": true,
+      "withConsent": false
+    }
+  },
+  "timestamp": "2024-09-30T16:17:36Z",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://widget.proca.app/d/petition_xyz/de/index.html",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}

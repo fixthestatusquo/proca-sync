@@ -1,20 +1,44 @@
 {
-  "name": "proca-sync",
-  "version": "1.0.1",
+  "name": "@proca/sync",
+  "version": "1.1.1",
   "description": "Proca-to-CRM syncer",
   "main": "dist/index.js",
   "repository": "git@github.com:fixthestatusquo/proca-sync.git",
   "license": "AGPL-3.0-or-later",
+  "private": false,
   "files": [
+    "bin",
     "dist",
-    "src",
-    "bin"
+    "README.md",
+    "LICENSE"
   ],
+  "main": "bin/sync",
+  "run": "bin/sync",
+  "bin": "bin/sync",
   "scripts": {
     "build": "tsc",
     "test": "ts-node-dev src/test.ts",
     "start": "ts-node-dev src/index.ts"
   },
+  "keywords": [
+    "petition",
+    "proca",
+    "campaigning",
+    "CRM",
+    "civicrm",
+    "brevo",
+    "mailchimp",
+    "mailjet",
+    "salesforce",
+    "digital-engagement",
+    "social-change",
+    "nonprofit",
+    "civic-tech",
+    "activism",
+    "email-campaign",
+    "RabbitMQ",
+    "AMQP"
+  ],
   "devDependencies": {
     "@sentry/types": "^8.25.0",
     "@types/cli-color": "^2.0.6",
@@ -27,7 +51,7 @@
   "dependencies": {
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@proca/crypto": "^3.4.0",
-    "@proca/queue": "^5.2.3",
+    "@proca/queue": "^5.2.7",
     "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^8.25.0",
     "@supabase/supabase-js": "^2.45.4",
@@ -39,6 +63,6 @@
     "jsforce": "^1.11.1",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
-    "node-mailjet": "^6.0.5"
+    "node-mailjet": "^6.0.6"
   }
 }

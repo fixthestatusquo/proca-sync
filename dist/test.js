@@ -53,6 +53,8 @@ const clihelp = () => {
         "--dump (write the messages as file)",
         "--verbose (show the result)",
         "--pause (wait between each message)",
+        "[env] alternate way to configure the env to avoid the '-- --env'",
+        "[data file.json] file containing the message to process'"
         //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
     ].join("\n"));
     process.exit(0);
@@ -74,6 +76,9 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     if (opt.help) {
         clihelp();
         process.exit(0);
+    }
+    if (opt._.length && !opt.env) {
+        opt.env = opt._.shift();
     }
     if (opt.env) {
         if (!(0, fs_1.existsSync)(opt.env)) {
@@ -105,7 +110,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         }
         for (const file of opt._) {
             const message = JSON.parse((0, fs_1.readFileSync)(file, "utf8"));
-            if (!message.campaign.id) { // update to the newer v2 format
+            if (message.campaign && !message.campaign.id) { // update to the newer v2 format
                 message.campaign.id = message.campaignId;
                 message.action.id = message.actionId;
                 message.org.id = message.orgId;
