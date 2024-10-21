@@ -60,7 +60,7 @@
     "cli-color": "^2.0.4",
     "dotenv": "^16.4.5",
     "i18n-iso-countries": "^7.11.3",
-    "jsforce": "^1.11.1",
+    "jsforce": "^3.5.2",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "node-mailjet": "^6.0.6"
