@@ -64,6 +64,22 @@ class MailjetDOI extends CRM {
     return true;
   }
 
+  addContactToList = async (email: string): Promise<void> => {
+    try {
+      const response = await this.mailjet
+        .post("listrecipient", { 'version': 'v3' })
+        .request({
+          "IsUnsubscribed": "true",
+          "ContactAlt": email,
+          "ListID": this.list
+        });
+
+      console.log(`Contact ${email} added to list ${this.list}:`, response.body);
+    } catch (error: any) {
+      console.log(`Failed to add contact ${email} to list ${this.list}: ${error.statusCode}`);
+    }
+  }
+
   handleMessage = async (
     message: ActionMessage | EventMessage
   ): Promise<handleResult | boolean> => {
@@ -89,16 +105,23 @@ class MailjetDOI extends CRM {
           "Email": message.contact.email
         });
 
-      return (status === 201 ? true : false);
-    } catch (e: any) {
-        if (e.response.statusText.includes("already exists")) {
-          return this.updateContact(message);
-        }
-        console.log(e.message);
+      if (status === 201) {
+        // Add contact to the list
+        await this.addContactToList(message.contact.email);
+        return true;
+      } else {
         return false;
       }
+    } catch (e: any) {
+      if (e.response.statusText.includes("already exists")) {
+        await this.updateContact(message);
+        await this.addContactToList(message.contact.email);
+        return true;
+      }
+      console.log(e.message);
+      return false;
     }
-
+  }
 
  updateContact = async (
     message: Message
@@ -124,7 +147,8 @@ class MailjetDOI extends CRM {
      console.log(error.message);
      return false;
    }
-}
+ }
+
 }
 
 export default MailjetDOI;
