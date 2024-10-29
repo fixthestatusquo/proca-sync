@@ -3,15 +3,11 @@ import {
   CRMType,
   ActionMessage,
   handleResult,
-  ProcaCampaign,
-  ProcessStatus,
 } from "../crm";
-
 import { string2map } from "../utils";
 
 type Params = {
   [key: string]: any;
-  //  AUTH_TOKEN?: string;
 };
 
 class Mailjet extends CRM {
@@ -35,8 +31,6 @@ class Mailjet extends CRM {
       process.exit(1);
     }
 
-
-
     if (!process.env.LIST) {
       console.error(
         "you need to set the LIST (audience id) from mailjet in the .env.xx"
@@ -55,7 +49,6 @@ class Mailjet extends CRM {
       // get query format, key = contact field, value = merge field in mailjet
       // eg. CONTACT_PROPERTIES="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
       this.contactProperties = string2map(process.env.CONTACT_PROPERTIES);
-      console.log("contact properties", this.contactProperties);
     }
   }
 
@@ -73,77 +66,120 @@ class Mailjet extends CRM {
     return true;
   }
 
+  addContactToList = async (email: string): Promise<boolean> => {
+    try {
+      const response = await this.mailjet
+        .post("listrecipient", { 'version': 'v3' })
+        .request({
+          "IsUnsubscribed":"false",
+          "ContactAlt": email,
+          "ListID": this.list
+        });
+
+      return true;
+    } catch (error: any) {
+      console.error(`Failed to add contact ${email} to list ${this.list}: ${error.statusCode}`);
+      return false;
+    }
+  }
+
+  updateContactProperties = async (message: ActionMessage): Promise<boolean> => {
+
+    const data = Object.entries(this.contactProperties).map(([sourceField, mailjetField]) => ({
+        Name: mailjetField,
+      Value: message.contact[sourceField] || ""
+      }));
+
+    try {
+      await this.mailjet
+        .put("contactdata", { 'version': 'v3' })
+        .id(message.contact.email)
+        .request({
+          "Data": data
+        })
+
+      return true;
+    } catch (e) {
+      console.error(`Updating properties for contact ${message.contact.email}, action ${message.actionId} faile with ${e.statusCode}`);
+      return false;
+	    }
+    }
+
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
 
+    console.log("Action taken from the queue", message.action.id);
 
-
-try {
-    const existing = await this.fetchContact(message.contact.email,{});
-
-const source = "proca";
-const camp = {id: 0, name: "todo"};
-
-const action = message.action;
-
-    if (existing === false) {
-      return this.createContact(message.contact, action, camp.id, source);
-    } else {
-console.log(existing);
-      return this.updateContact(existing, message.contact, action, camp.id, source);
+    if (this.verbose) {
+      console.log(message);
     }
-    return false;
-} catch (e:any) {
-  console.log(e); throw new Error (e);
-}
-}
 
-  createContact = async (
-    contact: any,
-    action: any,
-    campaign_id: number,
-    source?: string
-  ): Promise<boolean> => {
+    try {
+      // create contact
+      const { response: { status } } = await this.mailjet
+        .post("contact", { 'version': 'v3' })
+        .request({
+          "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName,
+          "Email": message.contact.email
+        });
 
-const request = await this.mailjet
-	.post("contact", {'version': 'v3'})
-	.request({
-      "Name":contact.lastName ? contact.firsttName + ' ' + contact.lastName : contact.firstName,
-      "Email":contact.email
-    });
-
-console.log("request", request);
-   return false;
-}
-
-  updateContact = async (
-    crmContact: any,
-    contact: any,
-    action: any,
-    campaign_id: number,
-    source?: string
-  ): Promise<boolean> => {
-    if (campaign_id === null) {
-      throw new Error ("missing campaign id"); 
+      if (status === 201) {
+        const  properties = await this.updateContactProperties(message);
+        const list = await this.addContactToList(message.contact.email);
+        return (properties && list);
+      } else {
+        return false;
+      }
+    } catch (e: any) {
+      if (e.response.statusText.includes("already exists")) {
+        // we do not care for errors, because the contact already exists
+        await this.updateContact(message);
+        await this.updateContactProperties(message);
+        await this.addContactToList(message.contact.email);
+        return true;
+      }
+      return false;
     }
-   return false;
-}
-
-  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-console.log(campaign);
-
-     return this.list;
-  };
-  fetchContact = async (email: string, context: any): Promise<any> => {
-    const result= await this.mailjet.get("contact",{'version': 'v3'}).id(email).request();
-
-  if (result.body.Data.count ===0) 
-    return false;
-  const contact=result.body.Data[0];
-console.log(contact);
-  return true;
   }
+
+ updateContact = async (
+    message: ActionMessage
+  ): Promise<boolean> => {
+   try {
+    const { response: { status } } = await this.mailjet
+       .put("contact", { 'version': 'v3' })
+       .id(message.contact.email)
+       .request({
+         "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName
+       });
+
+     return status === 200 ? true : false;
+   } catch (error: any) {
+     // mailjet returns error 304 when there is nothing to change
+     if (error.statusCode === 304) {
+       console.log(`${error.statusText} for ${message.contact.email}, ${message.actionId}`);
+       return true;
+     }
+     console.error(`Error: ${error.message} for ${message.contact.email}, ${message.actionId}`);
+     return false;
+   }
+ }
+
+//   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+// console.log(campaign);
+
+//      return this.list;
+//   };
+//   fetchContact = async (email: string, context: any): Promise<any> => {
+//     const result= await this.mailjet.get("contact",{'version': 'v3'}).id(email).request();
+
+//   if (result.body.Data.count ===0)
+//     return false;
+//   const contact=result.body.Data[0];
+// console.log(contact);
+//   return true;
+//   }
 
 }
 
