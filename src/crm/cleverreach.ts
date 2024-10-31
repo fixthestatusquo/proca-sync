@@ -1,6 +1,8 @@
-import { CRM, CRMType, ActionMessage, Message, EventMessage, handleResult } from "../crm";
+import { CRM, CRMType, ActionMessage, EventMessage, handleResult } from "../crm";
 import { getToken, postContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
+
+export type Message = ActionMessage | EventMessage;
 
 class CleverreachCRM extends CRM {
   token: string | null = null;
@@ -19,18 +21,7 @@ class CleverreachCRM extends CRM {
     }
   };
 
-  handleMessage = async (
-    message: ActionMessage | EventMessage
-  ): Promise<handleResult | boolean> => {
-
-    if (message.schema === "proca:action:2") {
-      console.log("Action taken from the queue", message.action.id);
-    } else if (message.schema === "proca:event:2") {
-      console.log("Event taken from queue", message.actionId);
-      message.contact = message.supporter.contact;
-      message.privacy = message.supporter.privacy;
-    }
-
+  handleMessage = async (message: Message) => {
     if (this.verbose) {
       console.log(message);
     }
@@ -68,6 +59,22 @@ class CleverreachCRM extends CRM {
         return false;
       }
     }
+  }
+
+  handleContact = async (
+    message: ActionMessage
+  ): Promise<handleResult | boolean> => {
+      console.log("Action taken from the queue", message.action.id);
+    return this.handleMessage(message);
+  };
+
+  handleEvent = async (
+    message: EventMessage
+  ): Promise<handleResult | boolean> => {
+      console.log("Event taken from queue", message.actionId);
+      message.contact = message.supporter.contact;
+      message.privacy = message.supporter.privacy;
+      return this.handleMessage(message);
   };
 
 }

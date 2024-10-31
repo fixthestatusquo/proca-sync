@@ -17,7 +17,6 @@ export enum ProcessStatus {
 }
 export { ActionMessageV2 as ActionMessage };
 export { EventMessageV2 as EventMessage };
-export type Message = ActionMessageV2 | EventMessageV2;
 export { Campaign as ProcaCampaign };
 
 type ProcaCampaign = Campaign;
@@ -85,11 +84,10 @@ interface CRMInterface {
   handleEmailStatusChange: (
     message: EventMessageV2
   ) => Promise<handleResult | boolean>;
-  handleMessage?: (message: ActionMessageV2 | EventMessageV2) => Promise<handleResult | boolean>;
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
   fetchContact?: (email: string, context?: any) => Promise<any>; // fetch the contact, mostly for debug
-  setSubscribed?: (id: any, subscribed: boolean) => Promise<boolean>;
+  setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
   log: (text: string | void, color: ProcessStatus | void) => void;
   count: Counters;
@@ -170,10 +168,6 @@ export abstract class CRM implements CRMInterface {
     throw new Error("you need to implement handleContact in your CRM");
   };
 
-  handleMessage = (message: ActionMessageV2 | EventMessageV2): Promise<handleResult | boolean> => {
-    throw new Error("handleMessage method not implemented.");
-  }
-
   formatResult = (result: handleResult | boolean): boolean => {
     if (typeof result === "boolean") return result;
     return result.processed;
@@ -204,8 +198,7 @@ export abstract class CRM implements CRMInterface {
       case CRMType.OptIn:
         // type guard: 'privacy' in message
         if ('privacy' in message) {
-
-        if (!message.privacy.withConsent) {
+          if (!message.privacy.withConsent) {
             this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
             return true;
           }
@@ -250,7 +243,6 @@ export abstract class CRM implements CRMInterface {
             return r; */
           }
         }
-
         this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
         break;
 
@@ -258,7 +250,9 @@ export abstract class CRM implements CRMInterface {
         const emailStatus = 'privacy' in message ? message.privacy?.emailStatus : message.supporter.privacy.emailStatus;
 
         if (emailStatus === 'double_opt_in') {
-          const r = this.formatResult(await this.handleMessage(message));
+          let r = 'privacy' in message
+            ? this.formatResult(await this.handleContact(message))
+            : this.formatResult(await this.handleEvent(message));
           if (r) {
             this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
             return true;
