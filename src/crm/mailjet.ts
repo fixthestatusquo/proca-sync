@@ -40,7 +40,7 @@ class Mailjet extends CRM {
     }
 
     try {
-   this.mailjet = require ('node-mailjet').apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
+      this.mailjet = require ('node-mailjet').apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
     } catch (e: any) {
       console.log(e.message, "can't connect, check MJ_APIKEY_PUBLIC and PRIVATE?");
       process.exit(1);
@@ -108,7 +108,6 @@ class Mailjet extends CRM {
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-
     console.log("Action taken from the queue", message.action.id);
 
     if (this.verbose) {
@@ -123,14 +122,11 @@ class Mailjet extends CRM {
           "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName,
           "Email": message.contact.email
         });
-
-      if (status === 201) {
-        const  properties = await this.updateContactProperties(message);
+      // add properties to the contact
+      const properties = await this.updateContactProperties(message);
+      // add contact to the list
         const list = await this.addContactToList(message.contact.email);
         return (properties && list);
-      } else {
-        return false;
-      }
     } catch (e: any) {
       if (e.response.statusText.includes("already exists")) {
         // we do not care for errors, because the contact already exists
@@ -166,21 +162,20 @@ class Mailjet extends CRM {
    }
  }
 
-//   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-// console.log(campaign);
+  //   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+  // console.log(campaign);
 
-//      return this.list;
-//   };
-//   fetchContact = async (email: string, context: any): Promise<any> => {
-//     const result= await this.mailjet.get("contact",{'version': 'v3'}).id(email).request();
+  //      return this.list;
+  //   };
+  // fetchContact = async (email: string, context: any): Promise<any> => {
+  //   const result= await this.mailjet.get("contact",{'version': 'v3'}).id(email).request();
 
-//   if (result.body.Data.count ===0)
-//     return false;
-//   const contact=result.body.Data[0];
-// console.log(contact);
-//   return true;
-//   }
-
+  // if (result.body.Data.count ===0)
+  //   return false;
+  // const contact=result.body.Data[0];
+  // console.log(contact);
+  // return true;
+  // }
 }
 
 export default Mailjet;
