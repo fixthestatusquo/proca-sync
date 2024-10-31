@@ -1,4 +1,4 @@
-import type { Message } from "../../crm";
+import type { Message } from "../cleverreach";
 
 type Attributes = Record<'created_at', string>
 
