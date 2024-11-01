@@ -98,9 +98,6 @@ class CRM {
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement handleContact in your CRM");
         });
-        this.handleMessage = (message) => {
-            throw new Error("handleMessage method not implemented.");
-        };
         this.formatResult = (result) => {
             if (typeof result === "boolean")
                 return result;
@@ -182,7 +179,9 @@ class CRM {
                 case CRMType.DoubleOptIn:
                     const emailStatus = 'privacy' in message ? (_e = message.privacy) === null || _e === void 0 ? void 0 : _e.emailStatus : message.supporter.privacy.emailStatus;
                     if (emailStatus === 'double_opt_in') {
-                        const r = this.formatResult(yield this.handleMessage(message));
+                        let r = 'privacy' in message
+                            ? this.formatResult(yield this.handleContact(message))
+                            : this.formatResult(yield this.handleEvent(message));
                         if (r) {
                             this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
                             return true;

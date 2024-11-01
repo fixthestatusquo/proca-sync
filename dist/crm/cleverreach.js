@@ -25,14 +25,6 @@ class CleverreachCRM extends crm_1.CRM {
             }
         });
         this.handleMessage = (message) => __awaiter(this, void 0, void 0, function* () {
-            if (message.schema === "proca:action:2") {
-                console.log("Action taken from the queue", message.action.id);
-            }
-            else if (message.schema === "proca:event:2") {
-                console.log("Event taken from queue", message.actionId);
-                message.contact = message.supporter.contact;
-                message.privacy = message.supporter.privacy;
-            }
             if (this.verbose) {
                 console.log(message);
             }
@@ -62,6 +54,16 @@ class CleverreachCRM extends crm_1.CRM {
                     return false;
                 }
             }
+        });
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            console.log("Action taken from the queue", message.action.id);
+            return this.handleMessage(message);
+        });
+        this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
+            console.log("Event taken from queue", message.actionId);
+            message.contact = message.supporter.contact;
+            message.privacy = message.supporter.privacy;
+            return this.handleMessage(message);
         });
         this.crmType = crm_1.CRMType.DoubleOptIn;
         this.initializeToken();

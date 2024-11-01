@@ -26,53 +26,90 @@ class Mailjet extends crm_1.CRM {
             }
             return true;
         });
-        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+        this.addContactToList = (email) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const existing = yield this.fetchContact(message.contact.email, {});
-                const source = "proca";
-                const camp = { id: 0, name: "todo" };
-                const action = message.action;
-                if (existing === false) {
-                    return this.createContact(message.contact, action, camp.id, source);
-                }
-                else {
-                    console.log(existing);
-                    return this.updateContact(existing, message.contact, action, camp.id, source);
-                }
+                const response = yield this.mailjet
+                    .post("listrecipient", { 'version': 'v3' })
+                    .request({
+                    "IsUnsubscribed": "false",
+                    "ContactAlt": email,
+                    "ListID": this.list
+                });
+                return true;
+            }
+            catch (error) {
+                console.error(`Failed to add contact ${email} to list ${this.list}: ${error.statusCode}`);
                 return false;
+            }
+        });
+        this.updateContactProperties = (message) => __awaiter(this, void 0, void 0, function* () {
+            const data = Object.entries(this.contactProperties).map(([sourceField, mailjetField]) => ({
+                Name: mailjetField,
+                Value: message.contact[sourceField] || ""
+            }));
+            try {
+                yield this.mailjet
+                    .put("contactdata", { 'version': 'v3' })
+                    .id(message.contact.email)
+                    .request({
+                    "Data": data
+                });
+                return true;
             }
             catch (e) {
-                console.log(e);
-                throw new Error(e);
-            }
-        });
-        this.createContact = (contact, action, campaign_id, source) => __awaiter(this, void 0, void 0, function* () {
-            const request = yield this.mailjet
-                .post("contact", { 'version': 'v3' })
-                .request({
-                "Name": contact.lastName ? contact.firsttName + ' ' + contact.lastName : contact.firstName,
-                "Email": contact.email
-            });
-            console.log("request", request);
-            return false;
-        });
-        this.updateContact = (crmContact, contact, action, campaign_id, source) => __awaiter(this, void 0, void 0, function* () {
-            if (campaign_id === null) {
-                throw new Error("missing campaign id");
-            }
-            return false;
-        });
-        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            console.log(campaign);
-            return this.list;
-        });
-        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
-            const result = yield this.mailjet.get("contact", { 'version': 'v3' }).id(email).request();
-            if (result.body.Data.count === 0)
+                console.error(`Updating properties for contact ${message.contact.email}, action ${message.actionId} faile with ${e.statusCode}`);
                 return false;
-            const contact = result.body.Data[0];
-            console.log(contact);
-            return true;
+            }
+        });
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            console.log("Action taken from the queue", message.action.id);
+            if (this.verbose) {
+                console.log(message);
+            }
+            try {
+                // create contact
+                const { response: { status } } = yield this.mailjet
+                    .post("contact", { 'version': 'v3' })
+                    .request({
+                    "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName,
+                    "Email": message.contact.email
+                });
+                // add properties to the contact
+                const properties = yield this.updateContactProperties(message);
+                // add contact to the list
+                const list = yield this.addContactToList(message.contact.email);
+                return (properties && list);
+            }
+            catch (e) {
+                if (e.response.statusText.includes("already exists")) {
+                    // we do not care for errors, because the contact already exists
+                    yield this.updateContact(message);
+                    yield this.updateContactProperties(message);
+                    yield this.addContactToList(message.contact.email);
+                    return true;
+                }
+                return false;
+            }
+        });
+        this.updateContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { response: { status } } = yield this.mailjet
+                    .put("contact", { 'version': 'v3' })
+                    .id(message.contact.email)
+                    .request({
+                    "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName
+                });
+                return status === 200 ? true : false;
+            }
+            catch (error) {
+                // mailjet returns error 304 when there is nothing to change
+                if (error.statusCode === 304) {
+                    console.log(`${error.statusText} for ${message.contact.email}, ${message.actionId}`);
+                    return true;
+                }
+                console.error(`Error: ${error.message} for ${message.contact.email}, ${message.actionId}`);
+                return false;
+            }
         });
         this.crmType = crm_1.CRMType.OptIn;
         if (!process.env.MJ_APIKEY_PUBLIC) {
@@ -100,7 +137,6 @@ class Mailjet extends crm_1.CRM {
             // get query format, key = contact field, value = merge field in mailjet
             // eg. CONTACT_PROPERTIES="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
             this.contactProperties = (0, utils_1.string2map)(process.env.CONTACT_PROPERTIES);
-            console.log("contact properties", this.contactProperties);
         }
     }
 }
