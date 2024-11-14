@@ -39,9 +39,9 @@ export const getToken = async () => {
   }
 }
 
-export const getContact = async (email: string, token: string, listId: number): Promise<any> => {
+export const getContact = async (email: string, token: string): Promise<any> => {
     try {
-        const response = await fetch(apiUrl + `/v3/receivers.json/${email}?group_id=${listId}`, {
+        const response = await fetch(apiUrl + `/v3/receivers.json/${email}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -53,8 +53,13 @@ export const getContact = async (email: string, token: string, listId: number): 
             throw new Error(`Get receiver failed: ${response.statusText}`);
         }
 
-        const data = await response;
-        if (response.status === 200) return true;
+        const data = await response.json();
+
+        // if there is a value for quelle, we will skip that field when sending the message
+        if (data?.global_attributes?.quelle.length > 0) {
+            return true;
+        }
+        return false;
     } catch (error) {
         console.error('Get groups contact error:', error.message);
     }
@@ -83,12 +88,9 @@ export const getGroups = async (token: string, listId: number) => {
     }
 }
 
-// '/receivers' returns Bad request, status 400 if contact already exists and not accepted
-
-export const postContact = async (token: string, postData: any, listId: number, update: boolean = false) => {
-    const group = update ? '/receivers/upsert': '/receivers/';
+export const upsertContact = async (token: string, postData: any, listId: number) => {
     try {
-        const response = await fetch(apiUrl + '/v3/groups/' + listId + group, {
+        const response = await fetch(apiUrl + '/v3/groups/' + listId + '/receivers/upsert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -98,16 +100,8 @@ export const postContact = async (token: string, postData: any, listId: number, 
             body: JSON.stringify(postData)
         });
 
-        if (!response.ok && update === false) {
-            return response.status;
-        }
-        if (!response.ok) {
-            console.error('Post contact errooor:', response)
-            throw new Error(`Post contact failed: ${response.statusText}`);
-        }
-
-        const data = await response;
-        return data.status;
+        if (response.ok) return true;
+        return false
     } catch (error) {
         console.error('Post contact errooor:', error.message);
     }

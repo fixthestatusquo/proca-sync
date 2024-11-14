@@ -29,7 +29,7 @@ type ContactInfo = Omit<
   'quelle'
 > & Partial<Record<'quelle', string>>;
 
-export const formatAction = (message: Message, update: boolean = false): Contact => {
+export const formatAction = (message: Message, hasValue: boolean): Contact => {
   const global: ContactInfo = {
     "petition": message.campaign.title,
     "language": message.actionPage.locale,
@@ -52,7 +52,7 @@ export const formatAction = (message: Message, update: boolean = false): Contact
   }
 
   // do not overwrite 'quelle'
-  if (!update) global.quelle = message.campaign.title;
+  if (!hasValue) global.quelle = message.campaign.title;
 
   return (
     {

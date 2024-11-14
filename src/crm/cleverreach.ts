@@ -1,5 +1,5 @@
 import { CRM, CRMType, ActionMessage, EventMessage, handleResult } from "../crm";
-import { getToken, postContact } from "./cleverreach/client";
+import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
 
 export type Message = ActionMessage | EventMessage;
@@ -39,26 +39,16 @@ class CleverreachCRM extends CRM {
       throw new Error("Token is not available");
     }
 
-    const status = await postContact(this.token, formatAction(message), listId);
-    console.log("status", status);
+    const hasValue = await getContact(message.contact.email, this.token);
+    const done = await upsertContact(this.token, formatAction(message, hasValue), listId);
 
-    if (status === 200) {
+    if (done) {
       console.log(`Message ${message.actionId} sent`);
       return true;
-    } else {
-      const retryStatus = await postContact(
-        this.token,
-        formatAction(message, true),
-        listId,
-        true
-      );
-      if (retryStatus === 200) {
-        return true;
-      } else {
-        console.log(`Message ${message.actionId} not sent`);
-        return false;
-      }
     }
+    console.log(`Message ${message.actionId} not sent`);
+    return false;
+
   }
 
   handleContact = async (
@@ -72,10 +62,20 @@ class CleverreachCRM extends CRM {
     message: EventMessage
   ): Promise<handleResult | boolean> => {
       console.log("Event taken from queue", message.actionId);
+
       message.contact = message.supporter.contact;
       message.privacy = message.supporter.privacy;
       return this.handleMessage(message);
   };
+
+  fetchContact = async (email: string, context?: any): Promise<any> => {
+    return true;
+  };
+
+  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+    return true;
+  };
+
 
 }
 
