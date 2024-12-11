@@ -61,7 +61,7 @@ export const getContact = async (email: string, token: string): Promise<any> => 
         }
         return false;
     } catch (error) {
-        console.error('Get groups contact error:', error.message);
+        console.error('Get contact error:', error.message);
     }
     return false;
 }
