@@ -39,8 +39,8 @@ class CleverreachCRM extends CRM {
       throw new Error("Token is not available");
     }
 
-    const hasValue = await getContact(message.contact.email, this.token);
-    const done = await upsertContact(this.token, formatAction(message, hasValue), listId);
+    const hasValues = await getContact(message.contact.email, this.token);
+    const done = await upsertContact(this.token, formatAction(message, hasValues), listId);
 
     if (done) {
       console.log(`Message ${message.actionId} sent`);

@@ -3,7 +3,8 @@
   "actionType": "register",
   "createdAt": "2024-10-14T11:02:24Z",
   "customFields": {
-    "emailProvider": "fixthestatusquo.org"
+    "emailProvider": "fixthestatusquo.org",
+    "organisation": "Gotham ltd"
   },
   "testing": true,
   "id": 4722132
@@ -34,7 +35,7 @@
       "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
       "dupeRank": 4,
       "email": "brucewayne@example.org",
-      "firstName": "bruce"
+      "firstName": "Bruce"
     },
     "personalInfo": null,
     "privacy": {

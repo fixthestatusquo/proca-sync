@@ -29,20 +29,21 @@ type ContactInfo = Omit<
   'quelle'
 > & Partial<Record<'quelle', string>>;
 
-export const formatAction = (message: Message, hasValue: boolean): Contact => {
+export const formatAction = (message: Message, hasValues: any): Contact => {
+
+   // do not overwrite 'quelle', first and lastname if there is a value
   const global: ContactInfo = {
+    "quelle": hasValues?.quelle ? hasValues.quelle : message.campaign.title,
     "petition": message.campaign.title,
     "language": message.actionPage.locale,
     "phone": message.contact?.phone || "",
     "double_opt_in": "yes",
     "street": message.contact.street || "",
     "zip": message.contact.postcode || "",
-    "lastname": message.contact.lastName || "",
-    "firstname": message.contact.firstName,
+    "lastname": hasValues?.lastname ? hasValues.lastname : message.contact.lastName || "",
+    "firstname": hasValues?.firstname ? hasValues.firstname : message.contact.firstName,
     "country": message.contact.country || message.contact.area || "",
-    "company": message.action.customFields?.organisation
-      ? message.action.customFields?.organisation.toString()
-      : "",
+    "company": hasValues?.company ? hasValues?.company : message.action.customFields?.organisation?.toString() || "",
     "city": message.contact.locality || "",
     "last_changed": message.privacy.emailStatusChanged || ""
   }
@@ -50,9 +51,6 @@ export const formatAction = (message: Message, hasValue: boolean): Contact => {
   const attributes = {
     created_at: message.action.createdAt
   }
-
-  // do not overwrite 'quelle'
-  if (!hasValue) global.quelle = message.campaign.title;
 
   return (
     {
