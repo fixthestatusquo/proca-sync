@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
+exports.upsertContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const authUrl = process.env.CRM_URL;
@@ -49,9 +49,9 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getToken = getToken;
-const getContact = (email, token, listId) => __awaiter(void 0, void 0, void 0, function* () {
+const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + `/v3/receivers.json/${email}?group_id=${listId}`, {
+        const response = yield fetch(apiUrl + `/v3/receivers.json/${email}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,9 +61,13 @@ const getContact = (email, token, listId) => __awaiter(void 0, void 0, void 0, f
         if (!response.ok) {
             throw new Error(`Get receiver failed: ${response.statusText}`);
         }
-        const data = yield response;
-        if (response.status === 200)
-            return true;
+        const data = yield response.json();
+        // if there are values for quelle, name and lastname, we will skip those fields when sending the message
+        if (data === null || data === void 0 ? void 0 : data.global_attributes) {
+            const { firstname, lastname, company, quelle } = data.global_attributes;
+            return { firstname, lastname, company, quelle };
+        }
+        return {};
     }
     catch (error) {
         console.error('Get groups contact error:', error.message);
@@ -92,11 +96,9 @@ const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getGroups = getGroups;
-// '/receivers' returns Bad request, status 400 if contact already exists and not accepted
-const postContact = (token_1, postData_1, listId_1, ...args_1) => __awaiter(void 0, [token_1, postData_1, listId_1, ...args_1], void 0, function* (token, postData, listId, update = false) {
-    const group = update ? '/receivers/upsert' : '/receivers/';
+const upsertContact = (token, postData, listId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + '/v3/groups/' + listId + group, {
+        const response = yield fetch(apiUrl + '/v3/groups/' + listId + '/receivers/upsert', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -105,18 +107,12 @@ const postContact = (token_1, postData_1, listId_1, ...args_1) => __awaiter(void
             },
             body: JSON.stringify(postData)
         });
-        if (!response.ok && update === false) {
-            return response.status;
-        }
-        if (!response.ok) {
-            console.error('Post contact errooor:', response);
-            throw new Error(`Post contact failed: ${response.statusText}`);
-        }
-        const data = yield response;
-        return data.status;
+        if (response.ok)
+            return true;
+        return false;
     }
     catch (error) {
         console.error('Post contact errooor:', error.message);
     }
 });
-exports.postContact = postContact;
+exports.upsertContact = upsertContact;

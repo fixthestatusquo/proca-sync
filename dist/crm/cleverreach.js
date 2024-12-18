@@ -12,10 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const client_1 = require("./cleverreach/client");
 const data_1 = require("./cleverreach/data");
+const proca_1 = require("../proca");
 class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.token = null;
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            return r;
+        });
         this.initializeToken = () => __awaiter(this, void 0, void 0, function* () {
             try {
                 this.token = yield (0, client_1.getToken)();
@@ -25,35 +30,33 @@ class CleverreachCRM extends crm_1.CRM {
             }
         });
         this.handleMessage = (message) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
             if (this.verbose) {
                 console.log(message);
             }
-            if (!message.campaign.externalId) {
-                console.error(`List ID missing, set the externalId for the campaign ${message.campaign.name}`);
-                return false;
+            const camp = yield this.campaign(message.campaign);
+            // listId might be different for each campaign
+            // custom label is different for each campaign
+            if (!((_c = (_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.listId) || !((_f = (_e = (_d = camp.config) === null || _d === void 0 ? void 0 : _d.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.customLabel)) {
+                console.error(`Campaign config params missing, set the listId and custom label for the campaign ${message.campaign.name}`);
             }
             ;
             yield this.initializeToken();
-            const listId = parseInt(message.campaign.externalId.toString().slice(0, 6), 10);
+            const listId = ((_j = (_h = (_g = camp.config) === null || _g === void 0 ? void 0 : _g.component) === null || _h === void 0 ? void 0 : _h.sync) === null || _j === void 0 ? void 0 : _j.listId)
+                || process.env.CRM_LIST_ID || "666";
+            const customLabel = ((_m = (_l = (_k = camp.config) === null || _k === void 0 ? void 0 : _k.component) === null || _l === void 0 ? void 0 : _l.sync) === null || _m === void 0 ? void 0 : _m.customLabel)
+                || message.campaign.id + " " + message.campaign.title;
             if (!this.token) {
                 throw new Error("Token is not available");
             }
-            const status = yield (0, client_1.postContact)(this.token, (0, data_1.formatAction)(message), listId);
-            console.log("status", status);
-            if (status === 200) {
+            const hasValues = yield (0, client_1.getContact)(message.contact.email, this.token);
+            const done = yield (0, client_1.upsertContact)(this.token, (0, data_1.formatAction)(message, hasValues, customLabel.toLowerCase()), listId);
+            if (done) {
                 console.log(`Message ${message.actionId} sent`);
                 return true;
             }
-            else {
-                const retryStatus = yield (0, client_1.postContact)(this.token, (0, data_1.formatAction)(message, true), listId, true);
-                if (retryStatus === 200) {
-                    return true;
-                }
-                else {
-                    console.log(`Message ${message.actionId} not sent`);
-                    return false;
-                }
-            }
+            console.log(`Message ${message.actionId} not sent`);
+            return false;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             console.log("Action taken from the queue", message.action.id);
@@ -64,6 +67,12 @@ class CleverreachCRM extends crm_1.CRM {
             message.contact = message.supporter.contact;
             message.privacy = message.supporter.privacy;
             return this.handleMessage(message);
+        });
+        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
+            return true;
+        });
+        this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
+            return true;
         });
         this.crmType = crm_1.CRMType.DoubleOptIn;
         this.initializeToken();
