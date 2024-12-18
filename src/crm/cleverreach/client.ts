@@ -55,11 +55,12 @@ export const getContact = async (email: string, token: string): Promise<any> => 
 
         const data = await response.json();
 
-        // if there is a value for quelle, we will skip that field when sending the message
-        if (data?.global_attributes?.quelle.length > 0) {
-            return true;
+        // if there are values for quelle, name and lastname, we will skip those fields when sending the message
+        if (data?.global_attributes) {
+            const { firstname, lastname, company, quelle } = data.global_attributes;
+            return  { firstname, lastname, company, quelle };
         }
-        return false;
+        return {};
     } catch (error) {
         console.error('Get contact error:', error.message);
     }
