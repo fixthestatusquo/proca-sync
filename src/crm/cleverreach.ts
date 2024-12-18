@@ -1,6 +1,14 @@
-import { CRM, CRMType, ActionMessage, EventMessage, handleResult } from "../crm";
+import {
+  CRM,
+  CRMType,
+  ActionMessage,
+  EventMessage,
+  handleResult,
+  ProcaCampaign
+} from "../crm";
 import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
+import { fetchCampaign as procaCampaign }  from '../proca';
 
 export type Message = ActionMessage | EventMessage;
 
@@ -12,6 +20,12 @@ class CleverreachCRM extends CRM {
     this.crmType = CRMType.DoubleOptIn;
     this.initializeToken();
   }
+
+
+ fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+  const r = await procaCampaign(campaign.id);
+  return r;
+}
 
   initializeToken = async () => {
     try {
@@ -26,21 +40,28 @@ class CleverreachCRM extends CRM {
       console.log(message);
     }
 
-    if (!message.campaign.externalId) {
-      console.error(`List ID missing, set the externalId for the campaign ${message.campaign.name}`);
-      return false;
+    const camp = await this.campaign(message.campaign);
+
+    // listId might be different for each campaign
+    // custom label is different for each campaign
+    if (!camp.config?.component?.sync?.listId || !camp.config?.component?.sync?.customLabel) {
+      console.error(`Campaign config params missing, set the listId and custom label for the campaign ${message.campaign.name}`);
     };
 
     await this.initializeToken();
 
-    const listId =  parseInt(message.campaign.externalId.toString().slice(0, 6), 10);
+    const listId = camp.config?.component?.sync?.listId
+      || process.env.CRM_LIST_ID || "666";
+
+    const customLabel = camp.config?.component?.sync?.customLabel
+      || message.campaign.id + " " + message.campaign.title;
 
     if (!this.token) {
       throw new Error("Token is not available");
     }
 
     const hasValues = await getContact(message.contact.email, this.token);
-    const done = await upsertContact(this.token, formatAction(message, hasValues), listId);
+    const done = await upsertContact(this.token, formatAction(message, hasValues, customLabel.toLowerCase()), listId);
 
     if (done) {
       console.log(`Message ${message.actionId} sent`);
@@ -48,7 +69,6 @@ class CleverreachCRM extends CRM {
     }
     console.log(`Message ${message.actionId} not sent`);
     return false;
-
   }
 
   handleContact = async (
