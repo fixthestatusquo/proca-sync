@@ -18,6 +18,8 @@ export type CrmConfigType = {
   password: string;
 };
 
+const crmType = process.env.ACTION_TYPE || "OptIn";
+
 class SupabaseCRM extends CRM {
   crmAPI: any;
   pub: any;
@@ -25,7 +27,7 @@ class SupabaseCRM extends CRM {
 
   constructor(opt: {}) {
     super(opt);
-    this.crmType = CRMType.OptIn;
+    this.crmType = CRMType[crmType];
     if (!process.env.CRM_URL) {
       console.error(
         "you need to set the url of your crm endpoint in the .env.xx"
@@ -51,7 +53,7 @@ class SupabaseCRM extends CRM {
     this.config = config;
   }
 
-  
+
   openPublishChannel = (rabbit) => {
     console.log("ready to redispatch approved candidates");
     this.pub = rabbit.createPublisher({
