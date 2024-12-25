@@ -121,6 +121,10 @@ class CRM {
                         }
                         return r;
                     }
+                    else {
+                        this.log("Not a privacy+withConsent message, not sent: " + email + " " + actionId, ProcessStatus.error);
+                        return true;
+                    }
                     this.verbose && (console.log(message));
                     this.log("don't know how to process " + email + " " + actionId, ProcessStatus.error);
                     break;

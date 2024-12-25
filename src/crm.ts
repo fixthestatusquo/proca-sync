@@ -191,6 +191,9 @@ export abstract class CRM implements CRMInterface {
             this.log("failed " + email + " " + message.action.createdAt, ProcessStatus.error);
           }
           return r;
+        } else {
+          this.log("Not a privacy+withConsent message, not sent: " + email + " " + actionId, ProcessStatus.error);
+          return true;
         }
         this.verbose && (console.log(message));
         this.log("don't know how to process " +  email + " " + actionId, ProcessStatus.error);

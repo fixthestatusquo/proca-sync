@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const supabase_js_1 = require("@supabase/supabase-js");
 const queue_1 = require("@proca/queue");
+const crmType = process.env.ACTION_TYPE || "OptIn";
 class SupabaseCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
@@ -106,7 +107,7 @@ class SupabaseCRM extends crm_1.CRM {
             console.log(error);
             return false;
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_1.CRMType[crmType];
         if (!process.env.CRM_URL) {
             console.error("you need to set the url of your crm endpoint in the .env.xx");
             process.exit(1);
