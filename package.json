@@ -40,7 +40,7 @@
     "AMQP"
   ],
   "devDependencies": {
-    "@sentry/types": "^8.35.0",
+    "@sentry/types": "^8.50.0",
     "@types/cli-color": "^2.0.6",
     "@types/jsforce": "^1.11.5",
     "@types/mailchimp__mailchimp_marketing": "^3.0.20",
