@@ -1,4 +1,4 @@
-import { Campaign, ActionMessageV2, EventMessageV2, Counters } from "@proca/queue";
+import { Campaign, ActionMessageV2, EventMessageV2, CampaignUpdatedEventMessage, Counters } from "@proca/queue";
 import { Configuration } from "./config";
 import color from 'cli-color';
 import { spin } from "./spinner";
@@ -18,6 +18,7 @@ export enum ProcessStatus {
 export { ActionMessageV2 as ActionMessage };
 export { EventMessageV2 as EventMessage };
 export { Campaign as ProcaCampaign };
+export {CampaignUpdatedEventMessage as CampaignUpdatedEvent}
 
 type ProcaCampaign = Campaign;
 
@@ -82,7 +83,10 @@ interface CRMInterface {
   handleContact?: (message: ActionMessageV2) => Promise<handleResult | boolean>;
   handleEvent?: (message: EventMessageV2) => Promise<handleResult | boolean>;
   handleEmailStatusChange: (
-    message: EventMessageV2
+    message: EventMessageV2 | CampaignUpdatedEventMessage
+  ) => Promise<handleResult | boolean>;
+  handleCampaignUpdate?:(
+    message: CampaignUpdatedEventMessage
   ) => Promise<handleResult | boolean>;
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
@@ -168,22 +172,28 @@ export abstract class CRM implements CRMInterface {
     throw new Error("you need to implement handleContact in your CRM");
   };
 
+  handleCampaignUpdate = async (
+    message: CampaignUpdatedEventMessage
+  ): Promise<handleResult | boolean> => {
+    throw new Error("you need to implement handleCampaignUpdate in your CRM");
+  };
+
   formatResult = (result: handleResult | boolean): boolean => {
     if (typeof result === "boolean") return result;
     return result.processed;
   };
 
   handleActionContact = async (
-    message: ActionMessageV2 | EventMessageV2
+    message: ActionMessageV2
   ): Promise<handleResult | boolean> => {
-    //DEAL WITH typescript tantrum
-    const email = 'privacy' in message ? message.contact?.email : message.supporter.contact.email;
-    const actionId = 'privacy' in message ? message.actionId : 'event message';
+
+    const email = message.contact?.email
+    const actionId =  message.actionId;
 
     switch (this.crmType) {
       case CRMType.Contact:
-        // type guard: 'privacy' in message
-        if ('privacy' in message && message.privacy.withConsent) {
+
+        if (message.privacy.withConsent) {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
             this.log("added " + email + " " + message.action.createdAt, ProcessStatus.processed);
@@ -196,12 +206,10 @@ export abstract class CRM implements CRMInterface {
           return true;
         }
         this.verbose && (console.log(message));
-        this.log("don't know how to process " +  email + " " + actionId, ProcessStatus.error);
+        this.log("don't know how to process " + email + " " + actionId, ProcessStatus.error);
         break;
       case CRMType.OptIn:
-        // type guard: 'privacy' in message
-        if ('privacy' in message) {
-          if (!message.privacy.withConsent) {
+        if (!message.privacy.withConsent) {
             this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
             return true;
           }
@@ -245,17 +253,14 @@ export abstract class CRM implements CRMInterface {
             }
             return r; */
           }
-        }
         this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
         break;
 
       case CRMType.DoubleOptIn:
-        const emailStatus = 'privacy' in message ? message.privacy?.emailStatus : message.supporter.privacy.emailStatus;
+        const emailStatus =  message.privacy.emailStatus;
 
         if (emailStatus === 'double_opt_in') {
-          let r = 'privacy' in message
-            ? this.formatResult(await this.handleContact(message))
-            : this.formatResult(await this.handleEvent(message));
+          let r = this.formatResult(await this.handleContact(message))
           if (r) {
             this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
             return true;
@@ -304,6 +309,12 @@ export abstract class CRM implements CRMInterface {
     // 3. Supporter email bounces (invalid email)
     // 4. Event message arrives, We set Contact as bounced
 
+      // events unrelated to CRM are handled separately
+    if (event.eventType === "campaign_updated") {
+      const r = await this.handleCampaignUpdate(event);
+      return r;
+    }
+
     if (event.eventType === "email_status") {
       // handle only email status updates
       // check if we have that contact in CRM
@@ -319,8 +330,9 @@ export abstract class CRM implements CRMInterface {
           console.log(`Double opt in from ${event.supporter.contact.email}`);
 
           await this.setSubscribed(cont.id, true);
-          await this.handleEvent(event);
-          break;
+          //await this.handleEvent(event);
+          let r = this.formatResult(await this.handleEvent(event))
+          return r;
         }
 
         // Different kinds of problems with email delivery:

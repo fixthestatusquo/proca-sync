@@ -1,12 +1,8 @@
-import { syncQueue, ActionMessageV2, EventMessageV2, ConsumerOpts, count } from "@proca/queue";
+import { syncQueue, ActionMessageV2, EventMessageV2, ConsumerOpts, count, CampaignUpdatedEventMessage } from "@proca/queue";
 import { Configuration } from "./config";
 import { CRM } from "./crm";
-import {spin} from "./spinner";
 import {pause} from "./utils";
-//import * as crm from './crm.debug';
 let crm: any = {};
-// TODO: set type
-//
 
 
 export const listen = (config: Configuration, crm: CRM) => {
@@ -29,6 +25,7 @@ export const listen = (config: Configuration, crm: CRM) => {
     // Return nothing to have the message ACKed (removed from queue)
     //
     // What is this?
+
     switch (actionOrEvent.schema) {
       case "proca:action:2": {
         // An action done by Supporter
@@ -43,49 +40,47 @@ export const listen = (config: Configuration, crm: CRM) => {
           return false;
         }
         if (typeof r === "object" && "processed" in r) {
-//          spin (count.ack + count.nack, "processed");
+          //          spin (count.ack + count.nack, "processed");
           return !!r.processed;
         }
 
-//        spin (count.ack + count.nack, "bool processed");
+        //        spin (count.ack + count.nack, "bool processed");
         return !!r;
       }
 
-      case "proca:event:2":
-        {
-          // Some other event
-          const event: EventMessageV2 = actionOrEvent;
+      case "proca:event:2": {
+        // Some other event
+        const event: EventMessageV2 | CampaignUpdatedEventMessage = actionOrEvent;
 
-          // We are interested most in email status changes
-          switch (event.eventType) {
-            case "email_status": {
-              // An email status update such as Double opt in or bounce
-              if (crm.pause) {
-//                console.log("pause email status...");
-                await pause(3);
-              }
-              const r = await crm.handleEmailStatusChange(event);
-              if (typeof r === "object" && "processed" in r)
-                return !!r.processed;
-
-              if (typeof r === "boolean") return r;
-              return true;
-              // ignore other eventsa
-            }
+        // we are processing two types of events "email_status" and "campaign_updated"
+        // We are interested in email status changes
+        // other types mosly need to be processed to be removed from the queue
+        if (event.eventType === "email_status" || event.eventType === "campaign_updated") {
+          if (crm.pause) {
+            await pause(3);
           }
+          const r = await crm.handleEmailStatusChange(event);
+          if (typeof r === "object" && "processed" in r)
+            return !!r.processed;
+
+          if (typeof r === "boolean") return r;
+          return true;
+        } else {
+
           if (crm.pause) {
             console.log("pause event...");
             await pause(3);
           }
-          return false;
+          throw new Error("Unknown event type: " + event.eventType);
         }
-        throw new Error("unknown type " + actionOrEvent.schema);
-      // ignore other message types
+      }
+      default: {
+        if (crm.pause) {
+          console.log("pause...");
+          await pause(10);
+        }
+        throw new Error("Unknown message type: " + actionOrEvent.schema);
+      }
     }
-    if (crm.pause) {
-      console.log("pause...");
-      await pause(10);
-    }
-    return false;
   }, opts);
 };

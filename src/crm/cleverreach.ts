@@ -4,7 +4,8 @@ import {
   ActionMessage,
   EventMessage,
   handleResult,
-  ProcaCampaign
+  ProcaCampaign,
+  CampaignUpdatedEvent
 } from "../crm";
 import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
@@ -21,6 +22,10 @@ class CleverreachCRM extends CRM {
     this.initializeToken();
   }
 
+  handleCampaignUpdate = async (message: CampaignUpdatedEvent): Promise<handleResult | boolean> => {
+    //we are handling campaign updates toremove them from the queue
+    return true;
+  }
 
  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
   const r = await procaCampaign(campaign.id);
@@ -95,8 +100,6 @@ class CleverreachCRM extends CRM {
   setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
     return true;
   };
-
-
 }
 
 export default CleverreachCRM;
