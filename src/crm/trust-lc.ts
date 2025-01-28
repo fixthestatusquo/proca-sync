@@ -5,14 +5,10 @@ import {
   handleResult,
   ProcaCampaign,
 } from "../crm";
-import { writeFileSync } from "fs";
 import { formatAction, handleConsent } from "./trust-lc/data";
 import { postAction, verification } from "./trust-lc/client";
+import { fetchCampaign as procaCampaign }  from '../proca';
 
-/*
- * A debug CRM that displays the messages and events in the log
- *
- */
 
 class TrustCRM extends CRM {
   constructor(opt: {}) {
@@ -20,12 +16,17 @@ class TrustCRM extends CRM {
     this.crmType = CRMType.DoubleOptIn;
   }
 
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r = await procaCampaign (campaign.id);
+    return r;
+  }
+
   handleContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
     console.log("Taken from queue", message.action.id)
-    const camp = await this.campaign(message.campaign);
-    const actionPayload = formatAction(message);
+    const campaign = await this.fetchCampaign(message.campaign);
+    const actionPayload = formatAction(message, campaign?.config?.component?.sync?.moveCode);
     if (this.verbose) {
       console.log(actionPayload);
     }
@@ -54,7 +55,6 @@ class TrustCRM extends CRM {
       return false;
     }
   };
-
-}
+};
 
 export default TrustCRM;

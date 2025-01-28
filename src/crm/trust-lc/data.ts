@@ -44,8 +44,9 @@ export const handleConsent = (action: ActionMessageV2) => {
     : true;
 };
 
-export const formatAction = (queueAction: ActionMessageV2) => {
+export const formatAction = (queueAction: ActionMessageV2, moveCode: "string" | undefined) => {
   const postData = queueAction;
+  if (!moveCode) moveCode = "AKT" + postData.campaign.externalId;
   const action: TrustAction = {
     first_name: postData.contact.firstName,
     last_name: postData.contact.lastName,
@@ -56,14 +57,14 @@ export const formatAction = (queueAction: ActionMessageV2) => {
     message: postData.contact.comment,
     subscribe_newsletter: postData.privacy.emailStatus === "double_opt_in",
     data_handling_consent: handleConsent(queueAction),
-    move_code: "AKT" + postData.campaign.externalId,
+    move_code: moveCode,
     origin: postData.tracking?.location,
     created_at: postData.action.createdAt || "",
     confirmed_at: postData.privacy.givenAt || "",
     additional_attributes_attributes: [
       { name: "action_id", value: postData.actionId.toString() },
       { name: "petition_id", value: postData.actionPage.name },
-      { name: "Aktion", value: "AKT" + postData.campaign.externalId },
+      { name: "Aktion", value: moveCode },
     ],
   };
 
