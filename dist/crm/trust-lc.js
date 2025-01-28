@@ -12,18 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const data_1 = require("./trust-lc/data");
 const client_1 = require("./trust-lc/client");
-/*
- * A debug CRM that displays the messages and events in the log
- *
- */
+const proca_1 = require("../proca");
 class TrustCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            return r;
+        });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            var _a, _b, _c, _d;
             console.log("Taken from queue", message.action.id);
-            const camp = yield this.campaign(message.campaign);
-            const actionPayload = (0, data_1.formatAction)(message);
+            const campaign = yield this.fetchCampaign(message.campaign);
+            const actionPayload = (0, data_1.formatAction)(message, (_c = (_b = (_a = campaign === null || campaign === void 0 ? void 0 : campaign.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.moveCode);
             if (this.verbose) {
                 console.log(actionPayload);
             }
@@ -34,7 +35,7 @@ class TrustCRM extends crm_1.CRM {
                 },
             };
             const data = yield (0, client_1.postAction)(actionPayload);
-            if ((_a = data.petition_signature) === null || _a === void 0 ? void 0 : _a.verification_token) {
+            if ((_d = data.petition_signature) === null || _d === void 0 ? void 0 : _d.verification_token) {
                 const verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
                 console.log("Verified", verified);
                 return true;
@@ -51,4 +52,5 @@ class TrustCRM extends crm_1.CRM {
         this.crmType = crm_1.CRMType.DoubleOptIn;
     }
 }
+;
 exports.default = TrustCRM;

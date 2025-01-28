@@ -8,9 +8,11 @@ const handleConsent = (action) => {
         : true;
 };
 exports.handleConsent = handleConsent;
-const formatAction = (queueAction) => {
+const formatAction = (queueAction, moveCode) => {
     var _a, _b, _c;
     const postData = queueAction;
+    if (!moveCode)
+        moveCode = "AKT" + postData.campaign.externalId;
     const action = {
         first_name: postData.contact.firstName,
         last_name: postData.contact.lastName,
@@ -21,14 +23,14 @@ const formatAction = (queueAction) => {
         message: postData.contact.comment,
         subscribe_newsletter: postData.privacy.emailStatus === "double_opt_in",
         data_handling_consent: (0, exports.handleConsent)(queueAction),
-        move_code: "AKT" + postData.campaign.externalId,
+        move_code: moveCode,
         origin: (_a = postData.tracking) === null || _a === void 0 ? void 0 : _a.location,
         created_at: postData.action.createdAt || "",
         confirmed_at: postData.privacy.givenAt || "",
         additional_attributes_attributes: [
             { name: "action_id", value: postData.actionId.toString() },
             { name: "petition_id", value: postData.actionPage.name },
-            { name: "Aktion", value: "AKT" + postData.campaign.externalId },
+            { name: "Aktion", value: moveCode },
         ],
     };
     if ((_b = postData.contact.address) === null || _b === void 0 ? void 0 : _b.street)

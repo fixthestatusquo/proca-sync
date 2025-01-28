@@ -17,6 +17,10 @@ class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.token = null;
+        this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
+            //we are handling campaign updates toremove them from the queue
+            return true;
+        });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             const r = yield (0, proca_1.fetchCampaign)(campaign.id);
             return r;
