@@ -62,7 +62,7 @@ const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function*
             throw new Error(`Get receiver failed: ${response.statusText}`);
         }
         const data = yield response.json();
-        // if there are values for quelle, name and lastname, we will use those values if they are empty in the message
+        // if there are values for quelle, name, zip and lastname, we will use those values if they are empty in the message
         if (data === null || data === void 0 ? void 0 : data.global_attributes) {
             const { firstname, lastname, company, quelle, zip } = data.global_attributes;
             return { firstname, lastname, company, quelle, zip };

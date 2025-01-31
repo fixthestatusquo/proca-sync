@@ -44,7 +44,7 @@ export const formatAction = (message: Message, hasValues: any, customLabel: stri
     "phone": message.contact?.phone || "",
     "double_opt_in": "yes",
     "street": message.contact.street || "",
-    "zip": message.contact.postcode || "",
+    "zip": message.contact?.postcode ? message.contact?.postcode.toString() : hasValues?.zip || "",
     "lastname": hasValues?.lastname && !message.contact.lastName ? hasValues.lastname : message.contact.lastName || "",
     "firstname": message.contact.firstName,
     "country": message.contact.country || message.contact.area || "",

@@ -55,7 +55,7 @@ export const getContact = async (email: string, token: string): Promise<any> => 
 
         const data = await response.json();
 
-        // if there are values for quelle, name and lastname, we will use those values if they are empty in the message
+        // if there are values for quelle, name, zip and lastname, we will use those values if they are empty in the message
         if (data?.global_attributes) {
             const { firstname, lastname, company, quelle, zip } = data.global_attributes;
             return  { firstname, lastname, company, quelle, zip };
