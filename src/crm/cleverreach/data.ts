@@ -5,6 +5,7 @@ type Attributes = Record<'created_at', string>
 type Contact = {
   'email': string;
   'source': string;
+  "activated": number;
   'attributes': Attributes
   "global_attributes": ContactInfo;
 }
@@ -62,6 +63,7 @@ export const formatAction = (message: Message, hasValues: any, customLabel: stri
     {
       "email": message.contact.email,
       "source": message.tracking.location || "",
+      "activated": Math.floor(Date.now() / 1000),
       "attributes": attributes,
       "global_attributes": global
     }

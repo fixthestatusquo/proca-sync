@@ -28,6 +28,7 @@ const formatAction = (message, hasValues, customLabel) => {
     return ({
         "email": message.contact.email,
         "source": message.tracking.location || "",
+        "activated": Math.floor(Date.now() / 1000),
         "attributes": attributes,
         "global_attributes": global
     });
