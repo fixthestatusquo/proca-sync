@@ -1,13 +1,12 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-const authUrl = process.env.CRM_URL;
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID //letters
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
 
-if (!authUrl || !tokenUrl || !ID || !tokenUrl || !apiUrl) {
+if (!tokenUrl || !ID  || !apiUrl || !secret) {
     console.error("No credentials");
     process.exit(1);
 }
@@ -104,7 +103,7 @@ export const upsertContact = async (token: string, postData: any, listId: number
         if (response.ok) return true;
         return false
     } catch (error) {
-        console.error('Post contact errooor:', error.message);
+        console.error('Post contact error:', error.message);
     }
 }
 

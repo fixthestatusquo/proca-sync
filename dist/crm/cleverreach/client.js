@@ -15,12 +15,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.upsertContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const authUrl = process.env.CRM_URL;
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID; //letters
 const secret = process.env.CRM_SECRET;
 const apiUrl = process.env.CRM_URL;
-if (!authUrl || !tokenUrl || !ID || !tokenUrl || !apiUrl) {
+if (!tokenUrl || !ID || !apiUrl || !secret) {
     console.error("No credentials");
     process.exit(1);
 }
@@ -112,7 +111,7 @@ const upsertContact = (token, postData, listId) => __awaiter(void 0, void 0, voi
         return false;
     }
     catch (error) {
-        console.error('Post contact errooor:', error.message);
+        console.error('Post contact error:', error.message);
     }
 });
 exports.upsertContact = upsertContact;

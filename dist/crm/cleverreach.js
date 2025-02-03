@@ -18,7 +18,7 @@ class CleverreachCRM extends crm_1.CRM {
         super(opt);
         this.token = null;
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
-            //we are handling campaign updates toremove them from the queue
+            //we are handling campaign updates to remove them from the queue
             return true;
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {

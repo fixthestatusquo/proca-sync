@@ -23,7 +23,7 @@ class CleverreachCRM extends CRM {
   }
 
   handleCampaignUpdate = async (message: CampaignUpdatedEvent): Promise<handleResult | boolean> => {
-    //we are handling campaign updates toremove them from the queue
+    //we are handling campaign updates to remove them from the queue
     return true;
   }
 
