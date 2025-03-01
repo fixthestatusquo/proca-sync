@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.upsertSupporter = exports.getToken = void 0;
+exports.getSupporter = exports.upsertSupporter = exports.getToken = void 0;
 const crm_1 = require("../crm");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -59,7 +59,6 @@ const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, funct
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        const result = yield response.json();
         return response.status;
     }
     catch (error) {
@@ -67,6 +66,30 @@ const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.upsertSupporter = upsertSupporter;
+const getSupporter = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield fetch(apiUrl + 'supporter?' + 'email=' + 'brucewayne@example.com', {
+            method: "GET",
+            headers: {
+                "Accept": "application/json",
+                "ens-auth-token": token,
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        if (response.statusText === "No Content") {
+            console.log("responseText === No Content");
+            return {};
+        }
+        const result = yield response.json();
+        return result;
+    }
+    catch (error) {
+        console.error("Error:", error);
+    }
+});
+exports.getSupporter = getSupporter;
 class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
@@ -81,18 +104,20 @@ class CleverreachCRM extends crm_1.CRM {
             if (!token) {
                 throw new Error("Auth token is missing");
             }
+            const { ["Last Name"]: lastName, ["Address 1"]: address, Postcode, Phone } = yield (0, exports.getSupporter)(message.contact.email, token);
             const data = {
                 'Email Address': message.contact.email,
                 'First Name': message.contact.firstName,
-                'Last Name': message.contact.lastName || "",
-                'Address 1': message.contact.street || "",
-                Postcode: ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.postcode) || "",
-                Phone: ((_b = message.contact) === null || _b === void 0 ? void 0 : _b.phone) || "",
+                'Last Name': message.contact.lastName || lastName || "",
+                'Address 1': message.contact.street || address || "",
+                Postcode: ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.postcode) || Postcode || "",
+                Phone: ((_b = message.contact) === null || _b === void 0 ? void 0 : _b.phone) || Phone || "",
                 "questions": {
                     "Accepts Email": "Y"
+                    //,
+                    //"Nature Voter": "Y"
                 }
             };
-            console.log(data);
             const status = yield (0, exports.upsertSupporter)(data, token);
             return status === 200;
         });

@@ -1,55 +1,60 @@
 {
   "action": {
-    "actionType": "register",
-    "createdAt": "2025-02-05T01:09:10Z",
-    "customFields": {
-      "emailProvider": "icloud.com"
-    },
-    "testing": false
+    "actionType": "pledge",
+    "createdAt": "2025-02-27T18:29:06Z",
+    "customFields": {},
+    "testing": false,
+    "id": 5600944
   },
-  "actionId": 5376426,
+  "actionId": 5600944,
   "actionPage": {
     "locale": "en",
-    "name": "proca test/en",
+    "name": "naturevoter/en",
     "supporterConfirmTemplate": null,
     "thankYouTemplate": null,
-    "thankYouTemplateRef": null
+    "thankYouTemplateRef": null,
+    "id": 3788
   },
   "actionPageId": 3788,
   "campaign": {
     "contactSchema": "basic",
     "externalId": null,
-    "name": "proca test",
-    "title": "proca test"
+    "name": "naturevoter",
+    "title": "NatureVoter",
+    "id": 833
   },
   "campaignId": 833,
   "contact": {
     "area": "CA",
-    "contactRef": "-8pbQz1i23e8A5Ek62FV4z65gulIWywDZHtDvx1VqDU",
+    "contactRef": "KyG-twWCOVnMzPCPzyl_4UIjTHJbYmxrPhw3pii1XOE",
     "country": "CA",
-    "dupeRank": 0,
+    "dupeRank": 1,
     "email": "brucewayne@example.com",
-    "firstName": "BruceUpdated",
+    "firstName": "Bruce",
     "lastName": "Wayne",
-    "postcode": "M4N2G7"
+    "postcode": "90804"
   },
   "org": {
     "name": "naturecanada",
-    "title": "Nature Canada"
+    "title": "Nature Canada",
+    "id": 1028
   },
   "orgId": 1028,
   "personalInfo": null,
   "privacy": {
     "emailStatus": null,
     "emailStatusChanged": null,
-    "givenAt": "2025-02-05T01:09:10Z",
+    "givenAt": "2025-02-27T18:29:06Z",
     "optIn": true,
     "withConsent": true
   },
   "schema": "proca:action:2",
   "stage": "deliver",
   "tracking": {
-    "campaign": "proca test"
-
+    "campaign": "we.fixthestatusquo.org/",
+    "content": "",
+    "location": "https://naturecanada.ca/defend-nature/how-you-help-us-take-action/vote-for-nature/",
+    "medium": "we.fixthestatusquo.org",
+    "source": "referrer"
   }
 }

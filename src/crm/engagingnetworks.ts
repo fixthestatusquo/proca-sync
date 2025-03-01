@@ -2,7 +2,6 @@ import {
   CRM,
   CRMType,
   ActionMessage,
-  EventMessage,
   handleResult
 } from "../crm";
 import dotenv from 'dotenv';
@@ -58,9 +57,31 @@ export const upsertSupporter = async (data, token: string) => {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+    return response.status;
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+export const getSupporter = async (email, token: string) => {
+  try {
+    const response = await fetch(apiUrl + 'supporter?' + 'email=' + 'brucewayne@example.com', {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "ens-auth-token": token,
+      }
+    });
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    if (response.statusText === "No Content") {
+      console.log("responseText === No Content");
+      return {};
+    }
     const result = await response.json();
-    return response.status
+    return result;
   } catch (error) {
     console.error("Error:", error);
   }
@@ -97,20 +118,26 @@ class CleverreachCRM extends CRM {
       throw new Error("Auth token is missing");
     }
 
+    const {
+      ["Last Name"]: lastName,
+      ["Address 1"]: address,
+      Postcode,
+      Phone
+    } = await getSupporter(message.contact.email, token);
+
     const data = {
       'Email Address': message.contact.email,
       'First Name': message.contact.firstName,
-      'Last Name': message.contact.lastName || "",
-      'Address 1': message.contact.street || "",
-      Postcode: message.contact?.postcode || "",
-      Phone:  message.contact?.phone || "",
+      'Last Name': message.contact.lastName || lastName || "",
+      'Address 1': message.contact.street || address || "",
+      Postcode: message.contact?.postcode || Postcode || "",
+      Phone:  message.contact?.phone || Phone || "",
       "questions": {
-       "Accepts Email": "Y"
+        "Accepts Email": "Y"
+        //,
+        //"Nature Voter": "Y"
        }
     };
-
-    console.log(data)
-
     const status = await upsertSupporter(data, token);
     return status === 200;
   };
