@@ -133,9 +133,8 @@ class CleverreachCRM extends CRM {
       Postcode: message.contact?.postcode || Postcode || "",
       Phone:  message.contact?.phone || Phone || "",
       "questions": {
-        "Accepts Email": "Y"
-        //,
-        //"Nature Voter": "Y"
+        "Accepts Email": "Y",
+        "NatureVoter": "Y"
        }
     };
     const status = await upsertSupporter(data, token);
