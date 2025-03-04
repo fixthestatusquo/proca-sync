@@ -113,9 +113,8 @@ class CleverreachCRM extends crm_1.CRM {
                 Postcode: ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.postcode) || Postcode || "",
                 Phone: ((_b = message.contact) === null || _b === void 0 ? void 0 : _b.phone) || Phone || "",
                 "questions": {
-                    "Accepts Email": "Y"
-                    //,
-                    //"Nature Voter": "Y"
+                    "Accepts Email": "Y",
+                    "NatureVoter": "Y"
                 }
             };
             const status = yield (0, exports.upsertSupporter)(data, token);
