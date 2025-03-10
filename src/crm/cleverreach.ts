@@ -15,6 +15,7 @@ export type Message = ActionMessage | EventMessage;
 
 class CleverreachCRM extends CRM {
   token: string | null = null;
+  campaignCache = new Map<number, ProcaCampaign>(); // Store campaigns in memory
 
   constructor(opt: {}) {
     super(opt);
@@ -23,12 +24,14 @@ class CleverreachCRM extends CRM {
   }
 
   handleCampaignUpdate = async (message: CampaignUpdatedEvent): Promise<handleResult | boolean> => {
-    //we are handling campaign updates to remove them from the queue
+    //we need to refetch campaign when it is updated
+    await this.fetchCampaign(message.campaignId);
     return true;
   }
 
- fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-  const r = await procaCampaign(campaign.id);
+ fetchCampaign = async (id: number): Promise<any> => {
+   const r = await procaCampaign(id);
+   this.campaignCache.set(id, r);
   return r;
 }
 
@@ -44,8 +47,10 @@ class CleverreachCRM extends CRM {
     if (this.verbose) {
       console.log(message);
     }
-
-    const camp = await this.campaign(message.campaign);
+    let camp = this.campaignCache.get(message.campaign.id);
+    if (!camp) {
+      camp = await this.fetchCampaign(message.campaign.id);
+    }
 
     // listId might be different for each campaign
     // custom label is different for each campaign
@@ -55,11 +60,8 @@ class CleverreachCRM extends CRM {
 
     await this.initializeToken();
 
-    const listId = camp.config?.component?.sync?.listId
-      || process.env.CRM_LIST_ID || "666";
-
-    const customLabel = camp.config?.component?.sync?.customLabel
-      || message.campaign.id + " " + message.campaign.title;
+    const listId = camp.config?.component?.sync?.listId;
+    const customLabel = camp.config?.component?.sync?.customLabel;
 
     if (!this.token) {
       throw new Error("Token is not available");

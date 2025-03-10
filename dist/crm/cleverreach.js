@@ -17,12 +17,15 @@ class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.token = null;
+        this.campaignCache = new Map(); // Store campaigns in memory
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
-            //we are handling campaign updates to remove them from the queue
+            //we need to refetch campaign when it is updated
+            yield this.fetchCampaign(message.campaignId);
             return true;
         });
-        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+        this.fetchCampaign = (id) => __awaiter(this, void 0, void 0, function* () {
+            const r = yield (0, proca_1.fetchCampaign)(id);
+            this.campaignCache.set(id, r);
             return r;
         });
         this.initializeToken = () => __awaiter(this, void 0, void 0, function* () {
@@ -38,7 +41,10 @@ class CleverreachCRM extends crm_1.CRM {
             if (this.verbose) {
                 console.log(message);
             }
-            const camp = yield this.campaign(message.campaign);
+            let camp = this.campaignCache.get(message.campaign.id);
+            if (!camp) {
+                camp = yield this.fetchCampaign(message.campaign.id);
+            }
             // listId might be different for each campaign
             // custom label is different for each campaign
             if (!((_c = (_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.listId) || !((_f = (_e = (_d = camp.config) === null || _d === void 0 ? void 0 : _d.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.customLabel)) {
@@ -46,10 +52,8 @@ class CleverreachCRM extends crm_1.CRM {
             }
             ;
             yield this.initializeToken();
-            const listId = ((_j = (_h = (_g = camp.config) === null || _g === void 0 ? void 0 : _g.component) === null || _h === void 0 ? void 0 : _h.sync) === null || _j === void 0 ? void 0 : _j.listId)
-                || process.env.CRM_LIST_ID || "666";
-            const customLabel = ((_m = (_l = (_k = camp.config) === null || _k === void 0 ? void 0 : _k.component) === null || _l === void 0 ? void 0 : _l.sync) === null || _m === void 0 ? void 0 : _m.customLabel)
-                || message.campaign.id + " " + message.campaign.title;
+            const listId = (_j = (_h = (_g = camp.config) === null || _g === void 0 ? void 0 : _g.component) === null || _h === void 0 ? void 0 : _h.sync) === null || _j === void 0 ? void 0 : _j.listId;
+            const customLabel = (_m = (_l = (_k = camp.config) === null || _k === void 0 ? void 0 : _k.component) === null || _l === void 0 ? void 0 : _l.sync) === null || _m === void 0 ? void 0 : _m.customLabel;
             if (!this.token) {
                 throw new Error("Token is not available");
             }

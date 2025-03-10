@@ -87,7 +87,6 @@ const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function*
             throw new Error(`Get groups failed: ${response.statusText}`);
         }
         const data = yield response.text();
-        console.log('Get groups response status:', data);
         return data;
     }
     catch (error) {

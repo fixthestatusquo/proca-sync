@@ -18,16 +18,15 @@
     "actionPageId": 3012,
     "campaign": {
         "contactSchema": "basic",
-        "externalId": 62198700,
-        "name": "ha_testone",
-        "title": "HA Test-One 11"
+        "name": "ha_testone"
+
     },
     "campaignId": 492,
     "contact": {
         "area": null,
         "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
         "dupeRank": 16,
-        "email": "ivana@fixthestatusquo.org",
+        "email": "brucewayne@test.fixthestatusquo.org",
         "firstName": "Bruce"
     },
     "org": {

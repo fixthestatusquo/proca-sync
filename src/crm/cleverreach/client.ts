@@ -81,7 +81,6 @@ export const getGroups = async (token: string, listId: number) => {
         }
 
         const data = await response.text();
-        console.log('Get groups response status:', data);
         return data;
     } catch (error) {
         console.error('Get groups contact error:', error.message);
