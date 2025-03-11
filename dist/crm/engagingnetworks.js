@@ -117,6 +117,9 @@ class CleverreachCRM extends crm_1.CRM {
                     "NatureVoter": "Y"
                 }
             };
+            if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
+                data["questions"]["French"] = "Y";
+            }
             const status = yield (0, exports.upsertSupporter)(data, token);
             return status === 200;
         });

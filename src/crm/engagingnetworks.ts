@@ -137,6 +137,9 @@ class CleverreachCRM extends CRM {
         "NatureVoter": "Y"
        }
     };
+    if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
+      data["questions"]["French"] = "Y";
+    }
     const status = await upsertSupporter(data, token);
     return status === 200;
   };
