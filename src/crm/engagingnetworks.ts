@@ -141,6 +141,8 @@ class CleverreachCRM extends CRM {
       data["questions"]["French"] = "Y";
     }
     const status = await upsertSupporter(data, token);
+    status === 200 ? console.log(`Message ${message.actionId} sent`)
+      : console.log(`Message ${message.actionId} failed`);
     return status === 200;
   };
 }
