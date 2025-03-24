@@ -145,7 +145,7 @@ class CRM {
                         }
                         return r;
                     }
-                    if (message.privacy.optIn === false) {
+                    if (message.privacy.optIn === false || message.privacy.optIn === null) {
                         this.log("opt-out " + actionId, ProcessStatus.skipped);
                         //          this.verbose && console.log('opt-out',message.actionId);
                         return true; //OptOut contact, we don't need to process
