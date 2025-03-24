@@ -79,7 +79,6 @@ const getSupporter = (email, token) => __awaiter(void 0, void 0, void 0, functio
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
         if (response.statusText === "No Content") {
-            console.log("responseText === No Content");
             return {};
         }
         const result = yield response.json();

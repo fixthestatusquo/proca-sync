@@ -77,7 +77,6 @@ export const getSupporter = async (email, token: string) => {
     }
 
     if (response.statusText === "No Content") {
-      console.log("responseText === No Content");
       return {};
     }
     const result = await response.json();
