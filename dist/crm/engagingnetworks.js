@@ -111,10 +111,10 @@ class CleverreachCRM extends crm_1.CRM {
             const data = {
                 'Email Address': message.contact.email,
                 'First Name': message.contact.firstName,
-                'Last Name': ((_a = message === null || message === void 0 ? void 0 : message.contact) === null || _a === void 0 ? void 0 : _a.lastName) || lastName || "",
-                City: ((_b = message === null || message === void 0 ? void 0 : message.action.customFields) === null || _b === void 0 ? void 0 : _b.locality) || City || "",
-                Postcode: ((_c = message === null || message === void 0 ? void 0 : message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
-                Phone: ((_d = message === null || message === void 0 ? void 0 : message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
+                'Last Name': ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.lastName) || lastName || "",
+                City: ((_b = message.action.customFields) === null || _b === void 0 ? void 0 : _b.locality) || City || "",
+                Postcode: ((_c = message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
+                Phone: ((_d = message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
                 "questions": {
                     "Accepts Email": "Y",
                     "NatureVoter": "Y"

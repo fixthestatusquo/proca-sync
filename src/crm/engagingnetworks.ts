@@ -139,10 +139,10 @@ class CleverreachCRM extends CRM {
     const data = {
       'Email Address': message.contact.email,
       'First Name': message.contact.firstName,
-      'Last Name': message?.contact?.lastName || lastName || "",
-      City: message?.action.customFields?.locality || City || "",
-      Postcode: message?.contact?.postcode || Postcode || "",
-      Phone: message?.contact?.phone || Phone || "",
+      'Last Name': message.contact?.lastName || lastName || "",
+      City: message.action.customFields?.locality || City || "",
+      Postcode: message.contact?.postcode || Postcode || "",
+      Phone: message.contact?.phone || Phone || "",
       "questions": {
         "Accepts Email": "Y",
         "NatureVoter": "Y"
