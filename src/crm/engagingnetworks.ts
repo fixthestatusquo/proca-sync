@@ -24,23 +24,26 @@ const authHeaders = {
 
 export const getToken = async () => {
   try {
-      const response = await fetch(apiUrl+'authenticate', {
-          method: 'POST',
-        headers: authHeaders,
-          body: apiToken
-        })
+    const response = await fetch(apiUrl + 'authenticate', {
+      method: 'POST',
+      headers: authHeaders,
+      body: apiToken
+    });
 
-      if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`Error fetching token: ${response.statusText} - ${errorBody}`);
-      }
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Error fetching token: ${response.statusText} - ${errorBody}`);
+    }
 
     const data = await response.json();
-    return data['ens-auth-token'];
+    return {
+      token: data['ens-auth-token'],
+      expires_in: data['expires_in'] || 3600 // Default to 1 hour if not provided
+    };
   } catch (error) {
-      console.error('Error:', error.message);
+    console.error('Error:', error.message);
   }
-}
+};
 
 export const upsertSupporter = async (data, token: string) => {
   try {
@@ -88,16 +91,25 @@ export const getSupporter = async (email, token: string) => {
 
 class CleverreachCRM extends CRM {
   private _token: string | null = null;
+  private _tokenExpiry: number | null = null;
 
   constructor(opt: {}) {
     super(opt);
     this.crmType = CRMType.OptIn;
   }
+   // Getter for token that initializes it if needed
 
-  // Getter for token that initializes it if needed
   private async getToken(): Promise<string> {
-    if (!this._token) {
-      this._token = await getToken();
+    const now = Date.now();
+
+    // Fetch new token if missing or expired
+    if (!this._token || (this._tokenExpiry && now >= this._tokenExpiry)) {
+      const tokenData = await getToken();
+      if (!tokenData) {
+        throw new Error("Failed to retrieve token");
+      }
+      this._token = tokenData.token;
+      this._tokenExpiry = now + tokenData.expires_in * 1000; // Convert seconds to milliseconds
     }
     return this._token as string;
   }
@@ -119,7 +131,7 @@ class CleverreachCRM extends CRM {
 
     const {
       ["Last Name"]: lastName,
-      ["Address 1"]: address,
+      City,
       Postcode,
       Phone
     } = await getSupporter(message.contact.email, token);
@@ -127,21 +139,25 @@ class CleverreachCRM extends CRM {
     const data = {
       'Email Address': message.contact.email,
       'First Name': message.contact.firstName,
-      'Last Name': message.contact.lastName || lastName || "",
-      'Address 1': message.contact.street || address || "",
-      Postcode: message.contact?.postcode || Postcode || "",
-      Phone:  message.contact?.phone || Phone || "",
+      'Last Name': message?.contact?.lastName || lastName || "",
+      City: message?.action.customFields?.locality || City || "",
+      Postcode: message?.contact?.postcode || Postcode || "",
+      Phone: message?.contact?.phone || Phone || "",
       "questions": {
         "Accepts Email": "Y",
         "NatureVoter": "Y"
        }
     };
+
     if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
       data["questions"]["French"] = "Y";
     }
+
     const status = await upsertSupporter(data, token);
-    status === 200 ? console.log(`Message ${message.actionId} sent`)
+    status === 200
+      ? console.log(`Message ${message.actionId} sent`)
       : console.log(`Message ${message.actionId} failed`);
+
     return status === 200;
   };
 }

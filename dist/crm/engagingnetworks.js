@@ -38,7 +38,10 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
             throw new Error(`Error fetching token: ${response.statusText} - ${errorBody}`);
         }
         const data = yield response.json();
-        return data['ens-auth-token'];
+        return {
+            token: data['ens-auth-token'],
+            expires_in: data['expires_in'] || 3600 // Default to 1 hour if not provided
+        };
     }
     catch (error) {
         console.error('Error:', error.message);
@@ -93,8 +96,9 @@ class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this._token = null;
+        this._tokenExpiry = null;
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b;
+            var _a, _b, _c, _d;
             console.log("Action taken from the queue", message.action.id);
             if (this.verbose) {
                 console.log(message);
@@ -103,14 +107,14 @@ class CleverreachCRM extends crm_1.CRM {
             if (!token) {
                 throw new Error("Auth token is missing");
             }
-            const { ["Last Name"]: lastName, ["Address 1"]: address, Postcode, Phone } = yield (0, exports.getSupporter)(message.contact.email, token);
+            const { ["Last Name"]: lastName, City, Postcode, Phone } = yield (0, exports.getSupporter)(message.contact.email, token);
             const data = {
                 'Email Address': message.contact.email,
                 'First Name': message.contact.firstName,
-                'Last Name': message.contact.lastName || lastName || "",
-                'Address 1': message.contact.street || address || "",
-                Postcode: ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.postcode) || Postcode || "",
-                Phone: ((_b = message.contact) === null || _b === void 0 ? void 0 : _b.phone) || Phone || "",
+                'Last Name': ((_a = message === null || message === void 0 ? void 0 : message.contact) === null || _a === void 0 ? void 0 : _a.lastName) || lastName || "",
+                City: ((_b = message === null || message === void 0 ? void 0 : message.action.customFields) === null || _b === void 0 ? void 0 : _b.locality) || City || "",
+                Postcode: ((_c = message === null || message === void 0 ? void 0 : message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
+                Phone: ((_d = message === null || message === void 0 ? void 0 : message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
                 "questions": {
                     "Accepts Email": "Y",
                     "NatureVoter": "Y"
@@ -120,7 +124,8 @@ class CleverreachCRM extends crm_1.CRM {
                 data["questions"]["French"] = "Y";
             }
             const status = yield (0, exports.upsertSupporter)(data, token);
-            status === 200 ? console.log(`Message ${message.actionId} sent`)
+            status === 200
+                ? console.log(`Message ${message.actionId} sent`)
                 : console.log(`Message ${message.actionId} failed`);
             return status === 200;
         });
@@ -129,8 +134,15 @@ class CleverreachCRM extends crm_1.CRM {
     // Getter for token that initializes it if needed
     getToken() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this._token) {
-                this._token = yield (0, exports.getToken)();
+            const now = Date.now();
+            // Fetch new token if missing or expired
+            if (!this._token || (this._tokenExpiry && now >= this._tokenExpiry)) {
+                const tokenData = yield (0, exports.getToken)();
+                if (!tokenData) {
+                    throw new Error("Failed to retrieve token");
+                }
+                this._token = tokenData.token;
+                this._tokenExpiry = now + tokenData.expires_in * 1000; // Convert seconds to milliseconds
             }
             return this._token;
         });
