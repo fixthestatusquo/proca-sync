@@ -49,6 +49,7 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getToken = getToken;
 const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const response = yield fetch(apiUrl + 'supporter', {
             method: "POST",
@@ -57,15 +58,31 @@ const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, funct
                 "Content-Type": "application/json",
                 "ens-auth-token": token,
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         });
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            let errorMessage = `HTTP error! Status: ${response.status}`;
+            let errorBody;
+            try {
+                errorBody = yield response.json();
+                errorMessage += `, Message: ${JSON.stringify(errorBody)}`;
+            }
+            catch (_b) {
+                errorMessage += ", No additional error details in response body.";
+            }
+            // We have some invalid emails saved, and there is 'can receive' check on EN side
+            // Check if error message contains that error phrase and do not crash to prevent requing those messages
+            if ((_a = errorBody === null || errorBody === void 0 ? void 0 : errorBody.message) === null || _a === void 0 ? void 0 : _a.includes("Email address not found or is not valid")) {
+                // overwrite the status to 200 in status, it will still be 400 in the error message
+                return { status: 200, warning: errorMessage };
+            }
+            throw new Error(errorMessage);
         }
-        return response.status;
+        return { status: response.status };
     }
     catch (error) {
         console.error("Error:", error);
+        throw error; // Re-throw other errors
     }
 });
 exports.upsertSupporter = upsertSupporter;
@@ -123,11 +140,16 @@ class CleverreachCRM extends crm_1.CRM {
             if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
                 data["questions"]["French"] = "Y";
             }
-            const status = yield (0, exports.upsertSupporter)(data, token);
-            status === 200
-                ? console.log(`Message ${message.actionId} sent`)
-                : console.log(`Message ${message.actionId} failed`);
-            return status === 200;
+            const response = yield (0, exports.upsertSupporter)(data, token);
+            if (response.status === 200) {
+                response.warning ?
+                    console.log(`Message ${message.actionId} removed from the queue: ${response.warning}`)
+                    : console.log(`Message ${message.actionId} sent`);
+            }
+            else {
+                console.log(`Message ${message.actionId} failed: ${response.status}`);
+            }
+            return response.status === 200;
         });
         this.crmType = crm_1.CRMType.OptIn;
     }

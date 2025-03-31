@@ -54,17 +54,40 @@ export const upsertSupporter = async (data, token: string) => {
         "Content-Type": "application/json",
         "ens-auth-token": token,
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      let errorMessage = `HTTP error! Status: ${response.status}`;
+      let errorBody;
+
+      try {
+        errorBody = await response.json();
+        errorMessage += `, Message: ${JSON.stringify(errorBody)}`;
+      } catch {
+        errorMessage += ", No additional error details in response body.";
+      }
+
+      // We have some invalid emails saved, and there is 'can receive' check on EN side
+      // Check if error message contains that error phrase and do not crash to prevent requing those messages
+      if (
+        errorBody?.message?.includes("Email address not found or is not valid")
+      ) {
+        // overwrite the status to 200 in status, it will still be 400 in the error message
+        return { status: 200, warning: errorMessage };
+      }
+
+      throw new Error(errorMessage);
     }
-    return response.status;
+
+    return { status: response.status};
   } catch (error) {
     console.error("Error:", error);
+    throw error; // Re-throw other errors
   }
-}
+};
+
+
 export const getSupporter = async (email, token: string) => {
   try {
     const response = await fetch(apiUrl + 'supporter?' + 'email=' + 'brucewayne@example.com', {
@@ -153,12 +176,17 @@ class CleverreachCRM extends CRM {
       data["questions"]["French"] = "Y";
     }
 
-    const status = await upsertSupporter(data, token);
-    status === 200
-      ? console.log(`Message ${message.actionId} sent`)
-      : console.log(`Message ${message.actionId} failed`);
+    const response = await upsertSupporter(data, token);
 
-    return status === 200;
+    if (response.status === 200) {
+      response.warning ?
+        console.log(`Message ${message.actionId} removed from the queue: ${response.warning}`)
+        : console.log(`Message ${message.actionId} sent`)
+    } else {
+      console.log(`Message ${message.actionId} failed: ${response.status}`);
+    }
+
+    return response.status === 200;
   };
 }
 
