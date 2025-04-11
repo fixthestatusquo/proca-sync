@@ -133,10 +133,13 @@ class CleverreachCRM extends crm_1.CRM {
                 Postcode: ((_c = message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
                 Phone: ((_d = message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
                 "questions": {
-                    "Accepts Email": "Y",
-                    "NatureVoter": "Y"
+                    "Accepts Email": "Y"
                 }
             };
+            if (message.campaign.name === 'naturevoter') {
+                data["questions"]["NatureVoter"] = "Y";
+            }
+            ;
             if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
                 data["questions"]["French"] = "Y";
             }
