@@ -63,6 +63,6 @@
     "jsforce": "^3.7.0",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
-    "node-mailjet": "^6.0.6"
+    "node-mailjet": "^6.0.8"
   }
 }
