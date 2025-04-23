@@ -79,7 +79,7 @@ export const addCampaignContact = async (
 
   if (resp.length !== 0) return resp[0];
   // console.log(`creating campaign membership  ${ContactId} -> ${CampaignId}`)
-  
+
   const r2 = await conn
     .sobject("CampaignMember")
     .create(Object.assign({ CampaignId, Status: "Responded" }, memberId));
@@ -143,5 +143,7 @@ export const upsertContact = async (conn: Connection, contact: SFRecord) => {
 };
 
 export const foo = async (conn: Connection) => {
-  return await conn.sobject("CampaignMember").select().offset(0).limit(10);
+  return await conn
+  .sobject("CampaignMember")
+  .find({}, { limit: 10, offset: 0 });
 };

@@ -116,6 +116,8 @@ const upsertContact = (conn, contact) => __awaiter(void 0, void 0, void 0, funct
 });
 exports.upsertContact = upsertContact;
 const foo = (conn) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield conn.sobject("CampaignMember").select().offset(0).limit(10);
+    return yield conn
+        .sobject("CampaignMember")
+        .find({}, { limit: 10, offset: 0 });
 });
 exports.foo = foo;
