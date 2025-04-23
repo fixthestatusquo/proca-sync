@@ -26,6 +26,7 @@ class TrustCRM extends CRM {
   ): Promise<handleResult | boolean> => {
     console.log("Taken from queue", message.action.id)
     const campaign = await this.fetchCampaign(message.campaign);
+    console.log(8888888888, campaign?.config?.component?.sync?.moveCode);
     const actionPayload = formatAction(message, campaign?.config?.component?.sync?.moveCode);
     if (this.verbose) {
       console.log(actionPayload);
@@ -44,7 +45,7 @@ class TrustCRM extends CRM {
         verificationPayload
       );
 
-      console.log("Verified", verified)
+      console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", campaign?.config?.component?.sync?.moveCode || message.campaign?.externalId || "no moveCode");
 
       return true;
     } else if (data.alreadyProcessed) {

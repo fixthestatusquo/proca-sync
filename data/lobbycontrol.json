@@ -1,0 +1,57 @@
+{
+  "action": {
+    "actionType": "signature",
+    "createdAt": "2025-04-23T20:32:02Z",
+    "customFields": {
+      "emailProvider": "fixthestatusquo.org"
+    },
+    "testing": true
+  },
+  "actionId": 5727273345,
+  "actionPage": {
+    "locale": "en",
+    "name": "test00/lobbycontrol/en",
+    "supporterConfirmTemplate": "confirm",
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 3889,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "test00",
+    "title": "Test00"
+  },
+  "campaignId": 286,
+  "contact": {
+    "area": "ME",
+    "contactRef": "-Il3xusrDbh2bIK0wGN0vk4QXfze0CG_pA7poFoy6Tg",
+    "country": "ME",
+    "dupeRank": 0,
+    "email": "brucewayne@test.fixthestatusquo.org",
+    "firstName": "Bruce",
+    "lastName": "Wayne"
+  },
+  "org": {
+    "name": "lobbycontrol",
+    "title": "LobbyControl"
+  },
+  "orgId": 310,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": "double_opt_in",
+    "emailStatusChanged": "2024-01-02T01:23:45Z",
+    "givenAt": "2025-04-23T20:32:02Z",
+    "optIn": false,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://widget.proca.app/d/test00/lobbycontrol/en/index.html",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}

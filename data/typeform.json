@@ -1,0 +1,62 @@
+{
+  "action": {
+    "actionType": "mail2t",
+    "createdAt": "2025-04-11T07:48:31Z",
+    "customFields": {
+      "area": "BE",
+      "constituency": 74,
+      "emailProvider": "fixthestatusquo.org",
+      "language": "de",
+      "locality": "Berlin"
+    },
+    "testing": true
+  },
+  "actionId": 5703167,
+  "actionPage": {
+    "locale": "de",
+    "name": "superreiche_besteuern_klima_retten/de",
+    "supporterConfirmTemplate": "confirm",
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 3780,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "superreiche_besteuern_klima_retten",
+    "title": "Milliardäre besteuern - Klima retten!"
+  },
+  "campaignId": 827,
+  "contact": {
+    "area": "DE",
+    "contactRef": "1E4HalXr1WJkKnaeSyOgI8zTG8cKMu-vgFzWqeICtxY",
+    "country": "DE",
+    "dupeRank": 7,
+    "email": "ivana@fixthestatusquo.org",
+    "firstName": "bruce",
+    "lastName": "wayne",
+    "postcode": "10115"
+  },
+  "org": {
+    "name": "greenpeace_de",
+    "title": "Greenpeace e.V."
+  },
+  "orgId": 318,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": "double_opt_in",
+    "emailStatusChanged": "2025-04-11T07:50:22Z",
+    "givenAt": "2025-04-11T07:48:31Z",
+    "optIn": false,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://widget.proca.app/d/superreiche_besteuern_klima_retten/de/index.html",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}
