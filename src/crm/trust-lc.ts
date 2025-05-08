@@ -43,9 +43,7 @@ class TrustCRM extends CRM {
         data.petition_signature.verification_token,
         verificationPayload
       );
-
-      console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", campaign?.config?.component?.sync?.moveCode || message.campaign?.externalId || "no moveCode");
-
+      console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:",actionPayload.petition_signature.move_code || "no moveCode");
       return true;
     } else if (data.alreadyProcessed) {
       console.log("Already processed", "data:", data, "action:", message);

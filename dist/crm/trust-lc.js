@@ -21,7 +21,7 @@ class TrustCRM extends crm_1.CRM {
             return r;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            var _a, _b, _c, _d, _e, _f, _g, _h;
+            var _a, _b, _c, _d;
             console.log("Taken from queue", message.action.id);
             const campaign = yield this.fetchCampaign(message.campaign);
             const actionPayload = (0, data_1.formatAction)(message, (_c = (_b = (_a = campaign === null || campaign === void 0 ? void 0 : campaign.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.moveCode);
@@ -37,7 +37,7 @@ class TrustCRM extends crm_1.CRM {
             const data = yield (0, client_1.postAction)(actionPayload);
             if ((_d = data.petition_signature) === null || _d === void 0 ? void 0 : _d.verification_token) {
                 const verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
-                console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", ((_g = (_f = (_e = campaign === null || campaign === void 0 ? void 0 : campaign.config) === null || _e === void 0 ? void 0 : _e.component) === null || _f === void 0 ? void 0 : _f.sync) === null || _g === void 0 ? void 0 : _g.moveCode) || ((_h = message.campaign) === null || _h === void 0 ? void 0 : _h.externalId) || "no moveCode");
+                console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", actionPayload.petition_signature.move_code || "no moveCode");
                 return true;
             }
             else if (data.alreadyProcessed) {
