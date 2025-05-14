@@ -61,7 +61,7 @@ class Duh extends CRM {
 
       if (!res.ok) return null;
 
-      const data = await res.json(); console.log("Contact data:", res, data.contacts);
+      const data = await res.json();
       return data.contacts?.[0]?.id || null;
 
 
@@ -100,6 +100,44 @@ class Duh extends CRM {
     return data.contact.id;
 
   };
+// listId = "10" proca-test list
+  subscribeToList = async (contactId: string, listId: string = "10"): Promise<void> => {
+    const res = await fetch(`${url}/api/3/contactLists`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({
+        contactList: {
+          list: listId,
+          contact: contactId,
+          //status: 1, // 1 = subscribed
+        },
+      }),
+    });
+
+    if (!res.ok) throw new Error(`Failed to subscribe to list: ${res.statusText}`);
+    console.log(`Subscribed contact ${contactId} to list ${listId}`);
+  };
+
+  //The tag must already exist, default tag // name: p:ftsq-test1
+  addTagToContact = async (contactId: string, tagId = 174): Promise<void> => {
+    const res = await fetch(`${url}/api/3/contactTags`, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({
+        "contactTag": {
+          "contact": contactId,
+          "tag": tagId
+        }
+      }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(`Failed to add tag: ${JSON.stringify(errorData)}`);
+    }
+
+    console.log(`Tag ${tagId}" added to contact ${contactId}`);
+  };
 
   handleActionContact = async (
     message: ActionMessage
@@ -124,8 +162,19 @@ class Duh extends CRM {
         contactId = await this.createContact(email, firstName, lastName);
       }
 
+      if (!contactId) {
+        console.error("Failed to create or update contact");
+        return false;
+      }
 
-      return false;
+      // Subscribe to list
+      await this.subscribeToList(contactId);
+
+      // Add petition-specific tag
+      await this.addTagToContact(contactId);
+
+      console.log("Action contact processed successfully", message.action.id);
+      return true;
     } catch (err) {
       console.error("Error handling contact action:", err);
       return false;
