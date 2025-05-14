@@ -25,7 +25,7 @@ if (!url || !token) {
 //   petitionId: string;
 // };
 
-class Duh extends CRM {
+class ActiveCampaign extends CRM {
   constructor(opt: {}) {
     super(opt);
     this.crmType = CRMType.ActionContact;
@@ -136,7 +136,7 @@ class Duh extends CRM {
       throw new Error(`Failed to add tag: ${JSON.stringify(errorData)}`);
     }
 
-    console.log(`Tag ${tagId}" added to contact ${contactId}`);
+    console.log(`Tag ${tagId} added to contact ${contactId}`);
   };
 
   handleActionContact = async (
@@ -182,4 +182,4 @@ class Duh extends CRM {
   };
 }
 
-export default Duh;
+export default ActiveCampaign;
