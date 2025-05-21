@@ -7,6 +7,7 @@ import {
   ProcaCampaign,
 } from "../crm";
 import dotenv from "dotenv";
+import { pick } from "lodash";
 
 dotenv.config();
 
@@ -18,12 +19,11 @@ if (!url || !token) {
   process.exit(1);
 }
 
-// type ContactPayload = {
-//   email: string;
-//   firstName?: string;
-//   lastName?: string;
-//   petitionId: string;
-// };
+type ContactPayload = {
+  email?: string;
+  firstName: string;
+  lastName?: string;
+};
 
 class ActiveCampaign extends CRM {
   constructor(opt: {}) {
@@ -37,19 +37,50 @@ class ActiveCampaign extends CRM {
     'Content-Type': 'application/json',
   };
 
-  body = (email: string, firstName: string, lastName?: string) => {
+  // actionid for the last campaign
+  // send data source, text field, value "proca"
+
+  body = ({ email, firstName, lastName }: ContactPayload) => {
     const body: any = {
       contact: {
-        email: email,
-        firstName: firstName,
-      },
+          firstName: firstName,
+          lastName: lastName,
+          fieldValues: [
+            {
+              field: '29', // ID of the 'data_source' custom field
+              value: 'proca'
+            }]
+        }
     };
+
+    if (email) {
+      body.contact.email = email;
+    }
 
     if (lastName) {
       body.contact.lastName = lastName;
     }
     return JSON.stringify(body);
   };
+
+  async  getActiveCampaignFields() {
+    try {
+      const response = await fetch(`${url}/api/3/fields`, {
+        method: 'GET',
+        headers: this.headers
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching fields: ${response.status} ${response.statusText}`);
+      }
+      const data = await response.json();
+      console.log('Retrieved fields:', data.fields);
+      return data.fields;
+    } catch (error) {
+      console.error('Failed to fetch ActiveCampaign fields:', error);
+      return null;
+    }
+  }
+
 
   fetchContact = async (email: string): Promise<string | null> => {
     console.log("Fetching contact:", email);
@@ -71,8 +102,8 @@ class ActiveCampaign extends CRM {
     }
   };
 
-  createContact = async (email: string, firstName: string, lastName?: string): Promise<string> => {
-    const b = this.body(email, firstName, lastName);
+  createContact = async (contactPayload: ContactPayload): Promise<string> => {
+    const b = this.body(contactPayload);
     const res = await fetch(`${url}/api/3/contacts`, {
       method: "POST",
       headers: this.headers,
@@ -83,16 +114,12 @@ class ActiveCampaign extends CRM {
     return data.contact.id;
   };
 
-  updateContact = async (contactId: string, firstName: string, lastName?: string): Promise<string> => {
+  updateContact = async (contactId: string, contactPayload:ContactPayload ): Promise<string> => {
+    const b = this.body(contactPayload);
     const res = await fetch(`${url}/api/3/contacts/${contactId}`, {
       method: "PUT",
       headers: this.headers,
-      body: JSON.stringify({
-        contact: {
-          firstName: firstName,
-          lastName: lastName
-        }
-      }),
+      body: b,
     });
 
     if (!res.ok) throw new Error(`Failed to update contact: ${res.statusText}`);
@@ -142,8 +169,7 @@ class ActiveCampaign extends CRM {
   handleActionContact = async (
     message: ActionMessage
   ): Promise<handleResult | boolean> => {
-    const { email, firstName, lastName } = message.contact;
-
+    const email = message.contact.email;
 
     console.log("Processing action:", message.action.id, "testing:", message.action.testing);
 
@@ -154,12 +180,16 @@ class ActiveCampaign extends CRM {
     try {
       let contactId = await this.fetchContact(email);
 
-      console.log("Contact ID:", contactId);
+      const contactPayload: ContactPayload = contactId
+        ? pick(message.contact, ['firstName', 'lastName'])
+        : pick(message.contact, ['email', 'firstName', 'lastName']);
+
       if (contactId) {
         console.log("Contact already exists, update:", contactId);
-       contactId = await this.updateContact(contactId, firstName, lastName);
+        contactId = await this.updateContact(contactId, contactPayload);
       } else {
-        contactId = await this.createContact(email, firstName, lastName);
+        console.log("Creating new contact:", email);
+        contactId = await this.createContact(contactPayload);
       }
 
       if (!contactId) {
