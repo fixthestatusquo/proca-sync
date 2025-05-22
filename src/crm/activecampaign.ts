@@ -8,6 +8,7 @@ import {
 } from "../crm";
 import dotenv from "dotenv";
 import { pick } from "lodash";
+import { fetchCampaign as procaCampaign }  from '../proca';
 
 dotenv.config();
 
@@ -29,6 +30,11 @@ class ActiveCampaign extends CRM {
   constructor(opt: {}) {
     super(opt);
     this.crmType = CRMType.ActionContact;
+  }
+
+   fetchCampaign = async (id: number): Promise<any> => {
+     const r = await procaCampaign(id);
+    return r;
   }
 
   headers: HeadersInit = {
@@ -114,9 +120,9 @@ class ActiveCampaign extends CRM {
     return data.contact.id;
   };
 
-  updateContact = async (contactId: string, contactPayload:ContactPayload ): Promise<string> => {
+  updateContact = async (contactid: string, contactPayload:ContactPayload ): Promise<string> => {
     const b = this.body(contactPayload);
-    const res = await fetch(`${url}/api/3/contacts/${contactId}`, {
+    const res = await fetch(`${url}/api/3/contacts/${contactid}`, {
       method: "PUT",
       headers: this.headers,
       body: b,
@@ -127,33 +133,32 @@ class ActiveCampaign extends CRM {
     return data.contact.id;
 
   };
-// listId = "10" proca-test list
-  subscribeToList = async (contactId: string, listId: string = "10"): Promise<void> => {
+// listid = "10" proca-test list
+  subscribeToList = async (contactid: string, listid: string): Promise<void> => {
     const res = await fetch(`${url}/api/3/contactLists`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
         contactList: {
-          list: listId,
-          contact: contactId,
-          //status: 1, // 1 = subscribed
+          list: listid || 10, // default value??
+          contact: contactid
         },
       }),
     });
 
     if (!res.ok) throw new Error(`Failed to subscribe to list: ${res.statusText}`);
-    console.log(`Subscribed contact ${contactId} to list ${listId}`);
+    console.log(`Subscribed contact ${contactid} to list ${listid}`);
   };
 
-  //The tag must already exist, default tag // name: p:ftsq-test1
-  addTagToContact = async (contactId: string, tagId = 174): Promise<void> => {
+  //The tag must already exist, default?
+  addTagToContact = async (contactid: string, tagid): Promise<void> => {
     const res = await fetch(`${url}/api/3/contactTags`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
         "contactTag": {
-          "contact": contactId,
-          "tag": tagId
+          "contact": contactid,
+          "tag": tagid || 174 // default value??
         }
       }),
     });
@@ -163,7 +168,7 @@ class ActiveCampaign extends CRM {
       throw new Error(`Failed to add tag: ${JSON.stringify(errorData)}`);
     }
 
-    console.log(`Tag ${tagId} added to contact ${contactId}`);
+    console.log(`Tag ${tagid} added to contact ${contactid}`);
   };
 
   handleActionContact = async (
@@ -178,30 +183,32 @@ class ActiveCampaign extends CRM {
     }
 
     try {
-      let contactId = await this.fetchContact(email);
+      let contactid = await this.fetchContact(email);
 
-      const contactPayload: ContactPayload = contactId
+      const contactPayload: ContactPayload = contactid
         ? pick(message.contact, ['firstName', 'lastName'])
         : pick(message.contact, ['email', 'firstName', 'lastName']);
 
-      if (contactId) {
-        console.log("Contact already exists, update:", contactId);
-        contactId = await this.updateContact(contactId, contactPayload);
+      if (contactid) {
+        console.log("Contact already exists, update:", contactid);
+        contactid = await this.updateContact(contactid, contactPayload);
       } else {
         console.log("Creating new contact:", email);
-        contactId = await this.createContact(contactPayload);
+        contactid = await this.createContact(contactPayload);
       }
 
-      if (!contactId) {
+      if (!contactid) {
         console.error("Failed to create or update contact");
         return false;
       }
+      let camp = await this.fetchCampaign(message.campaign.id);
+      const { listid, tagid } = camp.config?.component?.sync || {};
 
       // Subscribe to list
-      await this.subscribeToList(contactId);
+      await this.subscribeToList(contactid, listid);
 
       // Add petition-specific tag
-      await this.addTagToContact(contactId);
+      await this.addTagToContact(contactid, tagid);
 
       console.log("Action contact processed successfully", message.action.id);
       return true;
