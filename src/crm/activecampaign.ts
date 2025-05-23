@@ -24,6 +24,8 @@ type ContactPayload = {
   email?: string;
   firstName: string;
   lastName?: string;
+  contactRef: string;
+  id: string;
 };
 
 class ActiveCampaign extends CRM {
@@ -46,16 +48,27 @@ class ActiveCampaign extends CRM {
   // actionid for the last campaign
   // send data source, text field, value "proca"
 
-  body = ({ email, firstName, lastName }: ContactPayload) => {
+  body = ({ email, firstName, lastName, contactRef, id }: ContactPayload) => {
     const body: any = {
       contact: {
           firstName: firstName,
           lastName: lastName,
+          proca_ref_id: contactRef,
+          proca_777_action_id: id,
           fieldValues: [
             {
               field: '29', // ID of the 'data_source' custom field
               value: 'proca'
-            }]
+            },
+            {
+              field: '39', // ID of the 'proca_777_action_id' custom field
+              value: id
+            },
+            {
+              field: '38', // ID of the 'proca_ref_id' custom field
+              value: contactRef
+            }
+          ]
         }
     };
 
@@ -140,8 +153,9 @@ class ActiveCampaign extends CRM {
       headers: this.headers,
       body: JSON.stringify({
         contactList: {
-          list: listid || 10, // default value??
-          contact: contactid
+          list: listid || 1, // default value??
+          contact: contactid,
+          status: 1
         },
       }),
     });
@@ -158,7 +172,7 @@ class ActiveCampaign extends CRM {
       body: JSON.stringify({
         "contactTag": {
           "contact": contactid,
-          "tag": tagid || 174 // default value??
+          "tag": tagid || 175 // default value??
         }
       }),
     });
@@ -185,9 +199,12 @@ class ActiveCampaign extends CRM {
     try {
       let contactid = await this.fetchContact(email);
 
-      const contactPayload: ContactPayload = contactid
-        ? pick(message.contact, ['firstName', 'lastName'])
-        : pick(message.contact, ['email', 'firstName', 'lastName']);
+      const contactPayload: ContactPayload = {
+        ...(contactid
+          ? pick(message.contact, ['firstName', 'lastName', 'contactRef'])
+          : pick(message.contact, ['email', 'firstName', 'lastName', 'contactRef'])),
+        id: message.action.id,
+      };
 
       if (contactid) {
         console.log("Contact already exists, update:", contactid);
