@@ -26,6 +26,25 @@ type ContactPayload = {
   lastName?: string;
   contactRef: string;
   id: string;
+  postcode?: string;
+  phone?: string;
+};
+
+type FieldValue = {
+  field: string;
+  value: string;
+};
+
+type ActiveCampaignContact = {
+  email?: string;
+  firstName: string;
+  lastName?: string;
+  phone?: string;
+  fieldValues: FieldValue[];
+};
+
+type ActiveCampaignPayload = {
+  contact: ActiveCampaignContact;
 };
 
 class ActiveCampaign extends CRM {
@@ -48,39 +67,43 @@ class ActiveCampaign extends CRM {
   // actionid for the last campaign
   // send data source, text field, value "proca"
 
-  body = ({ email, firstName, lastName, contactRef, id }: ContactPayload) => {
-    const body: any = {
-      contact: {
-          firstName: firstName,
-          lastName: lastName,
-          proca_ref_id: contactRef,
-          proca_777_action_id: id,
-          fieldValues: [
-            {
-              field: '29', // ID of the 'data_source' custom field
-              value: 'proca'
-            },
-            {
-              field: '39', // ID of the 'proca_777_action_id' custom field
-              value: id
-            },
-            {
-              field: '38', // ID of the 'proca_ref_id' custom field
-              value: contactRef
-            }
-          ]
-        }
-    };
-
-    if (email) {
-      body.contact.email = email;
+  body = ({ email, firstName, lastName, contactRef, id, phone, postcode }: ContactPayload) => {
+  const fieldValues = [
+    {
+      field: '29', // data_source
+      value: 'proca'
+    },
+    {
+      field: '48', // proca_185_action_id
+      value: id
+    },
+    {
+      field: '47', // proca_ref_id
+      value: contactRef
     }
+  ];
 
-    if (lastName) {
-      body.contact.lastName = lastName;
-    }
-    return JSON.stringify(body);
+  // Add ZIP (postcode) only if it's provided
+  if (postcode) {
+    fieldValues.push({
+      field: '11', // ZIP custom field
+      value: postcode
+    });
+  }
+
+  const contact: ActiveCampaignContact = {
+    firstName,
+    fieldValues
   };
+
+  // Conditionally add optional fields
+  if (email) contact.email = email;
+  if (lastName) contact.lastName = lastName;
+  if (phone) contact.phone = phone;
+
+  return JSON.stringify({ contact });
+};
+
 
   async  getActiveCampaignFields() {
     try {
@@ -99,6 +122,26 @@ class ActiveCampaign extends CRM {
       return null;
     }
   }
+
+  async getActiveCampaignLists() {
+  try {
+    const response = await fetch(`${url}/api/3/lists`, {
+      method: 'GET',
+      headers: this.headers
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching lists: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Retrieved lists:', data.lists);
+    return data.lists;
+  } catch (error) {
+    console.error('Failed to fetch ActiveCampaign lists:', error);
+    return null;
+  }
+}
 
 
   fetchContact = async (email: string): Promise<string | null> => {
@@ -165,25 +208,27 @@ class ActiveCampaign extends CRM {
   };
 
   //The tag must already exist, default?
-  addTagToContact = async (contactid: string, tagid): Promise<void> => {
+  addTagsToContact = async (contactId: string, tagIds: number[] = [175]): Promise<void> => {
+  for (const tagId of tagIds) {
     const res = await fetch(`${url}/api/3/contactTags`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
-        "contactTag": {
-          "contact": contactid,
-          "tag": tagid || 175 // default value??
-        }
+        contactTag: {
+          contact: contactId,
+          tag: tagId,
+        },
       }),
     });
 
     if (!res.ok) {
       const errorData = await res.json();
-      throw new Error(`Failed to add tag: ${JSON.stringify(errorData)}`);
+      throw new Error(`Failed to add tag ${tagId}: ${JSON.stringify(errorData)}`);
     }
 
-    console.log(`Tag ${tagid} added to contact ${contactid}`);
-  };
+    console.log(`Tag ${tagId} added to contact ${contactId}`);
+  }
+};
 
   handleActionContact = async (
     message: ActionMessage
@@ -192,17 +237,16 @@ class ActiveCampaign extends CRM {
 
     console.log("Processing action:", message.action.id, "testing:", message.action.testing);
 
-    if (this.verbose) {
+      if (this.verbose) {
       console.log(JSON.stringify(message, null, 2));
     }
-
     try {
       let contactid = await this.fetchContact(email);
 
       const contactPayload: ContactPayload = {
         ...(contactid
-          ? pick(message.contact, ['firstName', 'lastName', 'contactRef'])
-          : pick(message.contact, ['email', 'firstName', 'lastName', 'contactRef'])),
+          ? pick(message.contact, ['firstName', 'lastName', 'contactRef', 'phone', 'postcode'])
+          : pick(message.contact, ['email', 'firstName', 'lastName', 'contactRef', 'phone', 'postcode'])),
         id: message.action.id,
       };
 
@@ -224,8 +268,8 @@ class ActiveCampaign extends CRM {
       // Subscribe to list
       await this.subscribeToList(contactid, listid);
 
-      // Add petition-specific tag
-      await this.addTagToContact(contactid, tagid);
+      // Add petition-specific tags
+      await this.addTagsToContact(contactid, [185, 186]);
 
       console.log("Action contact processed successfully", message.action.id);
       return true;
@@ -233,7 +277,7 @@ class ActiveCampaign extends CRM {
       console.error("Error handling contact action:", err);
       return false;
     }
-  };
+    };
 }
 
 export default ActiveCampaign;
