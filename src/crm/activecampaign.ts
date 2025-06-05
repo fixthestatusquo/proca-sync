@@ -1,4 +1,3 @@
-import { count } from '@proca/queue';
 import {
   CRM,
   CRMType,
@@ -67,26 +66,30 @@ class ActiveCampaign extends CRM {
   // actionid for the last campaign
   // send data source, text field, value "proca"
 
-  body = ({ email, firstName, lastName, contactRef, id, phone, postcode }: ContactPayload) => {
-  const fieldValues = [
-    {
-      field: '29', // data_source
-      value: 'proca'
-    },
-    {
-      field: '48', // proca_185_action_id
-      value: id
-    },
-    {
-      field: '47', // proca_ref_id
-      value: contactRef
-    }
-  ];
+  body = ({ email, firstName, lastName, contactRef, id, phone, postcode }: ContactPayload,
+    data_source: string,
+    action_id_field: string,
+    ref_field: string,
+    zip_field: string) => {
+    const fieldValues = [
+      {
+        field: data_source, // data_source field ID
+        value: 'proca'
+      },
+      {
+        field: action_id_field,
+        value: id
+      },
+      {
+        field: ref_field,
+        value: contactRef
+      }
+    ];
 
   // Add ZIP (postcode) only if it's provided
   if (postcode) {
     fieldValues.push({
-      field: '11', // ZIP custom field
+      field: zip_field, // ZIP field ID, default is 11
       value: postcode
     });
   }
@@ -102,8 +105,7 @@ class ActiveCampaign extends CRM {
   if (phone) contact.phone = phone;
 
   return JSON.stringify({ contact });
-};
-
+  };
 
   async  getActiveCampaignFields() {
     try {
@@ -133,7 +135,6 @@ class ActiveCampaign extends CRM {
     if (!response.ok) {
       throw new Error(`Error fetching lists: ${response.status} ${response.statusText}`);
     }
-
     const data = await response.json();
     console.log('Retrieved lists:', data.lists);
     return data.lists;
@@ -160,43 +161,40 @@ class ActiveCampaign extends CRM {
 
     } catch (err) {
       console.error("Error fetching contact:", err);
-      throw err;
+      return null;
     }
   };
 
-  createContact = async (contactPayload: ContactPayload): Promise<string> => {
-    const b = this.body(contactPayload);
+  createContact = async (bodyContent: string): Promise<string> => {
     const res = await fetch(`${url}/api/3/contacts`, {
       method: "POST",
       headers: this.headers,
-      body: b,
+      body: bodyContent,
     });
     if (!res.ok) throw new Error(`Failed to create contact: ${res.statusText}`);
     const data = await res.json();
     return data.contact.id;
   };
 
-  updateContact = async (contactid: string, contactPayload:ContactPayload ): Promise<string> => {
-    const b = this.body(contactPayload);
+  updateContact = async (contactid: string, bodyContent: string): Promise<string> => {
     const res = await fetch(`${url}/api/3/contacts/${contactid}`, {
       method: "PUT",
       headers: this.headers,
-      body: b,
+      body: bodyContent,
     });
 
     if (!res.ok) throw new Error(`Failed to update contact: ${res.statusText}`);
-   const data = await res.json();
+    const data = await res.json();
     return data.contact.id;
-
   };
-// listid = "10" proca-test list
+
   subscribeToList = async (contactid: string, listid: string): Promise<void> => {
     const res = await fetch(`${url}/api/3/contactLists`, {
       method: "POST",
       headers: this.headers,
       body: JSON.stringify({
         contactList: {
-          list: listid || 1, // default value??
+          list: listid,
           contact: contactid,
           status: 1
         },
@@ -208,24 +206,24 @@ class ActiveCampaign extends CRM {
   };
 
   //The tag must already exist, default?
-  addTagsToContact = async (contactId: string, tagIds: number[] = [175]): Promise<void> => {
-  for (const tagId of tagIds) {
-    const res = await fetch(`${url}/api/3/contactTags`, {
-      method: "POST",
-      headers: this.headers,
-      body: JSON.stringify({
-        contactTag: {
-          contact: contactId,
-          tag: tagId,
-        },
-      }),
-    });
+  addTagsToContact = async (contactId: string, tagIds: string): Promise<void> => {
+    const ids = tagIds.replace(/\s+/g, "").split(",");
+    for (const tagId of ids) {
+      const res = await fetch(`${url}/api/3/contactTags`, {
+        method: "POST",
+        headers: this.headers,
+        body: JSON.stringify({
+          contactTag: {
+            contact: contactId,
+            tag: tagId,
+          },
+        }),
+      });
 
     if (!res.ok) {
       const errorData = await res.json();
       throw new Error(`Failed to add tag ${tagId}: ${JSON.stringify(errorData)}`);
     }
-
     console.log(`Tag ${tagId} added to contact ${contactId}`);
   }
 };
@@ -241,6 +239,20 @@ class ActiveCampaign extends CRM {
       console.log(JSON.stringify(message, null, 2));
     }
     try {
+
+      let camp = await this.fetchCampaign(message.campaign.id);
+      const { listid,
+        tagids,
+        action_id_field,
+        ref_field,
+        data_source,
+        zip_field } = camp.config?.component?.sync || {};
+
+      if (!tagids || !action_id_field || !ref_field) {
+        console.error("Missing required configuration for ActiveCampaign sync");
+        return false;
+      };
+
       let contactid = await this.fetchContact(email);
 
       const contactPayload: ContactPayload = {
@@ -250,26 +262,31 @@ class ActiveCampaign extends CRM {
         id: message.action.id,
       };
 
+      const bodyContent = this.body(
+        contactPayload,
+        data_source || '29',
+        action_id_field,
+        ref_field,
+        zip_field || '11');
+
       if (contactid) {
         console.log("Contact already exists, update:", contactid);
-        contactid = await this.updateContact(contactid, contactPayload);
+        contactid = await this.updateContact(contactid, bodyContent);
       } else {
         console.log("Creating new contact:", email);
-        contactid = await this.createContact(contactPayload);
+        contactid = await this.createContact(bodyContent);
       }
 
       if (!contactid) {
         console.error("Failed to create or update contact");
         return false;
       }
-      let camp = await this.fetchCampaign(message.campaign.id);
-      const { listid, tagid } = camp.config?.component?.sync || {};
 
       // Subscribe to list
-      await this.subscribeToList(contactid, listid);
+      await this.subscribeToList(contactid, listid || '1');
 
       // Add petition-specific tags
-      await this.addTagsToContact(contactid, [185, 186]);
+      await this.addTagsToContact(contactid, tagids);
 
       console.log("Action contact processed successfully", message.action.id);
       return true;
