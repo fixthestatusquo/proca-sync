@@ -146,7 +146,6 @@ class ActiveCampaign extends CRM {
 
 
   fetchContact = async (email: string): Promise<string | undefined> => {
-    console.log("Fetching contact:", email);
     try {
       const res = await fetch(`${url}/api/3/contacts?email=${encodeURIComponent(email)}`, {
         method: "GET",

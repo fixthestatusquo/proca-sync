@@ -74,7 +74,6 @@ class ActiveCampaign extends crm_1.CRM {
         };
         this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            console.log("Fetching contact:", email);
             try {
                 const res = yield fetch(`${url}/api/3/contacts?email=${encodeURIComponent(email)}`, {
                     method: "GET",
