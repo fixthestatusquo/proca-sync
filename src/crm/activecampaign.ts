@@ -255,6 +255,7 @@ class ActiveCampaign extends CRM {
 
       let contactid = await this.fetchContact(email);
 
+      // Email is necessary to create contact, but it is redundant for the update
       const contactPayload: ContactPayload = {
         ...(contactid
           ? pick(message.contact, ['firstName', 'lastName', 'contactRef', 'phone', 'postcode'])
