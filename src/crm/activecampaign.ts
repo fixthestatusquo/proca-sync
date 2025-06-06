@@ -202,7 +202,6 @@ class ActiveCampaign extends CRM {
     });
 
     if (!res.ok) throw new Error(`Failed to subscribe to list: ${res.statusText}`);
-    console.log(`Subscribed contact ${contactid} to list ${listid}`);
   };
 
   //The tag must already exist, default?
@@ -224,7 +223,6 @@ class ActiveCampaign extends CRM {
       const errorData = await res.json();
       throw new Error(`Failed to add tag ${tagId}: ${JSON.stringify(errorData)}`);
     }
-    console.log(`Tag ${tagId} added to contact ${contactId}`);
   }
 };
 
