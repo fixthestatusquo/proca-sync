@@ -52,8 +52,8 @@ class ActiveCampaign extends CRM {
     this.crmType = CRMType.ActionContact;
   }
 
-   fetchCampaign = async (id: number): Promise<any> => {
-     const r = await procaCampaign(id);
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r = await procaCampaign (campaign.id);
     return r;
   }
 
@@ -239,8 +239,8 @@ class ActiveCampaign extends CRM {
       console.log(JSON.stringify(message, null, 2));
     }
     try {
-
-      let camp = await this.fetchCampaign(message.campaign.id);
+      // updates will not be considered!!!
+      const camp = await this.campaign(message.campaign);
       const { listid,
         tagids,
         action_id_field,
@@ -248,7 +248,7 @@ class ActiveCampaign extends CRM {
         data_source,
         zip_field } = camp.config?.component?.sync || {};
 
-      if (!tagids || !action_id_field || !ref_field) {
+      if (!tagids || !action_id_field || !ref_field || !data_source || !zip_field) {
         console.error("Missing required configuration for ActiveCampaign sync");
         return false;
       };
@@ -264,10 +264,10 @@ class ActiveCampaign extends CRM {
 
       const bodyContent = this.body(
         contactPayload,
-        data_source || '29',
+        data_source,
         action_id_field,
         ref_field,
-        zip_field || '11');
+        zip_field);
 
       if (contactid) {
         console.log("Contact already exists, update:", contactid);
@@ -291,7 +291,7 @@ class ActiveCampaign extends CRM {
       console.log("Action contact processed successfully", message.action.id);
       return true;
     } catch (err) {
-      console.error("Error handling contact action:", err);
+      console.error("Error handling contact action:", err.message);
       return false;
     }
     };
