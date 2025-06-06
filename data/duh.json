@@ -26,8 +26,11 @@
     "contactRef": "KyG-twWCOVnMzPCPzyl_4UIjTHJbYmxrPhw3pii1XOE",
     "country": "ME",
     "dupeRank": 0,
-    "email": "brucewayne@example.com",
-    "firstName": "bruce"
+    "email": "brucewayne@test.fixthestatusquo.org",
+    "firstName": "Bruce",
+    "lastName": "Wayne",
+    "postcode": "81000",
+    "phone": "123456789"
   },
   "org": {
     "name": "deutsche_umwelthilfe",
@@ -39,7 +42,7 @@
     "emailStatus": null,
     "emailStatusChanged": null,
     "givenAt": "2025-05-12T14:21:53Z",
-    "optIn": false,
+    "optIn": true,
     "withConsent": true
   },
   "schema": "proca:action:2",

@@ -70,7 +70,7 @@ class ActiveCampaign extends CRM {
     data_source: string,
     action_id_field: string,
     ref_field: string,
-    zip_field: string) => {
+    zip_field: string | undefined) => {
     const fieldValues = [
       {
         field: data_source, // data_source field ID
@@ -87,7 +87,7 @@ class ActiveCampaign extends CRM {
     ];
 
   // Add ZIP (postcode) only if it's provided
-  if (postcode) {
+  if (postcode && zip_field) {
     fieldValues.push({
       field: zip_field, // ZIP field ID, default is 11
       value: postcode
@@ -245,7 +245,7 @@ class ActiveCampaign extends CRM {
         data_source,
         zip_field } = camp.config?.component?.sync || {};
 
-      if (!tagids || !action_id_field || !ref_field || !data_source || !zip_field) {
+      if (!tagids || !action_id_field || !ref_field || !data_source) {
         console.error("Missing required configuration for ActiveCampaign sync");
         return false;
       };
