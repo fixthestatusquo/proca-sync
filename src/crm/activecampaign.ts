@@ -145,7 +145,7 @@ class ActiveCampaign extends CRM {
 }
 
 
-  fetchContact = async (email: string): Promise<string | null> => {
+  fetchContact = async (email: string): Promise<string | undefined> => {
     console.log("Fetching contact:", email);
     try {
       const res = await fetch(`${url}/api/3/contacts?email=${encodeURIComponent(email)}`, {
@@ -153,15 +153,14 @@ class ActiveCampaign extends CRM {
         headers: this.headers,
       });
 
-      if (!res.ok) return null;
+      if (!res.ok) return;
 
       const data = await res.json();
-      return data.contacts?.[0]?.id || null;
+      return data.contacts?.[0]?.id;
 
 
     } catch (err) {
       console.error("Error fetching contact:", err);
-      return null;
     }
   };
 
