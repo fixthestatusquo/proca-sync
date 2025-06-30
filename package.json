@@ -58,7 +58,7 @@
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.0.0",
     "i18n-iso-countries": "^7.13.0",
     "jsforce": "^3.7.0",
     "lodash": "^4.17.21",
