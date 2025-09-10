@@ -290,12 +290,21 @@ class CiviCRM extends CRM {
       throw new Error ("missing campaign id"); 
     }
     const params = this.getParams(contact, action, campaign_id, source);
+    try { 
     const r = await this.crmAPI.create("Contact", params);
+console.log("created",r);
     if (!r.error_message) return true;
     console.error ("createContact",r.error_message, params, r);
     if (r.status === 403) {
       console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
     }
+    } catch (e) {
+console.log("aaaa",e);
+      if (e.cause?.status === 403) {
+        console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+      }
+    }
+console.log("aaaa");
     return false;
   };
 
@@ -366,7 +375,10 @@ class CiviCRM extends CRM {
 
       throw new Error ("can't read campaign "+campaign.name + ':' + r.error_message +". CHeck your permission on civicampaign");
     }
-    if (r.count === 0) {
+    if (r.count === 1) {
+      console.log("campaign",r.values[0])
+      return r.values[0];
+    }
       console.log("let's create the campaign", campaign.name);
       const now = new Date();
       r = await this.crmAPI.create("Campaign", {
@@ -378,7 +390,6 @@ class CiviCRM extends CRM {
         },
       },0);
 
-    }
     if (!r.values.id) {
       throw new Error ("can't get or create campaign "+campaign.name);
     }
