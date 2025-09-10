@@ -1,0 +1,60 @@
+import {
+  CRM,
+  CRMType,
+  ActionMessage,
+  handleResult,
+  ProcaCampaign,
+} from "../crm";
+import dotenv from "dotenv";
+import { pick } from "lodash";
+import { fetchCampaign as procaCampaign }  from '../proca';
+
+dotenv.config();
+
+const url = process.env.CRM_URL;
+const token = process.env.CRM_API_TOKEN;
+
+if (!url || !token) {
+  console.error("Missing CRM credentials.");
+  process.exit(1);
+}
+
+class ActionNetworks extends CRM {
+  constructor(opt: {}) {
+    super(opt);
+    this.crmType = CRMType.OptIn;
+  }
+
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r = await procaCampaign (campaign.id);
+    return r;
+  }
+
+
+  handleActionContact = async (
+    message: ActionMessage
+  ): Promise<handleResult | boolean> => {
+    const email = message.contact.email;
+
+    console.log("Processing action:", message.action.id, "testing:", message.action.testing);
+    console.log("Message", message);
+
+      if (this.verbose) {
+      console.log(JSON.stringify(message, null, 2));
+    }
+    try {
+
+      const camp = await this.campaign(message.campaign);
+
+      let contactid = await this.fetchContact(email);
+
+
+      return false;
+    } catch (err) {
+      console.error("Error handling contact action:", err.message);
+      return false;
+    }
+    };
+}
+
+export default ActionNetworks;
