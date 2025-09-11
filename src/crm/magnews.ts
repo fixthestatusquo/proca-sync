@@ -7,13 +7,9 @@ import {
   ProcaCampaign,
 } from "../crm";
 
-import {Contact, ContactValues, ContactOptions} from './magnews/interfaces'
+import { Contact, ContactValues, ContactOptions } from "./magnews/interfaces";
 
-import {
-  setClientToken,
-  addContact
-} from './magnews/client'
-
+import { setClientToken, addContact } from "./magnews/client";
 
 /*
  *
@@ -24,7 +20,7 @@ interface CRM {
 */
 
 class MagNewsCRM extends CRM {
-  public iddatabase: number; 
+  public iddatabase: number;
   public clientToken: string;
   public idnewsletter: number;
   public audience: string;
@@ -39,14 +35,14 @@ class MagNewsCRM extends CRM {
   }
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
 
     const member = this.actionToContactRecord(message, camp);
     const r = await addContact(this.clientToken, member);
     if (!Boolean(r)) {
-       //not sure what to do
+      //not sure what to do
       return { processed: true };
     }
 

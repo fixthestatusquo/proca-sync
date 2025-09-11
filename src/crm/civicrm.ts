@@ -32,13 +32,13 @@ class CiviCRM extends CRM {
     this.crmType = CRMType.OptIn;
     if (!process.env.CIVICRM_API_KEY) {
       console.error(
-        "you need to set the CIVICRM_API_KEY from CiviCRM in the .env.xx"
+        "you need to set the CIVICRM_API_KEY from CiviCRM in the .env.xx",
       );
       process.exit(1);
     }
     if (!process.env.CIVICRM_URL) {
       console.error(
-        "you need to set the url of your api4 endpoint from CiviCRM in the .env.xx"
+        "you need to set the url of your api4 endpoint from CiviCRM in the .env.xx",
       );
       process.exit(1);
     }
@@ -59,7 +59,7 @@ class CiviCRM extends CRM {
 
     if (!process.env.GROUP) {
       console.error(
-        "you need to set the GROUP (usually your newsletter group) from CiviCRM in the .env.xx"
+        "you need to set the GROUP (usually your newsletter group) from CiviCRM in the .env.xx",
       );
     }
     this.group = process.env.GROUP || "";
@@ -77,7 +77,7 @@ class CiviCRM extends CRM {
       const r = await this.crmAPI.get("Group", { limit: 200 });
 
       if (r.count === 0) {
-        console.error ("can't access groups, possible missing permission");
+        console.error("can't access groups, possible missing permission");
       } else {
         console.warn("missing group id, some options:");
       }
@@ -86,36 +86,43 @@ class CiviCRM extends CRM {
       });
       process.exit(1); // should we create the contacts without putting them in a group?
     } else {
-      const r = await this.crmAPI.get("Group", { 
-      limit:1, where: [["id", "=", this.group]]});
+      const r = await this.crmAPI.get("Group", {
+        limit: 1,
+        where: [["id", "=", this.group]],
+      });
 
       if (r.count === 0) {
-        console.error ("can't access the group, possible missing permission",this.group);
+        console.error(
+          "can't access the group, possible missing permission",
+          this.group,
+        );
         process.exit(1); // should we create the contacts without putting them in a group?
       }
     }
-    let countries:any = undefined;
-    try { 
-    countries = await this.crmAPI.get(
-      "Country",
-      {
-        select: ["id", "iso_code", "row_count"],
-        limit: 9999,
-      },
-      { iso_code: "id" }
-    );
-    if (countries.error_code) {
-      console.error (countries,"problem accessing civicrm REST API"); process.exit(1);
-    }
+    let countries: any = undefined;
+    try {
+      countries = await this.crmAPI.get(
+        "Country",
+        {
+          select: ["id", "iso_code", "row_count"],
+          limit: 9999,
+        },
+        { iso_code: "id" },
+      );
+      if (countries.error_code) {
+        console.error(countries, "problem accessing civicrm REST API");
+        process.exit(1);
+      }
     } catch (e) {
-      console.error (e,"problem accessing civicrm REST API"); process.exit(1);
+      console.error(e, "problem accessing civicrm REST API");
+      process.exit(1);
     }
     this.countries = countries.values;
     return true;
   };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
 
@@ -135,7 +142,13 @@ class CiviCRM extends CRM {
     if (existing === false) {
       return this.createContact(message.contact, action, camp.id, source);
     } else {
-      return this.updateContact(existing, message.contact, action, camp.id, source);
+      return this.updateContact(
+        existing,
+        message.contact,
+        action,
+        camp.id,
+        source,
+      );
     }
     return false;
   };
@@ -144,7 +157,7 @@ class CiviCRM extends CRM {
     contact: any,
     action: any,
     campaign_id: number,
-    source?: string
+    source?: string,
   ): Record<string, any> => {
     let params: Record<string, any> = {
       values: {
@@ -186,15 +199,17 @@ class CiviCRM extends CRM {
             values: {
               activity_type_id: 32,
               source_contact_id: "$id",
-              subject: action.customFields?.subject ? action.customFields.subject :
-                (contact.dupeRank === 0
+              subject: action.customFields?.subject
+                ? action.customFields.subject
+                : contact.dupeRank === 0
                   ? source
-                  : source + " #" + contact.dupeRank),
+                  : source + " #" + contact.dupeRank,
               location: "action_" + action.id,
               activity_date_time: action.createdAt,
               //              location: action.,
               campaign_id: campaign_id,
-              details: action?.customFields?.message || action?.customFields?.comment,
+              details:
+                action?.customFields?.message || action?.customFields?.comment,
             },
           },
         ],
@@ -235,10 +250,10 @@ class CiviCRM extends CRM {
     contact: any,
     action: any,
     campaign_id: number,
-    source?: string
+    source?: string,
   ): Promise<boolean> => {
     if (campaign_id === null) {
-      throw new Error ("missing campaign id"); 
+      throw new Error("missing campaign id");
     }
 
     const params = this.getParams(contact, action, campaign_id, source);
@@ -275,7 +290,7 @@ class CiviCRM extends CRM {
     const r = await this.crmAPI.update("Contact", params);
     //    console.dir(r, { depth: null });
     if (!r.error_message) return true;
-    console.error ("updateContact",r.error_message,params);
+    console.error("updateContact", r.error_message, params);
     return false;
   };
 
@@ -283,28 +298,31 @@ class CiviCRM extends CRM {
     contact: any,
     action: any,
     campaign_id: number,
-    source?: string
+    source?: string,
   ): Promise<boolean> => {
-
     if (campaign_id === null) {
-      throw new Error ("missing campaign id"); 
+      throw new Error("missing campaign id");
     }
     const params = this.getParams(contact, action, campaign_id, source);
-    try { 
-    const r = await this.crmAPI.create("Contact", params);
-console.log("created",r);
-    if (!r.error_message) return true;
-    console.error ("createContact",r.error_message, params, r);
-    if (r.status === 403) {
-      console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
-    }
+    try {
+      const r = await this.crmAPI.create("Contact", params);
+      console.log("created", r);
+      if (!r.error_message) return true;
+      console.error("createContact", r.error_message, params, r);
+      if (r.status === 403) {
+        console.info(
+          "probably a missing permission, it needs to access civi, create activity, group, contact",
+        );
+      }
     } catch (e) {
-console.log("aaaa",e);
+      console.log("aaaa", e);
       if (e.cause?.status === 403) {
-        console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+        console.info(
+          "probably a missing permission, it needs to access civi, create activity, group, contact",
+        );
       }
     }
-console.log("aaaa");
+    console.log("aaaa");
     return false;
   };
 
@@ -366,32 +384,45 @@ console.log("aaaa");
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    let r = await this.crmAPI.get("Campaign", {
-      select: ["id", "name","title"],
-      limit: 1,
-      where: [["name", "=", campaign.name]],
-    },0);
+    let r = await this.crmAPI.get(
+      "Campaign",
+      {
+        select: ["id", "name", "title"],
+        limit: 1,
+        where: [["name", "=", campaign.name]],
+      },
+      0,
+    );
     if (r.error_code) {
-
-      throw new Error ("can't read campaign "+campaign.name + ':' + r.error_message +". CHeck your permission on civicampaign");
+      throw new Error(
+        "can't read campaign " +
+          campaign.name +
+          ":" +
+          r.error_message +
+          ". CHeck your permission on civicampaign",
+      );
     }
     if (r.count === 1) {
-      console.log("campaign",r.values[0])
+      console.log("campaign", r.values[0]);
       return r.values[0];
     }
-      console.log("let's create the campaign", campaign.name);
-      const now = new Date();
-      r = await this.crmAPI.create("Campaign", {
+    console.log("let's create the campaign", campaign.name);
+    const now = new Date();
+    r = await this.crmAPI.create(
+      "Campaign",
+      {
         values: {
           name: campaign.name,
           title: campaign.title,
           description: "campaign on proca",
           start_date: now.toISOString(),
         },
-      },0);
+      },
+      0,
+    );
 
     if (!r.values.id) {
-      throw new Error ("can't get or create campaign "+campaign.name);
+      throw new Error("can't get or create campaign " + campaign.name);
     }
     return r.values;
   };

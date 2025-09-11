@@ -91,6 +91,10 @@ class CRM {
             //optional async init for extran fetch and setup that can't be done in the constructor
             return true;
         });
+        this.close = () => __awaiter(this, void 0, void 0, function* () {
+            console.log("Closing");
+            return true;
+        });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
             // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist

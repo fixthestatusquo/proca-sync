@@ -38,7 +38,7 @@ class SalesforceCRM extends CRM {
     this.crmType = CRMType.OptIn;
     if (!process.env.SALESFORCE_URL) {
       this.error(
-        "you need to set the url of your api4 endpoint in the .env.xx"
+        "you need to set the url of your api4 endpoint in the .env.xx",
       );
       process.exit(1);
     }
@@ -81,7 +81,7 @@ class SalesforceCRM extends CRM {
   };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     if (this.verbose) {
       console.log("processing...", message);
@@ -100,16 +100,16 @@ class SalesforceCRM extends CRM {
         const LeadId = await upsertLead(this.crmAPI, record);
         if (!LeadId) throw Error(`Could not upsert lead`);
         try {
-        const r = await addCampaignContact(
-          this.crmAPI,
-          camp.Id,
-          { LeadId },
-          message
-        );
+          const r = await addCampaignContact(
+            this.crmAPI,
+            camp.Id,
+            { LeadId },
+            message,
+          );
         } catch (e) {
           return true;
         }
-//        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
+        //        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
       } else {
         const record = actionToContactRecord(message, {
           language: this.config.fieldLanguage,
@@ -123,9 +123,9 @@ class SalesforceCRM extends CRM {
           this.crmAPI,
           camp.Id,
           { ContactId },
-          message
+          message,
         );
-//        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
+        //        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
       }
       return true;
     } catch (er) {
@@ -133,11 +133,11 @@ class SalesforceCRM extends CRM {
         // already in campaign
         return true;
       }
-console.log(message);
+      console.log(message);
       this.error(
-        `tried to add ${message.contact.email} but error happened `+
-        JSON.stringify(er) + 
-        ` CODE>${er.errorCode}<`
+        `tried to add ${message.contact.email} but error happened ` +
+          JSON.stringify(er) +
+          ` CODE>${er.errorCode}<`,
       );
       return false;
     }

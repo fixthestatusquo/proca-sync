@@ -206,17 +206,28 @@ class CiviCRM extends crm_1.CRM {
             return false;
         });
         this.createContact = (contact, action, campaign_id, source) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (campaign_id === null) {
                 throw new Error("missing campaign id");
             }
             const params = this.getParams(contact, action, campaign_id, source);
-            const r = yield this.crmAPI.create("Contact", params);
-            if (!r.error_message)
-                return true;
-            console.error("createContact", r.error_message, params, r);
-            if (r.status === 403) {
-                console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+            try {
+                const r = yield this.crmAPI.create("Contact", params);
+                console.log("created", r);
+                if (!r.error_message)
+                    return true;
+                console.error("createContact", r.error_message, params, r);
+                if (r.status === 403) {
+                    console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+                }
             }
+            catch (e) {
+                console.log("aaaa", e);
+                if (((_a = e.cause) === null || _a === void 0 ? void 0 : _a.status) === 403) {
+                    console.info("probably a missing permission, it needs to access civi, create activity, group, contact");
+                }
+            }
+            console.log("aaaa");
             return false;
         });
         this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
@@ -282,18 +293,20 @@ class CiviCRM extends crm_1.CRM {
             if (r.error_code) {
                 throw new Error("can't read campaign " + campaign.name + ':' + r.error_message + ". CHeck your permission on civicampaign");
             }
-            if (r.count === 0) {
-                console.log("let's create the campaign", campaign.name);
-                const now = new Date();
-                r = yield this.crmAPI.create("Campaign", {
-                    values: {
-                        name: campaign.name,
-                        title: campaign.title,
-                        description: "campaign on proca",
-                        start_date: now.toISOString(),
-                    },
-                }, 0);
+            if (r.count === 1) {
+                console.log("campaign", r.values[0]);
+                return r.values[0];
             }
+            console.log("let's create the campaign", campaign.name);
+            const now = new Date();
+            r = yield this.crmAPI.create("Campaign", {
+                values: {
+                    name: campaign.name,
+                    title: campaign.title,
+                    description: "campaign on proca",
+                    start_date: now.toISOString(),
+                },
+            }, 0);
             if (!r.values.id) {
                 throw new Error("can't get or create campaign " + campaign.name);
             }

@@ -14,7 +14,11 @@ type ProcaResponse = {
 };
 
 //export const graphQL: Promise<ProcaResponse> = async (operation, query, options) => {
-export async function graphQL (operation, query, options): Promise<ProcaResponse> {
+export async function graphQL(
+  operation,
+  query,
+  options,
+): Promise<ProcaResponse> {
   if (!options) options = {};
   if (!options.apiUrl)
     options.apiUrl =
@@ -43,7 +47,7 @@ export async function graphQL (operation, query, options): Promise<ProcaResponse
       }),
     });
     if (!res.ok) {
-      return <ProcaResponse> {
+      return <ProcaResponse>{
         errors: [{ message: "network error #" + res.status }],
       };
     }
@@ -73,11 +77,10 @@ export async function graphQL (operation, query, options): Promise<ProcaResponse
     data = response.data;
   } catch (error) {
     console.error(error);
-      return <ProcaResponse> 
-    { errors: [{ message: error.toString() }] };
+    return <ProcaResponse>{ errors: [{ message: error.toString() }] };
   }
   return data;
-};
+}
 
 export const fetchCampaign = async (id) => {
   let variables = {};
@@ -86,8 +89,8 @@ export const fetchCampaign = async (id) => {
     id, name, title, config, externalId
   }
 }`;
-  
-  const data : any = await graphQL("campaign", query, { variables: { id: id } });
+
+  const data: any = await graphQL("campaign", query, { variables: { id: id } });
   if (!data?.campaign) throw new Error(data);
 
   if (data?.campaign?.config)

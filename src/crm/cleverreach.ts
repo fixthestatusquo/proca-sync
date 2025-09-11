@@ -5,11 +5,11 @@ import {
   EventMessage,
   handleResult,
   ProcaCampaign,
-  CampaignUpdatedEvent
+  CampaignUpdatedEvent,
 } from "../crm";
 import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
-import { fetchCampaign as procaCampaign }  from '../proca';
+import { fetchCampaign as procaCampaign } from "../proca";
 
 export type Message = ActionMessage | EventMessage;
 
@@ -23,17 +23,19 @@ class CleverreachCRM extends CRM {
     this.initializeToken();
   }
 
-  handleCampaignUpdate = async (message: CampaignUpdatedEvent): Promise<handleResult | boolean> => {
+  handleCampaignUpdate = async (
+    message: CampaignUpdatedEvent,
+  ): Promise<handleResult | boolean> => {
     //we need to refetch campaign when it is updated
     await this.fetchCampaign(message.campaignId);
     return true;
-  }
+  };
 
- fetchCampaign = async (id: number): Promise<any> => {
-   const r = await procaCampaign(id);
-   this.campaignCache.set(id, r);
-  return r;
-}
+  fetchCampaign = async (id: number): Promise<any> => {
+    const r = await procaCampaign(id);
+    this.campaignCache.set(id, r);
+    return r;
+  };
 
   initializeToken = async () => {
     try {
@@ -54,9 +56,14 @@ class CleverreachCRM extends CRM {
 
     // listId might be different for each campaign
     // custom label is different for each campaign
-    if (!camp.config?.component?.sync?.listId || !camp.config?.component?.sync?.customLabel) {
-      console.error(`Campaign config params missing, set the listId and custom label for the campaign ${message.campaign.name}`);
-    };
+    if (
+      !camp.config?.component?.sync?.listId ||
+      !camp.config?.component?.sync?.customLabel
+    ) {
+      console.error(
+        `Campaign config params missing, set the listId and custom label for the campaign ${message.campaign.name}`,
+      );
+    }
 
     await this.initializeToken();
 
@@ -68,7 +75,11 @@ class CleverreachCRM extends CRM {
     }
 
     const hasValues = await getContact(message.contact.email, this.token);
-    const done = await upsertContact(this.token, formatAction(message, hasValues, customLabel.toLowerCase()), listId);
+    const done = await upsertContact(
+      this.token,
+      formatAction(message, hasValues, customLabel.toLowerCase()),
+      listId,
+    );
 
     if (done) {
       console.log(`Message ${message.actionId} sent`);
@@ -76,23 +87,23 @@ class CleverreachCRM extends CRM {
     }
     console.log(`Message ${message.actionId} not sent`);
     return false;
-  }
+  };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-      console.log("Action taken from the queue", message.action.id);
+    console.log("Action taken from the queue", message.action.id);
     return this.handleMessage(message);
   };
 
   handleEvent = async (
-    message: EventMessage
+    message: EventMessage,
   ): Promise<handleResult | boolean> => {
-      console.log("Event taken from queue", message.actionId);
+    console.log("Event taken from queue", message.actionId);
 
-      message.contact = message.supporter.contact;
-      message.privacy = message.supporter.privacy;
-      return this.handleMessage(message);
+    message.contact = message.supporter.contact;
+    message.privacy = message.supporter.privacy;
+    return this.handleMessage(message);
   };
 
   fetchContact = async (email: string, context?: any): Promise<any> => {

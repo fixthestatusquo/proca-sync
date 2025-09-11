@@ -48,7 +48,7 @@ setBounced = async (id : number, bounced:boolean) => {
 */
 
   handleActionContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
     writeJson(message, message.action.actionType + "_" + message.actionId);

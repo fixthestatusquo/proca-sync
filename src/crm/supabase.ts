@@ -30,14 +30,14 @@ class SupabaseCRM extends CRM {
     this.crmType = CRMType[crmType];
     if (!process.env.CRM_URL) {
       console.error(
-        "you need to set the url of your crm endpoint in the .env.xx"
+        "you need to set the url of your crm endpoint in the .env.xx",
       );
 
       process.exit(1);
     }
     if (!process.env.AUTH_USER || !process.env.AUTH_PASS) {
       console.error(
-        "you need to set the AUTH_USER and AUTH_PASSWORD for your supabase access and  in the .env.xx"
+        "you need to set the AUTH_USER and AUTH_PASSWORD for your supabase access and  in the .env.xx",
       );
 
       process.exit(1);
@@ -52,7 +52,6 @@ class SupabaseCRM extends CRM {
     this.crmAPI = createClient(config.server, config.publicKey);
     this.config = config;
   }
-
 
   openPublishChannel = (rabbit) => {
     console.log("ready to redispatch approved candidates");
@@ -99,11 +98,11 @@ class SupabaseCRM extends CRM {
           } else {
             console.log("skipping", payload);
           }
-        }
+        },
       )
       .subscribe();
 
-    console.log("receive notifications",error);
+    console.log("receive notifications", error);
     if (error) {
       console.log(error);
       return false;
@@ -112,7 +111,7 @@ class SupabaseCRM extends CRM {
   };
 
   dispatchEvent = async (status: string, data) => {
-console.log("not redispatch event");
+    console.log("not redispatch event");
 
     if (status !== "approved") {
       console.log("ignoring status:", status, data.actionId);
@@ -134,7 +133,7 @@ console.log("not redispatch event");
   };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     if (this.verbose) {
       console.log("processing...", message);

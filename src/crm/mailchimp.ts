@@ -43,26 +43,26 @@ class MailchimpCRM extends CRM {
     this.crmType = CRMType.OptIn;
     if (!process.env.AUTH_TOKEN) {
       console.error(
-        "you need to set the AUTH_TOKEN from mailchimp in the .env.xx"
+        "you need to set the AUTH_TOKEN from mailchimp in the .env.xx",
       );
       process.exit(1);
     }
     this.token = process.env.AUTH_TOKEN;
     if (!process.env.LIST) {
       console.error(
-        "you need to set the LIST (audience id) from mailchimp in the .env.xx"
+        "you need to set the LIST (audience id) from mailchimp in the .env.xx",
       );
     }
     this.list = process.env.LIST || "";
     if (!process.env.GROUP) {
       console.warn(
-        "you might want to set interest groups from mailchimp in the .env.xx if you want to use it to store campaigns"
+        "you might want to set interest groups from mailchimp in the .env.xx if you want to use it to store campaigns",
       );
     }
     this.group = process.env.GROUP || "";
     if (!process.env.INTEREST) {
       console.warn(
-        "you might want to set interest from mailchimp in the .env.xx if you want to use it to store campaigns"
+        "you might want to set interest from mailchimp in the .env.xx if you want to use it to store campaigns",
       );
     }
     this.interest = process.env.INTEREST || "";
@@ -91,15 +91,15 @@ class MailchimpCRM extends CRM {
         });
       return false;
     }
-    const r = await allCampaigns(this.client,this.list,this.group);
-    r.interests?.forEach ( (d:any) => {
-      console.log("campaign?",d.id,d.name,d.subscriber_count);
+    const r = await allCampaigns(this.client, this.list, this.group);
+    r.interests?.forEach((d: any) => {
+      console.log("campaign?", d.id, d.name, d.subscriber_count);
     });
     return true;
-  }
+  };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     //const response = await this.client.ping.get();
     const actionPayload = formatAction(message, this.mergeFields, false, false);
@@ -111,7 +111,7 @@ class MailchimpCRM extends CRM {
         this.client,
         this.list,
         actionPayload,
-        this.verbose
+        this.verbose,
       );
       if (Boolean(r)) {
         return r;
@@ -143,7 +143,7 @@ class MailchimpCRM extends CRM {
     client: any,
     list_id: string,
     member: Contact | ContactSubscription,
-    verbose = false
+    verbose = false,
   ): Promise<boolean> => {
     if (!member.status) {
       member.status = member.status_if_new;
@@ -151,8 +151,7 @@ class MailchimpCRM extends CRM {
     if (this.interest) {
       member.interests = {};
       member.interests[this.interest] = true;
-      console.log("add to interest",member); 
-        
+      console.log("add to interest", member);
     }
     try {
       const response = await client.lists.addListMember(list_id, member, {
@@ -163,7 +162,7 @@ class MailchimpCRM extends CRM {
         throw new Error(response.errors);
       }
       if (verbose) {
-         console.log("verbose addContactToList");
+        console.log("verbose addContactToList");
         delete response._links;
         console.log(response);
       }

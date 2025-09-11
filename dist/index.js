@@ -122,7 +122,19 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const crm = yield (0, crm_1.init)(config);
         console.log("listening for messages");
-        (0, listener_1.listen)(config, crm);
+        const queue = (0, listener_1.listen)(config, crm);
+        process.on('SIGINT', () => __awaiter(void 0, void 0, void 0, function* () {
+            console.log('Caught interrupt signal');
+            if (queue) {
+                // a close method is not documented, but it's a good practice to have one
+                // @ts-ignore
+                yield queue.close();
+            }
+            if (crm.close) {
+                yield crm.close();
+            }
+            process.exit(0);
+        }));
     }
     catch (er) {
         console.error(`Problem: ${er}`);

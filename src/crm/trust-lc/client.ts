@@ -1,72 +1,85 @@
-import crypto from 'crypto';
-import dotenv from 'dotenv';
+import crypto from "crypto";
+import dotenv from "dotenv";
 dotenv.config();
 
 import { Signature, Verification } from "./data";
 
 const makeHeaders = () => {
-  const key = process.env['TRUST_KEY'];
+  const key = process.env["TRUST_KEY"];
   if (!key) throw Error("TRUST_KEY not set");
   const stamp = Math.floor(Math.floor(Date.now() / 1000) / 30).toString();
-  const token = crypto.createHmac("sha256", key).update(stamp).digest().toString('hex');
+  const token = crypto
+    .createHmac("sha256", key)
+    .update(stamp)
+    .digest()
+    .toString("hex");
 
   return {
-   method: "POST",
+    method: "POST",
     headers: {
       Accept: "application/json",
-      'Authorization': `Token token="proca-test:${token}"`,
-      'Content-Type': 'application/json;charset=UTF-8'
-    }
-  }
-}
+      Authorization: `Token token="proca-test:${token}"`,
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+  };
+};
 
 export const postAction = async (body: Signature) => {
   if ("string" !== typeof process.env.POST_URL) {
-    throw new Error ("POST_URL missing in env");
+    throw new Error("POST_URL missing in env");
   }
   try {
-    const response= await fetch(process.env.POST_URL,{...(makeHeaders()),body:JSON.stringify(body)});
+    const response = await fetch(process.env.POST_URL, {
+      ...makeHeaders(),
+      body: JSON.stringify(body),
+    });
     const data = await response.json();
     return data;
-    } catch (error: any) {
-      console.error('post error: ', error);
-      throw(error);
-    }
-}
-
-export const verification = async (verificationToken: string, body: Verification) => {
-  if ("string" !== typeof process.env.VERIFICATION_URL) {
-    throw new Error ("POST_URL missing in env");
+  } catch (error: any) {
+    console.error("post error: ", error);
+    throw error;
   }
-  const url = process.env.VERIFICATION_URL + verificationToken + '/verify';
+};
+
+export const verification = async (
+  verificationToken: string,
+  body: Verification,
+) => {
+  if ("string" !== typeof process.env.VERIFICATION_URL) {
+    throw new Error("POST_URL missing in env");
+  }
+  const url = process.env.VERIFICATION_URL + verificationToken + "/verify";
   try {
-    const response = await fetch(
-      url,
-      {body:JSON.stringify(body),
-      ...(makeHeaders())}
-    );
+    const response = await fetch(url, {
+      body: JSON.stringify(body),
+      ...makeHeaders(),
+    });
     if (response.status === 204) {
       return "allgood";
     }
 
-    const data= await response.json();
+    const data = await response.json();
     return data;
-    } catch (error: any) {
-      console.error('post error: ', error);
-      throw(error);
+  } catch (error: any) {
+    console.error("post error: ", error);
+    throw error;
   }
-}
+};
 
 export const lookup = async (email: string) => {
   if ("string" !== typeof process.env.LOOKUP_URL) {
-    throw new Error ("LOOKUP_URL missing in env");
+    throw new Error("LOOKUP_URL missing in env");
   }
   const url = process.env.LOOKUP_URL + email;
   try {
-    const response = await fetch (url, makeHeaders());
+    const response = await fetch(url, makeHeaders());
     const data = await response.json();
-    return {success: true, data:data};
-    } catch (error: any) {
-      return {success:false, status:error.response?.status, data: error.response};
+    return { success: true, data: data };
+  } catch (error: any) {
+    return {
+      success: false,
+      status: error.response?.status,
+      data: error.response,
+    };
   }
-}
+};

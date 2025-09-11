@@ -1,16 +1,10 @@
-import {
-  CRM,
-  CRMType,
-  ActionMessage,
-  handleResult
-} from "../crm";
-import dotenv from 'dotenv';
+import { CRM, CRMType, ActionMessage, handleResult } from "../crm";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const apiUrl = process.env.CRM_URL;
 const apiToken = process.env.CRM_API_TOKEN;
-
 
 if (!apiUrl || !apiToken) {
   console.error("No ccccredentials");
@@ -18,39 +12,41 @@ if (!apiUrl || !apiToken) {
 }
 
 const authHeaders = {
-  'Accept': 'application/json',
-  'Content-Type': 'application/json'
+  Accept: "application/json",
+  "Content-Type": "application/json",
 };
 
 export const getToken = async () => {
   try {
-    const response = await fetch(apiUrl + 'authenticate', {
-      method: 'POST',
+    const response = await fetch(apiUrl + "authenticate", {
+      method: "POST",
       headers: authHeaders,
-      body: apiToken
+      body: apiToken,
     });
 
     if (!response.ok) {
       const errorBody = await response.text();
-      throw new Error(`Error fetching token: ${response.statusText} - ${errorBody}`);
+      throw new Error(
+        `Error fetching token: ${response.statusText} - ${errorBody}`,
+      );
     }
 
     const data = await response.json();
     return {
-      token: data['ens-auth-token'],
-      expires_in: data['expires_in'] || 3600 // Default to 1 hour if not provided
+      token: data["ens-auth-token"],
+      expires_in: data["expires_in"] || 3600, // Default to 1 hour if not provided
     };
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error("Error:", error.message);
   }
 };
 
 export const upsertSupporter = async (data, token: string) => {
   try {
-    const response = await fetch(apiUrl + 'supporter', {
+    const response = await fetch(apiUrl + "supporter", {
       method: "POST",
       headers: {
-        "Accept": "application/json",
+        Accept: "application/json",
         "Content-Type": "application/json",
         "ens-auth-token": token,
       },
@@ -80,23 +76,25 @@ export const upsertSupporter = async (data, token: string) => {
       throw new Error(errorMessage);
     }
 
-    return { status: response.status};
+    return { status: response.status };
   } catch (error) {
     console.error("Error:", error);
     throw error; // Re-throw other errors
   }
 };
 
-
 export const getSupporter = async (email, token: string) => {
   try {
-    const response = await fetch(apiUrl + 'supporter?' + 'email=' + 'brucewayne@example.com', {
-      method: "GET",
-      headers: {
-        "Accept": "application/json",
-        "ens-auth-token": token,
-      }
-    });
+    const response = await fetch(
+      apiUrl + "supporter?" + "email=" + "brucewayne@example.com",
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "ens-auth-token": token,
+        },
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -110,7 +108,7 @@ export const getSupporter = async (email, token: string) => {
   } catch (error) {
     console.error("Error:", error);
   }
-}
+};
 
 class CleverreachCRM extends CRM {
   private _token: string | null = null;
@@ -120,7 +118,7 @@ class CleverreachCRM extends CRM {
     super(opt);
     this.crmType = CRMType.OptIn;
   }
-   // Getter for token that initializes it if needed
+  // Getter for token that initializes it if needed
 
   private async getToken(): Promise<string> {
     const now = Date.now();
@@ -138,7 +136,7 @@ class CleverreachCRM extends CRM {
   }
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     console.log("Action taken from the queue", message.action.id);
 
@@ -156,24 +154,24 @@ class CleverreachCRM extends CRM {
       ["Last Name"]: lastName,
       City,
       Postcode,
-      Phone
+      Phone,
     } = await getSupporter(message.contact.email, token);
 
     const data = {
-      'Email Address': message.contact.email,
-      'First Name': message.contact.firstName,
-      'Last Name': message.contact?.lastName || lastName || "",
+      "Email Address": message.contact.email,
+      "First Name": message.contact.firstName,
+      "Last Name": message.contact?.lastName || lastName || "",
       City: message.action.customFields?.locality || City || "",
       Postcode: message.contact?.postcode || Postcode || "",
       Phone: message.contact?.phone || Phone || "",
-      "questions": {
-        "Accepts Email": "Y"
-       }
+      questions: {
+        "Accepts Email": "Y",
+      },
     };
 
-    if (message.campaign.name === 'naturevoter') {
-      data["questions"]["NatureVoter"] = "Y"
-    };
+    if (message.campaign.name === "naturevoter") {
+      data["questions"]["NatureVoter"] = "Y";
+    }
 
     if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
       data["questions"]["French"] = "Y";
@@ -182,9 +180,11 @@ class CleverreachCRM extends CRM {
     const response = await upsertSupporter(data, token);
 
     if (response.status === 200) {
-      response.warning ?
-        console.log(`Message ${message.actionId} removed from the queue: ${response.warning}`)
-        : console.log(`Message ${message.actionId} sent`)
+      response.warning
+        ? console.log(
+            `Message ${message.actionId} removed from the queue: ${response.warning}`,
+          )
+        : console.log(`Message ${message.actionId} sent`);
     } else {
       console.log(`Message ${message.actionId} failed: ${response.status}`);
     }

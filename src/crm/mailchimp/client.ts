@@ -30,22 +30,27 @@ export const allLists = async (client: any): Promise<any> => {
   return client.lists.getAllLists({ count: 30 });
 };
 
-export const allCampaigns = async (client: any, list: string, category: string): Promise<any> => {
+export const allCampaigns = async (
+  client: any,
+  list: string,
+  category: string,
+): Promise<any> => {
   if (!category) {
     const r = await client.lists.getListInterestCategories(list);
     const categories = r.categories || [];
-console.log(categories);
-    categories && categories.forEach ((d: any) => {
-      console.log(d.id, d.title);
-    });
-   return {interests:[]};
+    console.log(categories);
+    categories &&
+      categories.forEach((d: any) => {
+        console.log(d.id, d.title);
+      });
+    return { interests: [] };
   }
   const response = await client.lists.listInterestCategoryInterests(
     list,
-    category
+    category,
   );
-console.log(response);
-  return response; 
+  console.log(response);
+  return response;
 };
 
 export interface List {
@@ -66,7 +71,7 @@ const LIST_CACHE: Record<string, List> = {};
 export const upsertList = async (
   client: any,
   name: string,
-  templateName: string
+  templateName: string,
 ) => {
   //const ls: Record<string,any>[] = await lists(client)
   console.error("not updated");
@@ -111,7 +116,6 @@ export const memberHash = (email: string) => {
   const hash = crypto.createHash("md5").update(email).digest("hex");
   return hash;
 };
-
 
 export const findMember = async (client: any, email: string) => {
   const result = await client.searchMembers.search(email);

@@ -14,13 +14,11 @@ import { writeFileSync } from "fs";
  */
 
 class DebugCRM extends CRM {
-
-
   handleActionContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-    console.log("message",message.actionId, message.campaign?.title);
+    console.log("message", message.actionId, message.campaign?.title);
     return false;
   };
 

@@ -21,11 +21,10 @@ const clihelp = () => {
       "--pause (wait between each message)",
       "[env] alternate way to configure the env to avoid the '-- --env'",
       //      "boolean inputs, no validatiton, everything but 'false' will be set to 'true'"
-    ].join("\n")
+    ].join("\n"),
   );
   process.exit(0);
-
-}
+};
 
 export const main = async (argv: string[]) => {
   const opt = parseArg(argv, {
@@ -51,7 +50,7 @@ export const main = async (argv: string[]) => {
     opt.env = opt._.shift();
   }
   if (opt.env) {
-    console.log("trying with",opt.env);
+    console.log("trying with", opt.env);
     if (!existsSync(opt.env)) {
       const env = ".env." + opt.env;
       process.env.PROCA_ENV = opt.env;
@@ -62,10 +61,10 @@ export const main = async (argv: string[]) => {
     }
     envConfig = { path: opt.env };
   } else {
-    if (process.env.NODE_ENV !== 'production') {
-      console.error("missing -e or --env params"); process.exit(1);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("missing -e or --env params");
+      process.exit(1);
     }
-
   }
   const conf = dotenv.config(envConfig);
   if (process.env.SENTRY_URL) {
@@ -76,16 +75,16 @@ export const main = async (argv: string[]) => {
     const config = configFromOptions(conf, opt);
     if (opt.dump) {
       console.warn(
-        "saving into data folder instead of using " + process.env.CRM
+        "saving into data folder instead of using " + process.env.CRM,
       );
       process.env.CRM = "file";
     }
-    const crm = await init (config);
+    const crm = await init(config);
     console.log("listening for messages");
     const queue = listen(config, crm);
 
-    process.on('SIGINT', async () => {
-      console.log('Caught interrupt signal');
+    process.on("SIGINT", async () => {
+      console.log("Caught interrupt signal");
       if (queue) {
         // a close method is not documented, but it's a good practice to have one
         // @ts-ignore

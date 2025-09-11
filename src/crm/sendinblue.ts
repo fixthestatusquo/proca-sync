@@ -26,12 +26,12 @@ class SendInBlueCRM extends CRM {
     this.crmType = CRMType.OptIn;
     this.apiInstance.setApiKey(
       SibApiV3Sdk.AccountApiApiKeys.apiKey,
-      process.env.SENDINBLUE_KEY
+      process.env.SENDINBLUE_KEY,
     );
   }
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     let camp;
     try {
@@ -43,7 +43,11 @@ class SendInBlueCRM extends CRM {
     console.log(camp.id, message.contact.email);
     let createContact = new SibApiV3Sdk.CreateContact();
     createContact.email = message.contact.email;
-    createContact.attributes = {"LANG":message.actionPage.locale,"FIRSTNAME":message.contact.firstName, "LASTNAME":message.contact.lastName || ""};
+    createContact.attributes = {
+      LANG: message.actionPage.locale,
+      FIRSTNAME: message.contact.firstName,
+      LASTNAME: message.contact.lastName || "",
+    };
 
     createContact.listIds = [camp.id];
     createContact.updateEnabled = true;
@@ -51,12 +55,12 @@ class SendInBlueCRM extends CRM {
       const contact = await this.apiInstance.createContact(createContact);
     } catch (e) {
       if (e.body) {
-        console.log("error creating",e.body,e.body.code,e.body.message);
+        console.log("error creating", e.body, e.body.code, e.body.message);
       } else {
-        console.log("error creating no code",e);
-     }
-//      const error = JSON.parse(e.body);
-//      console.log(error.code,error.message); 
+        console.log("error creating no code", e);
+      }
+      //      const error = JSON.parse(e.body);
+      //      console.log(error.code,error.message);
       return { processed: false };
     }
     return { processed: true };
@@ -65,7 +69,7 @@ class SendInBlueCRM extends CRM {
   campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
     let name: string = campaign.name;
     if (campaign.externalId) {
-      name ="proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+      name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
     }
     if (!this.campaigns[name]) {
       this.campaigns[name] = await this.fetchCampaign(campaign);
@@ -79,7 +83,7 @@ class SendInBlueCRM extends CRM {
       const name = "proca";
       if (folders.body.folders) {
         let procaFolder = folders.body.folders.filter(
-          (d: any) => d.name === name
+          (d: any) => d.name === name,
         );
         if (!procaFolder.length) {
           const createFolder = new SibApiV3Sdk.CreateUpdateFolder();
@@ -92,14 +96,13 @@ class SendInBlueCRM extends CRM {
         this.folderId = procaFolder.id;
 
         let lists = await this.apiInstance.getLists(50, 0);
-          lists = lists.body.lists;
+        lists = lists.body.lists;
         if (lists.length) {
-          lists.forEach ( (d:any) => this.campaigns[d.name] = d);
+          lists.forEach((d: any) => (this.campaigns[d.name] = d));
         }
-
       }
     } catch (e) {
-      console.log("error fetching campaigns",e);
+      console.log("error fetching campaigns", e);
     }
   };
 
@@ -109,15 +112,14 @@ class SendInBlueCRM extends CRM {
         const data = await this.apiInstance.getList(campaign.externalId);
         return data.body;
       } catch (e) {
-         console.error("can't fetch list",campaign.externalId);
-         throw e;
+        console.error("can't fetch list", campaign.externalId);
+        throw e;
       }
     }
 
     if (Object.keys(this.campaigns).length === 0) {
       await this.fetchCampaigns();
-      if (this.campaigns[campaign.name])
-        return this.campaigns[campaign.name];
+      if (this.campaigns[campaign.name]) return this.campaigns[campaign.name];
     }
     try {
       const createList = new SibApiV3Sdk.CreateList();

@@ -44,7 +44,10 @@ export const handleConsent = (action: ActionMessageV2) => {
     : true;
 };
 
-export const formatAction = (queueAction: ActionMessageV2, moveCode: "string" | undefined) => {
+export const formatAction = (
+  queueAction: ActionMessageV2,
+  moveCode: "string" | undefined,
+) => {
   const postData = queueAction;
   if (!moveCode) moveCode = "AKT" + postData.campaign.externalId;
   const action: TrustAction = {

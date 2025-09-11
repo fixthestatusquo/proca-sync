@@ -28,7 +28,7 @@ export const makeClient = async (opt: CrmConfigType) => {
 export const campaignByName = async (
   conn: Connection,
   name: string,
-  opt: any
+  opt: any,
 ) => {
   let campaign;
   const campaignTypeId = opt.campaignType;
@@ -69,7 +69,7 @@ export const addCampaignContact = async (
   conn: Connection,
   CampaignId: string,
   memberId: MemberID,
-  _action: ActionMessageV2
+  _action: ActionMessageV2,
 ) => {
   // const _addedDate = action.action.createdAt.split("T")[0]
   const resp = await conn
@@ -111,7 +111,7 @@ export const upsertLead = async (conn: Connection, contact: SFRecord) => {
     if (er.name === "MULTIPLE_CHOICES") {
       const idPath = er.content[er.content.length - 1].split("/");
       console.warn(
-        `Duplicate records for ${contact.Email}:  ${er.content}, returning last one`
+        `Duplicate records for ${contact.Email}:  ${er.content}, returning last one`,
       );
       return idPath[idPath.length - 1];
     } else if (er.name === "CANNOT_UPDATE_CONVERTED_LEAD") {
@@ -144,6 +144,6 @@ export const upsertContact = async (conn: Connection, contact: SFRecord) => {
 
 export const foo = async (conn: Connection) => {
   return await conn
-  .sobject("CampaignMember")
-  .find({}, { limit: 10, offset: 0 });
+    .sobject("CampaignMember")
+    .find({}, { limit: 10, offset: 0 });
 };

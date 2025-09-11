@@ -8,7 +8,6 @@ import {
 
 import { createClient } from "@supabase/supabase-js";
 
-
 export type CrmConfigType = {
   server: string;
   publicKey: string;
@@ -17,15 +16,15 @@ export type CrmConfigType = {
 };
 
 type PublicCommentType = {
-  created_at: string,
-  comment: string,
-  campaign: string,
-  widget_id: number,
-  uuid: string,
-  lang: string,
-  area?: string,
-  name?: string,
-  locality?: string
+  created_at: string;
+  comment: string;
+  campaign: string;
+  widget_id: number;
+  uuid: string;
+  lang: string;
+  area?: string;
+  name?: string;
+  locality?: string;
 };
 
 class PublicCommentCRM extends CRM {
@@ -38,7 +37,7 @@ class PublicCommentCRM extends CRM {
     this.crmType = CRMType.Contact;
     if (!process.env.CRM_URL) {
       console.error(
-        "you need to set the url of your crm endpoint in the .env.xx"
+        "you need to set the url of your crm endpoint in the .env.xx",
       );
 
       process.exit(1);
@@ -62,25 +61,26 @@ class PublicCommentCRM extends CRM {
         password: this.config.password,
       });
       console.log(data, error);
-      if (error) throw new Error (error);
+      if (error) throw new Error(error);
       this.crmAPI.auth.startAutoRefresh();
     } else {
-      console.info("Starting as anonymous. Consider adding AUTH_USER and AUTH_PATH in your env instead.");
-//      const { data, error } = await this.crmAPI.auth.signInAnonymously();
-//      console.log(data, error);
+      console.info(
+        "Starting as anonymous. Consider adding AUTH_USER and AUTH_PATH in your env instead.",
+      );
+      //      const { data, error } = await this.crmAPI.auth.signInAnonymously();
+      //      console.log(data, error);
       //if (error) throw new Error (error);
       //this.crmAPI.auth.startAutoRefresh();
     }
     return true;
-  }
-
+  };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     return campaign;
   };
 
   handleContact = async (
-    message: ActionMessage
+    message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     if (this.verbose) {
       console.log("processing...", message);
@@ -89,7 +89,8 @@ class PublicCommentCRM extends CRM {
 
     const comment = message.action.customFields.comment;
     if (!comment) {
-      console.log("nothing to save, no comment on the action"); return true;
+      console.log("nothing to save, no comment on the action");
+      return true;
     }
     const data: PublicCommentType = {
       //      id: message.actionId, let's keep the sequence
@@ -105,7 +106,8 @@ class PublicCommentCRM extends CRM {
     if (message.contact.firstName) {
       data.name = message.contact.firstName.trim();
       if (message.contact.lastName) {
-        data.name += " " + message.contact.lastName.charAt(0).toUpperCase().trim();
+        data.name +=
+          " " + message.contact.lastName.charAt(0).toUpperCase().trim();
       }
       if (message.action.customFields.locality) {
         data.locality = message.action.customFields.locality.toString();
@@ -113,10 +115,8 @@ class PublicCommentCRM extends CRM {
       }
     }
 
-
     console.log(data);
     const { error } = await this.crmAPI.from("comments").insert(data);
-
 
     if (!error) return true;
 
