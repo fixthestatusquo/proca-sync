@@ -2,7 +2,7 @@
   "name": "@proca/sync",
   "version": "2.0.0",
   "description": "Proca-to-CRM syncer",
-  "main": "dist/index.js",
+  "main": "bin/sync",
   "repository": "git@github.com:fixthestatusquo/proca-sync.git",
   "license": "AGPL-3.0-or-later",
   "private": false,
@@ -12,7 +12,6 @@
     "README.md",
     "LICENSE"
   ],
-  "main": "bin/sync",
   "run": "bin/sync",
   "bin": "bin/sync",
   "scripts": {
@@ -58,6 +57,7 @@
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
+    "csv-stringify": "^6.6.0",
     "dotenv": "^16.4.5",
     "i18n-iso-countries": "^7.13.0",
     "jsforce": "^3.7.0",

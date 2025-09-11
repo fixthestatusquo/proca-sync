@@ -82,7 +82,20 @@ export const main = async (argv: string[]) => {
     }
     const crm = await init (config);
     console.log("listening for messages");
-    listen(config, crm);
+    const queue = listen(config, crm);
+
+    process.on('SIGINT', async () => {
+      console.log('Caught interrupt signal');
+      if (queue) {
+        // a close method is not documented, but it's a good practice to have one
+        // @ts-ignore
+        await queue.close();
+      }
+      if (crm.close) {
+        await crm.close();
+      }
+      process.exit(0);
+    });
   } catch (er) {
     console.error(`Problem: ${er}`);
     Sentry.captureException(er);

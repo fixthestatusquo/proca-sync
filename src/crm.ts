@@ -77,6 +77,7 @@ export interface Params {
 
 interface CRMInterface {
   init: () => Promise<boolean>;
+  close: () => Promise<boolean>;
   handleActionContact: (
     message: ActionMessageV2
   ) => Promise<handleResult | boolean>;
@@ -147,6 +148,10 @@ export abstract class CRM implements CRMInterface {
     return true;
   }
 
+  close = async (): Promise<boolean> => {
+    console.log("Closing");
+    return true;
+  }
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     // we don't fetch nor create the campaign from the CRM, by default we consider that all information needed is the name of the campaign as set on proca
     // in most CRMs, you'll want to fetch the campaign details from the CRM or create one if it doesn't exist
@@ -202,7 +207,7 @@ export abstract class CRM implements CRMInterface {
           }
           return r;
         } else {
-          this.log("Not a privacy+withConsent message, not sent: " + email + " " + actionId, ProcessStatus.error);
+          this.log(message.action.actionType +" Not a privacy+withConsent message, not sent: " + email + " " + actionId, ProcessStatus.error);
           return true;
         }
         this.verbose && (console.log(message));
