@@ -1,5 +1,6 @@
 import { ActionMessageV2 } from '@proca/queue';
 import {
+  Contact,
   CRM,
   CRMType,
   handleResult,
@@ -20,8 +21,8 @@ if (!url || !token) {
 type ANPerson = {
   given_name?: string;
   family_name?: string;
-  email_addresses: { address: string }[];
-  phone_numbers?: { number: string }[];
+  email_addresses: { address: string, status: string }[];
+  phone_numbers?: { number: string, status: string }[];
   postal_addresses?: { postal_code?: string }[];
   identifiers?: string[];
   languages_spoken?: string[];
@@ -39,14 +40,15 @@ const actionToPerson = (message: ActionMessageV2, tags: string[]): ANPersonPaylo
     identifiers: [`proca:${contactRef}`],
     given_name: firstName,
     family_name: lastName,
-    email_addresses: [{ address: email }],
+    email_addresses: [{ address: email, status: "subscribed" }],
     languages_spoken: [ message.actionPage?.locale ]
   };
 
   if (phone) {
     person.phone_numbers = [
       {
-        number: phone
+        number: phone,
+        status: "subscribed"
       },
     ];
   };
@@ -69,6 +71,27 @@ const actionToPerson = (message: ActionMessageV2, tags: string[]): ANPersonPaylo
   return { person: person, "add_tags": tags  };
 };
 
+const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Contact & { phone: string }) => {
+
+  const existingEmail = exists?.email_addresses?.find(
+    e => e.address.toLowerCase() === contact.email
+  );
+
+  if (existingEmail && existingEmail.status !== "subscribed") {
+    personPayload.person.email_addresses[0].status = "unsubscribed";
+  }
+
+  if (contact?.phone && exists?.phone_numbers?.length) {
+    const existingPhone = exists.phone_numbers.find(
+      p => p.number.replace(/\D/g, "") === contact.phone.replace(/\D/g, "")
+    );
+    if (existingPhone && existingPhone.status !== "subscribed" && personPayload.person.phone_numbers) {
+      personPayload.person.phone_numbers[0].status = "unsubscribed";
+    }
+  }
+  return personPayload;
+};
+
 const headers = {
   "Content-Type": "application/json",
   "OSDI-API-Token": token!,
@@ -80,7 +103,7 @@ class ActionNetwork extends CRM {
   tagCache: Map<any, any>;
   constructor(opt: {}) {
     super(opt);
-    this.crmType = CRMType.OptIn;
+    this.crmType = CRMType.Contact;
     this.formCache = new Map();
     this.tagCache = new Map();
   }
@@ -278,9 +301,16 @@ fetchContact = async (email: string): Promise<any> => {
       console.log(JSON.stringify(message, null, 2));
     }
     try {
-      const tags = ["supporterr", message.campaign.name];
+      const tags = ["supporter", message.campaign.name];
       await this.setTags(tags);
       const personPayload = actionToPerson(message, tags);
+
+      if (!message.privacy.optIn) {
+        // if supporter exists and is subscribed, we do not unsubscribe them
+        const exists = await this.fetchContact(message.contact.email);
+        if (exists) adjustStatus(personPayload, exists, message.contact);
+      }
+
       console.log("Person payload:", JSON.stringify(personPayload, null, 2));
       const contact = await this.upsertContact(personPayload);
       const personUri = contact?._links?.self?.href;
