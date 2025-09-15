@@ -6,7 +6,6 @@ import {
   ProcaCampaign
 } from "../crm";
 import dotenv from "dotenv";
-import { fetchCampaign as procaCampaign }  from '../proca';
 
 dotenv.config();
 
@@ -30,9 +29,10 @@ type ANPerson = {
 
 type ANPersonPayload = {
   person: ANPerson;
+  add_tags: string[];
 };
 
-const actionToPerson = (message: ActionMessageV2): ANPersonPayload => {
+const actionToPerson = (message: ActionMessageV2, tags: string[]): ANPersonPayload => {
   const { area, contactRef, country,  email, firstName, lastName,  postcode, phone } = message.contact;
 
   const person: any = {
@@ -66,7 +66,7 @@ const actionToPerson = (message: ActionMessageV2): ANPersonPayload => {
     (k) => person[k] === undefined && delete person[k]
   );
 
-  return { person };
+  return { person: person, "add_tags": tags  };
 };
 
 const headers = {
@@ -77,10 +77,12 @@ const headers = {
 
 class ActionNetwork extends CRM {
   formCache: Map<any, any>;
+  tagCache: Map<any, any>;
   constructor(opt: {}) {
     super(opt);
     this.crmType = CRMType.OptIn;
     this.formCache = new Map();
+    this.tagCache = new Map();
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
@@ -172,7 +174,28 @@ class ActionNetwork extends CRM {
     return await res.json();
   };
 
-  fetchContact = async (email: string, context?: any): Promise<any> => {
+
+fetchTestForm = async () => {
+  const url = `https://actionnetwork.org/api/v2/forms/9693c20c-37e4-408b-8de1-caee11407d4e/`;
+
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: headers    });
+
+    if (!res.ok) {
+      throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("Error fetching form:", err);
+    throw err;
+  }
+}
+
+fetchContact = async (email: string): Promise<any> => {
     console.log(`Fetching contact for email: ${email}`);
     try {
       const res = await fetch(`${url}/people?filter=email_address eq '${encodeURIComponent(email)}'`, {
@@ -216,22 +239,52 @@ class ActionNetwork extends CRM {
     }
   };
 
-  handleActionContact = async (message: ActionMessageV2): Promise<handleResult | boolean> => {
+
+  setTags = async (tagNames: string[]): Promise<void> => {
+  for (const tagName of tagNames) {
+    try {
+      if (this.tagCache.has(tagName)) continue;
+
+      // Try fetching the tag
+      const res = await fetch(`${url}/tags?filter=name eq '${encodeURIComponent(tagName)}'`, { headers });
+      if (!res.ok) throw new Error(`Failed to fetch tag "${tagName}": ${res.status}`);
+
+      const data = await res.json();
+      let tag = data?._embedded?.["osdi:tags"]?.find((t: any) => t.name === tagName) || null;
+
+      // If no tag, create it
+      if (!tag) {
+        const createRes = await fetch(`${url}/tags`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ name: tagName, origin_system: "Proca" }),
+        });
+        if (!createRes.ok) throw new Error(`Failed to create tag "${tagName}": ${createRes.status} ${createRes.statusText}`);
+        tag = await createRes.json();
+      }
+
+      // Cache the tag
+      this.tagCache.set(tagName, tag);
+    } catch (err: any) {
+      throw new Error(`Error ensuring tag "${tagName}": ${err.message}`);
+    }
+  }
+};
+
+  handleContact = async (message: ActionMessageV2): Promise<handleResult | boolean> => {
      console.log("Processing action:", message.action.id, "testing:", message.action.testing);
 
       if (this.verbose) {
       console.log(JSON.stringify(message, null, 2));
     }
     try {
-      const personPayload = actionToPerson(message);
+      const tags = ["supporterr", message.campaign.name];
+      await this.setTags(tags);
+      const personPayload = actionToPerson(message, tags);
+      console.log("Person payload:", JSON.stringify(personPayload, null, 2));
       const contact = await this.upsertContact(personPayload);
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
-
-      const form = await this.fetchForm(message.campaign.title, message.actionPage.locale);
-
-      await this.submitAction(form, personUri, message);
-      console.log("Submitted action:", message.action.id);
 
       return true;
     } catch (err: any) {
