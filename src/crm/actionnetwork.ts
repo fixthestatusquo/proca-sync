@@ -33,14 +33,16 @@ type ANPersonPayload = {
   add_tags: string[];
 };
 
-const actionToPerson = (message: ActionMessageV2, tags: string[]): ANPersonPayload => {
+const actionToPerson = (message: ActionMessageV2,
+  tags: string[],
+  status: "subscribed" | "unsubscribed"): ANPersonPayload => {
   const { area, contactRef, country,  email, firstName, lastName,  postcode, phone } = message.contact;
 
   const person: any = {
     identifiers: [`proca:${contactRef}`],
     given_name: firstName,
     family_name: lastName,
-    email_addresses: [{ address: email, status: "subscribed" }],
+    email_addresses: [{ address: email, status: status }],
     languages_spoken: [ message.actionPage?.locale ]
   };
 
@@ -48,7 +50,7 @@ const actionToPerson = (message: ActionMessageV2, tags: string[]): ANPersonPaylo
     person.phone_numbers = [
       {
         number: phone,
-        status: "subscribed"
+        status: status
       },
     ];
   };
@@ -77,16 +79,16 @@ const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Cont
     e => e.address.toLowerCase() === contact.email
   );
 
-  if (existingEmail && existingEmail.status !== "subscribed") {
-    personPayload.person.email_addresses[0].status = "unsubscribed";
+  if (existingEmail && existingEmail.status === "subscribed") {
+    personPayload.person.email_addresses[0].status = "subscribed";
   }
 
   if (contact?.phone && exists?.phone_numbers?.length) {
     const existingPhone = exists.phone_numbers.find(
       p => p.number.replace(/\D/g, "") === contact.phone.replace(/\D/g, "")
     );
-    if (existingPhone && existingPhone.status !== "subscribed" && personPayload.person.phone_numbers) {
-      personPayload.person.phone_numbers[0].status = "unsubscribed";
+    if (existingPhone && existingPhone.status === "subscribed" && personPayload.person.phone_numbers) {
+      personPayload.person.phone_numbers[0].status = "subscribed";
     }
   }
   return personPayload;
@@ -303,7 +305,8 @@ fetchContact = async (email: string): Promise<any> => {
     try {
       const tags = ["supporter", message.campaign.name];
       await this.setTags(tags);
-      const personPayload = actionToPerson(message, tags);
+      const status = message.privacy.optIn ? "subscribed" : "unsubscribed";
+      const personPayload = actionToPerson(message, tags, status);
 
       if (!message.privacy.optIn) {
         // if supporter exists and is subscribed, we do not unsubscribe them
