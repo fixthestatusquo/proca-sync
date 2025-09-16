@@ -221,7 +221,6 @@ fetchTestForm = async () => {
 }
 
 fetchContact = async (email: string): Promise<any> => {
-    console.log(`Fetching contact for email: ${email}`);
     try {
       const res = await fetch(`${url}/people?filter=email_address eq '${encodeURIComponent(email)}'`, {
         headers: headers,
@@ -256,14 +255,12 @@ fetchContact = async (email: string): Promise<any> => {
       if (!res.ok) {
         throw new Error(`ActionNetwork API error: ${res.status} ${res.statusText}`);
       }
-      console.log(`Upserted contact with status ${res.status}`);
       return await res.json();
     } catch (err: any) {
       console.error(`Error upserting contact in ActionNetwork: ${err.message}`);
       return null;
     }
   };
-
 
   setTags = async (tagNames: string[]): Promise<void> => {
   for (const tagName of tagNames) {
@@ -309,16 +306,14 @@ fetchContact = async (email: string): Promise<any> => {
       const personPayload = actionToPerson(message, tags, status);
 
       if (!message.privacy.optIn) {
-        // if supporter exists and is subscribed, we do not unsubscribe them
         const exists = await this.fetchContact(message.contact.email);
+        // if supporter who opts-out exists and is subscribed, we do not unsubscribe them
         if (exists) adjustStatus(personPayload, exists, message.contact);
       }
 
-      console.log("Person payload:", JSON.stringify(personPayload, null, 2));
       const contact = await this.upsertContact(personPayload);
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
-
       return true;
     } catch (err: any) {
       console.error("Error handling contact/action:", err.message);
