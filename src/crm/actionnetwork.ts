@@ -7,16 +7,25 @@ import {
   ProcaCampaign
 } from "../crm";
 import dotenv from "dotenv";
-
+import { fetchCampaign as procaCampaign }  from '../proca';
 dotenv.config();
 
 const url = process.env.CRM_URL as string;
 const token = process.env.CRM_API_TOKEN as string;
+const form = process.env.CRM_FORM as string;
+
+const testUrl = process.env.CRM_TEST_URL as string;
+const testToken = process.env.CRM_TEST_API_TOKEN as string;
+const testForm = process.env.CRM_TEST_FORM as string;
 
 if (!url || !token) {
   console.error("Missing CRM credentials.");
   process.exit(1);
-}
+};
+
+if (!testUrl || !testToken) {
+  console.error("Missing test credentials, defaulting to prod")
+};
 
 type ANPerson = {
   given_name?: string;
@@ -118,6 +127,11 @@ const headers = {
   "OSDI-API-Token": token!,
 };
 
+const testHeaders = {
+  "Content-Type": "application/json",
+  "OSDI-API-Token": testToken!,
+};
+
 
 class ActionNetwork extends CRM {
   formCache: Map<any, any>;
@@ -130,51 +144,40 @@ class ActionNetwork extends CRM {
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    return true;
+     const r = await procaCampaign(campaign.id);
+    return r;
   }
 
-  async fetchForm(campaignTitle: string, locale: string): Promise<any> {
-    const key = `${campaignTitle}:${locale}`;
-    if (this.formCache.has(key)) {
-      return this.formCache.get(key);
-    }
-
-    const formTitle = `${campaignTitle} ${locale.split("_")[0].toUpperCase()}`;
-    const res = await fetch(
-      `${url}/forms?filter=title eq '${encodeURIComponent(formTitle)}'`,
-      {
-        headers: headers
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch form: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    let form = data?._embedded?.["osdi:forms"]?.[0] || null;
-
-    // If no form, create one
+    async fetchForm(): Promise<any> {
     if (!form) {
-      console.log(`No form found, creating new form: ${formTitle}`);
-      const createRes = await fetch(`${url}/forms`, {
-        method: "POST",
-        headers: headers,
-        body: JSON.stringify({
-          name: formTitle,
-          title: formTitle,
-          origin_system: "Proca",
-        }),
-      });
-
-      if (!createRes.ok) {
-        throw new Error(`Failed to create form: ${createRes.status} ${createRes.statusText}`);
-      };
-      form = await createRes.json();
+      throw new Error("CRM_FORM env variable not set");
     }
-    this.formCache.set(key, form);
-    return form;
+
+    // return from cache if available
+    if (this.formCache.has(form)) {
+      return this.formCache.get(form);
+    }
+
+      try {
+      console.log("frm url", `${url}forms/${form}` )
+        const res = await fetch(`${url}forms/${testForm}`, {
+          method: "GET",
+          headers: headers
+        });
+
+      if (!res.ok) {
+        throw new Error(`Failed to fetch form: ${res.status} ${res.statusText}`);
+      }
+
+      const formData = await res.json();
+      this.formCache.set(form, formData); // cache it
+      return formData;
+    } catch (err: any) {
+      console.error(`Error fetching form ${form}:`, err.message);
+      throw err;
+    }
   }
+
 
   // submit an action (form submission) for a given person
   submitAction = async (
@@ -218,26 +221,6 @@ class ActionNetwork extends CRM {
     return await res.json();
   };
 
-
-fetchTestForm = async () => {
-  const url = `https://actionnetwork.org/api/v2/forms/9693c20c-37e4-408b-8de1-caee11407d4e/`;
-
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: headers    });
-
-    if (!res.ok) {
-      throw new Error(`Request failed: ${res.status} ${res.statusText}`);
-    }
-
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("Error fetching form:", err);
-    throw err;
-  }
-}
 
 fetchContact = async (email: string): Promise<any> => {
     try {
@@ -313,8 +296,9 @@ fetchContact = async (email: string): Promise<any> => {
 };
 
   handleContact = async (message: ActionMessageV2): Promise<handleResult | boolean> => {
-     console.log("Processing action:", message.action.id, "testing:", message.action.testing);
+    console.log("Processing action:", message.action.id, "testing:", message.action.testing);
 
+    const campaign = await this.fetchCampaign(message.campaign);
       if (this.verbose) {
       console.log(JSON.stringify(message, null, 2));
     }
@@ -334,8 +318,7 @@ fetchContact = async (email: string): Promise<any> => {
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
 
-      const form = await this.fetchForm(message.campaign.title, message.actionPage.locale);
-
+      const form = await this.fetchForm();
       await this.submitAction(form, personUri, message);
       console.log("Submitted action:", message.action.id);
       return true;
