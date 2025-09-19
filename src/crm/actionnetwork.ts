@@ -33,17 +33,32 @@ type ANPersonPayload = {
   add_tags: string[];
 };
 
+const customizePersonAttrs = (message: ActionMessageV2, attrs: any) => {
+  switch (process.env.PROCA_USERNAME) {
+    case "greens": {
+      const locale = attrs.languages_spoken?.[0];
+      if (locale) {
+        const lang = message.actionPage.locale.split("_")[0].toLowerCase(); // en_GB → en
+        attrs.custom_fields ||= {};
+        attrs.custom_fields[`speaks_${lang}`] = "1";
+      }
+      break;
+    }
+  }
+};
+
 const actionToPerson = (message: ActionMessageV2,
   tags: string[],
   status: "subscribed" | "unsubscribed"): ANPersonPayload => {
-  const { area, contactRef, country,  email, firstName, lastName,  postcode, phone } = message.contact;
+  const { area, contactRef, country, email, firstName, lastName, postcode, phone } = message.contact;
+  const lang = message.actionPage.locale.split("_")[0].toLowerCase() || "en";
 
   const person: any = {
     identifiers: [`proca:${contactRef}`],
     given_name: firstName,
     family_name: lastName,
     email_addresses: [{ address: email, status: status }],
-    languages_spoken: [ message.actionPage?.locale ]
+    languages_spoken: [lang]
   };
 
   if (phone) {
@@ -70,8 +85,12 @@ const actionToPerson = (message: ActionMessageV2,
     (k) => person[k] === undefined && delete person[k]
   );
 
+  customizePersonAttrs(message, person);
+
   return { person: person, "add_tags": tags  };
 };
+
+
 
 const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Contact & { phone: string }) => {
 
