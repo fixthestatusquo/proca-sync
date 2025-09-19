@@ -329,10 +329,15 @@ fetchContact = async (email: string): Promise<any> => {
         // if supporter who opts-out exists and is subscribed, we do not unsubscribe them
         if (exists) adjustStatus(personPayload, exists, message.contact);
       }
-
+      console.log("person", JSON.stringify(personPayload))
       const contact = await this.upsertContact(personPayload);
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
+
+      const form = await this.fetchForm(message.campaign.title, message.actionPage.locale);
+
+      await this.submitAction(form, personUri, message);
+      console.log("Submitted action:", message.action.id);
       return true;
     } catch (err: any) {
       console.error("Error handling contact/action:", err.message);
