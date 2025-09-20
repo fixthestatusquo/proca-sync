@@ -126,9 +126,7 @@ class ActionNetwork extends CRM {
     if (this.formCache.has(id)) {
       return this.formCache.get(id);
     }
-
       try {
-      console.log("frm url", `${url}/forms/${id}` )
         const res = await fetch(`${url}/forms/${id}`, {
           method: "GET",
           headers: getHeaders(test)
@@ -205,7 +203,6 @@ fetchContact = async (email: string, test): Promise<any> => {
       // People are in _embedded["osdi:people"]
       const people = data?._embedded?.["osdi:people"];
       if (people && people.length > 0) {
-        console.log(`Found ${people.length} contact(s) for email ${email}`);
         return people[0]; // return the first match
       }
       return null;
@@ -247,7 +244,6 @@ fetchContact = async (email: string, test): Promise<any> => {
       if (!res.ok) throw new Error(`Failed to fetch tag "${tagName}": ${res.status}`);
 
       const data = await res.json();
-      console.log("data", data);
       let tag = data?._embedded?.["osdi:tags"]?.find((t: any) => t.name === tagName) || null;
 
       // If no tag, create it
@@ -289,18 +285,17 @@ fetchContact = async (email: string, test): Promise<any> => {
         // if supporter who opts-out exists and is subscribed, we do not unsubscribe them
         if (exists) adjustStatus(personPayload, exists, message.contact);
       }
-      console.log("person", JSON.stringify(personPayload))
 
-      // const contact = await this.upsertContact(personPayload, test);
-      // const personUri = contact?._links?.self?.href;
-     // if (!personUri) throw new Error("No person URI returned");
+      const contact = await this.upsertContact(personPayload, test);
+      const personUri = contact?._links?.self?.href;
+      if (!personUri) throw new Error("No person URI returned");
 
       const f = campaign.config.component?.sync?.form || (test ? testFormID || formID : formID);
       if (test && !testFormID) {
         console.warn("Test mode enabled but CRM_TEST_FORM is not set – falling back to prod form");
       }
       const form = await this.fetchForm(f, test);
-     // await this.submitAction(form, personUri, message, test);
+      await this.submitAction(form, personUri, message, test);
       console.log("Submitted action:", message.action.id);
       return true;
     } catch (err: any) {
