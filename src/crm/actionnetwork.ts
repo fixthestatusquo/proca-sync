@@ -11,19 +11,18 @@ import { fetchCampaign as procaCampaign }  from '../proca';
 dotenv.config();
 
 const url = process.env.CRM_URL as string;
-const token = process.env.CRM_API_TOKEN as string;
-const form = process.env.CRM_FORM as string;
+const token = process.env.CRM_API_TOKEN as string; // change!!
+const formID = process.env.CRM_FORM as string;
 
-const testUrl = process.env.CRM_TEST_URL as string;
 const testToken = process.env.CRM_TEST_API_TOKEN as string;
-const testForm = process.env.CRM_TEST_FORM as string;
+const testFormID = process.env.CRM_TEST_FORM as string;
 
 if (!url || !token) {
   console.error("Missing CRM credentials.");
   process.exit(1);
 };
 
-if (!testUrl || !testToken) {
+if (!testToken) {
   console.error("Missing test credentials, defaulting to prod")
 };
 
@@ -45,12 +44,9 @@ type ANPersonPayload = {
 const customizePersonAttrs = (message: ActionMessageV2, attrs: any) => {
   switch (process.env.PROCA_USERNAME) {
     case "greens": {
-      const locale = attrs.languages_spoken?.[0];
-      if (locale) {
         const lang = message.actionPage.locale.split("_")[0].toLowerCase(); // en_GB → en
         attrs.custom_fields ||= {};
         attrs.custom_fields[`speaks_${lang}`] = "1";
-      }
       break;
     }
   }
@@ -122,16 +118,10 @@ const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Cont
   return personPayload;
 };
 
-const headers = {
+const getHeaders = (test: boolean) => ({
   "Content-Type": "application/json",
-  "OSDI-API-Token": token!,
-};
-
-const testHeaders = {
-  "Content-Type": "application/json",
-  "OSDI-API-Token": testToken!,
-};
-
+  "OSDI-API-Token": test && testToken ? testToken : token,
+});
 
 class ActionNetwork extends CRM {
   formCache: Map<any, any>;
@@ -148,21 +138,21 @@ class ActionNetwork extends CRM {
     return r;
   }
 
-    async fetchForm(): Promise<any> {
-    if (!form) {
-      throw new Error("CRM_FORM env variable not set");
+    async fetchForm(id, test): Promise<any> {
+    if (!id) {
+      throw new Error("Form ID is missing");
     }
 
     // return from cache if available
-    if (this.formCache.has(form)) {
-      return this.formCache.get(form);
+    if (this.formCache.has(id)) {
+      return this.formCache.get(id);
     }
 
       try {
-      console.log("frm url", `${url}forms/${form}` )
-        const res = await fetch(`${url}forms/${testForm}`, {
+      console.log("frm url", `${url}/forms/${id}` )
+        const res = await fetch(`${url}/forms/${id}`, {
           method: "GET",
-          headers: headers
+          headers: getHeaders(test)
         });
 
       if (!res.ok) {
@@ -170,10 +160,10 @@ class ActionNetwork extends CRM {
       }
 
       const formData = await res.json();
-      this.formCache.set(form, formData); // cache it
+      this.formCache.set(id, formData); // cache it
       return formData;
     } catch (err: any) {
-      console.error(`Error fetching form ${form}:`, err.message);
+      console.error(`Error fetching form ${id}:`, err.message);
       throw err;
     }
   }
@@ -184,6 +174,7 @@ class ActionNetwork extends CRM {
     form: any,
     personUri: string,
     action: ActionMessageV2,
+    test = false,
     autoresponse = true
   ) => {
     const submissionUrl = form._links?.["osdi:submissions"]?.href;
@@ -208,7 +199,7 @@ class ActionNetwork extends CRM {
 
     const res = await fetch(submissionUrl, {
       method: "POST",
-      headers:  headers,
+      headers:  getHeaders(test),
       body: JSON.stringify(data),
     });
 
@@ -222,10 +213,10 @@ class ActionNetwork extends CRM {
   };
 
 
-fetchContact = async (email: string): Promise<any> => {
+fetchContact = async (email: string, test): Promise<any> => {
     try {
       const res = await fetch(`${url}/people?filter=email_address eq '${encodeURIComponent(email)}'`, {
-        headers: headers,
+        headers: getHeaders(test),
       });
 
       if (!res.ok) {
@@ -245,12 +236,12 @@ fetchContact = async (email: string): Promise<any> => {
     }
   };
 
-  upsertContact = async (person: ANPersonPayload): Promise<any> => {
+  upsertContact = async (person: ANPersonPayload, test: boolean): Promise<any> => {
 
     try {
       const res = await fetch(`${url}/people`, {
         method: "POST",
-        headers: headers,
+        headers: getHeaders(test),
         body: JSON.stringify(person),
       });
 
@@ -264,23 +255,27 @@ fetchContact = async (email: string): Promise<any> => {
     }
   };
 
-  setTags = async (tagNames: string[]): Promise<void> => {
+  setTags = async (tagNames: string[], test: boolean): Promise<void> => {
   for (const tagName of tagNames) {
     try {
       if (this.tagCache.has(tagName)) continue;
 
       // Try fetching the tag
-      const res = await fetch(`${url}/tags?filter=name eq '${encodeURIComponent(tagName)}'`, { headers });
+      const res = await fetch(`${url}/tags?filter=name eq '${encodeURIComponent(tagName)}'`, {
+        headers: getHeaders(test),
+      });
+
       if (!res.ok) throw new Error(`Failed to fetch tag "${tagName}": ${res.status}`);
 
       const data = await res.json();
+      console.log("data", data);
       let tag = data?._embedded?.["osdi:tags"]?.find((t: any) => t.name === tagName) || null;
 
       // If no tag, create it
       if (!tag) {
         const createRes = await fetch(`${url}/tags`, {
           method: "POST",
-          headers,
+          headers: getHeaders(test),
           body: JSON.stringify({ name: tagName, origin_system: "Proca" }),
         });
         if (!createRes.ok) throw new Error(`Failed to create tag "${tagName}": ${createRes.status} ${createRes.statusText}`);
@@ -296,30 +291,37 @@ fetchContact = async (email: string): Promise<any> => {
 };
 
   handleContact = async (message: ActionMessageV2): Promise<handleResult | boolean> => {
-    console.log("Processing action:", message.action.id, "testing:", message.action.testing);
+    const test = message.action.testing;
+    console.log("Processing action:", message.action.id, "testing:", test);
 
     const campaign = await this.fetchCampaign(message.campaign);
-      if (this.verbose) {
+
+    if (this.verbose) {
       console.log(JSON.stringify(message, null, 2));
     }
     try {
       const tags = ["supporter", message.campaign.name];
-      await this.setTags(tags);
+      await this.setTags(tags, test);
       const status = message.privacy.optIn ? "subscribed" : "unsubscribed";
       const personPayload = actionToPerson(message, tags, status);
 
       if (!message.privacy.optIn) {
-        const exists = await this.fetchContact(message.contact.email);
+        const exists = await this.fetchContact(message.contact.email, test);
         // if supporter who opts-out exists and is subscribed, we do not unsubscribe them
         if (exists) adjustStatus(personPayload, exists, message.contact);
       }
       console.log("person", JSON.stringify(personPayload))
-      const contact = await this.upsertContact(personPayload);
+
+      const contact = await this.upsertContact(personPayload, test);
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
 
-      const form = await this.fetchForm();
-      await this.submitAction(form, personUri, message);
+      const f = campaign.config.component?.sync?.form || (test ? testFormID || formID : formID);
+      if (test && !testFormID) {
+        console.warn("Test mode enabled but CRM_TEST_FORM is not set – falling back to prod form");
+      }
+      const form = await this.fetchForm(f, test);
+      await this.submitAction(form, personUri, message, test);
       console.log("Submitted action:", message.action.id);
       return true;
     } catch (err: any) {
