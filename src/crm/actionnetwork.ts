@@ -52,49 +52,28 @@ const customizePersonAttrs = (message: ActionMessageV2, attrs: any) => {
   }
 };
 
-const actionToPerson = (message: ActionMessageV2,
-  tags: string[],
-  status: "subscribed" | "unsubscribed"): ANPersonPayload => {
-  const { area, contactRef, country, email, firstName, lastName, postcode, phone } = message.contact;
-  const lang = message.actionPage.locale.split("_")[0].toLowerCase() || "en";
+const actionToPerson = (message: ActionMessageV2, tags: string[], status: "subscribed" | "unsubscribed"): ANPersonPayload => {
+  const { contactRef, email, firstName, lastName, phone, postcode, country, area } = message.contact;
+  const lang = (message.actionPage.locale.split("_")[0] || "en").toLowerCase();
 
-  const person: any = {
+  const person: ANPerson = {
     identifiers: [`proca:${contactRef}`],
     given_name: firstName,
     family_name: lastName,
-    email_addresses: [{ address: email, status: status }],
-    languages_spoken: [lang]
+    email_addresses: [{ address: email, status }],
+    languages_spoken: [lang],
+    ...(phone && { phone_numbers: [{ number: phone, status }] }),
+    ...(postcode || country || area ? {
+      postal_addresses: [
+        ...(postcode ? [{ postal_code: postcode }] : []),
+        ...(country || area ? [{ country: country || area }] : []),
+      ]
+    } : {})
   };
-
-  if (phone) {
-    person.phone_numbers = [
-      {
-        number: phone,
-        status: status
-      },
-    ];
-  };
-
-  if (postcode || country || area) {
-    person.postal_addresses = [];
-    if (postcode) {
-    person.postal_addresses.push({ postal_code: postcode });
-  }
-    if (country || area) {
-      person.postal_addresses.push({ country: country || area });
-    }
-  };
-
-  // Clean out undefined keys which is only maybe lastName
-  Object.keys(person).forEach(
-    (k) => person[k] === undefined && delete person[k]
-  );
 
   customizePersonAttrs(message, person);
-
-  return { person: person, "add_tags": tags  };
+  return { person, add_tags: tags };
 };
-
 
 
 const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Contact & { phone: string }) => {
@@ -312,16 +291,16 @@ fetchContact = async (email: string, test): Promise<any> => {
       }
       console.log("person", JSON.stringify(personPayload))
 
-      const contact = await this.upsertContact(personPayload, test);
-      const personUri = contact?._links?.self?.href;
-      if (!personUri) throw new Error("No person URI returned");
+      // const contact = await this.upsertContact(personPayload, test);
+      // const personUri = contact?._links?.self?.href;
+     // if (!personUri) throw new Error("No person URI returned");
 
       const f = campaign.config.component?.sync?.form || (test ? testFormID || formID : formID);
       if (test && !testFormID) {
         console.warn("Test mode enabled but CRM_TEST_FORM is not set – falling back to prod form");
       }
       const form = await this.fetchForm(f, test);
-      await this.submitAction(form, personUri, message, test);
+     // await this.submitAction(form, personUri, message, test);
       console.log("Submitted action:", message.action.id);
       return true;
     } catch (err: any) {
