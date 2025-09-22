@@ -151,7 +151,7 @@ class ActionNetwork extends CRM {
     form: any,
     personUri: string,
     action: ActionMessageV2,
-    test = false,
+    test,
     autoresponse = true
   ) => {
     const submissionUrl = form._links?.["osdi:submissions"]?.href;
@@ -290,9 +290,12 @@ fetchContact = async (email: string, test): Promise<any> => {
       const personUri = contact?._links?.self?.href;
       if (!personUri) throw new Error("No person URI returned");
 
-      const f = campaign.config.component?.sync?.form || (test ? testFormID || formID : formID);
-      if (test && !testFormID) {
-        console.warn("Test mode enabled but CRM_TEST_FORM is not set – falling back to prod form");
+      const f = test
+      ? (campaign.config.component?.sync?.test_form || testFormID || formID)
+      : (campaign.config.component?.sync?.form || formID);
+
+      if (test && !campaign.config.component?.sync?.test_form && !testFormID) {
+        console.warn("Test mode enabled but no test form configured – falling back to prod form");
       }
       const form = await this.fetchForm(f, test);
       await this.submitAction(form, personUri, message, test);
