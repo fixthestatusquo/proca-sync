@@ -5,7 +5,7 @@ const formatAction = (queueAction, config) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     const data = queueAction;
     /// Add data form_type
-    data.form_type = queueAction.action.actionType === "mail2target" ? "protestmail" : "petition";
+    data.form_type = queueAction.action.actionType === "mail2target" || "email" ? "protestmail" : "petition";
     if (data.action.customFields.promocode || data.action.customFields.promocodephone) {
         data.promo_code = ((_a = data.contact) === null || _a === void 0 ? void 0 : _a.phone)
             ? data.action.customFields.promocodephone.toString() || ""
