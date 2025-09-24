@@ -1,0 +1,58 @@
+{
+  "action": {
+    "actionType": "consultation",
+    "createdAt": "2025-09-01T10:20:31Z",
+    "customFields": {
+      "medium": "bluesky",
+      "comment": "prod test"
+    },
+    "testing": true
+  },
+  "actionId": 1,
+  "actionPage": {
+    "locale": "en",
+    "name": "houseconsult/en",
+    "supporterConfirmTemplate": null,
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 3974,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "houseconsult",
+    "title": "houseconsult"
+  },
+  "campaignId": 900,
+  "contact": {
+    "area": "BE",
+    "contactRef": "PVi-iuZjytluF6tcBMbEkrZsJIzLO9BhzdddMBErrqXVcw",
+    "country": "ME",
+    "dupeRank": 0,
+    "email": "brucewayne@example.org",
+    "firstName": "Bruce",
+    "postcode": "1000"
+  },
+  "org": {
+    "name": "greensefa",
+    "title": "Greens/EFA"
+  },
+  "orgId": 188,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": null,
+    "emailStatusChanged": null,
+    "givenAt": "2025-09-01T10:20:18Z",
+    "optIn": false,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "deliver",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://act.greens-efa.eu/test",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}
