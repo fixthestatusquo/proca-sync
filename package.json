@@ -54,7 +54,7 @@
     "@proca/queue": "^5.3.0",
     "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^9.35.0",
-    "@supabase/supabase-js": "^2.50.2",
+    "@supabase/supabase-js": "^2.75.0",
     "@topcli/spinner": "^2.1.2",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
