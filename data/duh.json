@@ -1,0 +1,57 @@
+{
+  "action": {
+    "actionType": "signature",
+    "createdAt": "2025-05-12T14:21:53Z",
+    "customFields": {},
+    "testing": true
+  },
+  "actionId": 5870638,
+  "actionPage": {
+    "locale": "en",
+    "name": "confirm_test/en",
+    "supporterConfirmTemplate": null,
+    "thankYouTemplate": null,
+    "thankYouTemplateRef": null
+  },
+  "actionPageId": 3918,
+  "campaign": {
+    "contactSchema": "basic",
+    "externalId": null,
+    "name": "confirm_test",
+    "title": "confirm test"
+  },
+  "campaignId": 869,
+  "contact": {
+    "area": "ME",
+    "contactRef": "KyG-twWCOVnMzPCPzyl_4UIjTHJbYmxrPhw3pii1XOE",
+    "country": "ME",
+    "dupeRank": 0,
+    "email": "brucewayne@test.fixthestatusquo.org",
+    "firstName": "Bruce",
+    "lastName": "Wayne",
+    "postcode": "81000",
+    "phone": "123456789"
+  },
+  "org": {
+    "name": "deutsche_umwelthilfe",
+    "title": "Deutsche Umwelthilfe"
+  },
+  "orgId": 913,
+  "personalInfo": null,
+  "privacy": {
+    "emailStatus": null,
+    "emailStatusChanged": null,
+    "givenAt": "2025-05-12T14:21:53Z",
+    "optIn": true,
+    "withConsent": true
+  },
+  "schema": "proca:action:2",
+  "stage": "supporter_confirm",
+  "tracking": {
+    "campaign": "unknown",
+    "content": "",
+    "location": "https://widget.proca.app/d/confirm_test/en/index.html",
+    "medium": "unknown",
+    "source": "unknown"
+  }
+}
