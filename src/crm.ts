@@ -192,7 +192,11 @@ export abstract class CRM implements CRMInterface {
   handleCampaignUpdate = async (
     message: CampaignUpdatedEventMessage,
   ): Promise<handleResult | boolean> => {
-    throw new Error("you need to implement handleCampaignUpdate in your CRM");
+    console.warn("campaign update", message.campaign.name, message.campaign.title);
+    //we need to refetch campaign when it is updated
+    //message is close enough to campaign structure?
+    await this.fetchCampaign(message.campaign);
+    return true;
   };
 
   formatResult = (result: handleResult | boolean): boolean => {
@@ -225,10 +229,10 @@ export abstract class CRM implements CRMInterface {
         } else {
           this.log(
             message.action.actionType +
-              " Not a privacy+withConsent message, not sent: " +
-              email +
-              " " +
-              actionId,
+            " Not a privacy+withConsent message, not sent: " +
+            email +
+            " " +
+            actionId,
             ProcessStatus.error,
           );
           return true;
@@ -243,9 +247,9 @@ export abstract class CRM implements CRMInterface {
         if (!message.privacy.withConsent) {
           this.log(
             "no withConsent " +
-              message.actionId +
-              " ," +
-              message.action.actionType,
+            message.actionId +
+            " ," +
+            message.action.actionType,
             ProcessStatus.skipped,
           );
           return true;
@@ -273,9 +277,9 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.optIn === true) {
           this.log(
             "opt-in, but no withConsent " +
-              actionId +
-              " " +
-              message.action?.actionType,
+            actionId +
+            " " +
+            message.action?.actionType,
             ProcessStatus.skipped,
           );
           //          this.verbose && console.log('opt-out',message.actionId);
@@ -294,9 +298,9 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.optIn === null) {
           this.log(
             "optIn null (implicit) withConsent " +
-              actionId +
-              " " +
-              message.action?.actionType,
+            actionId +
+            " " +
+            message.action?.actionType,
             ProcessStatus.skipped,
           );
           return true;

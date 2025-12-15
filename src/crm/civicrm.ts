@@ -396,10 +396,10 @@ class CiviCRM extends CRM {
     if (r.error_code) {
       throw new Error(
         "can't read campaign " +
-          campaign.name +
-          ":" +
-          r.error_message +
-          ". CHeck your permission on civicampaign",
+        campaign.name +
+        ":" +
+        r.error_message +
+        ". CHeck your permission on civicampaign",
       );
     }
     if (r.count === 1) {
@@ -420,7 +420,7 @@ class CiviCRM extends CRM {
       },
       0,
     );
-
+    console.log(r);
     if (!r.values.id) {
       throw new Error("can't get or create campaign " + campaign.name);
     }

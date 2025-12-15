@@ -25,11 +25,15 @@ class CsvCRM extends CRM {
     { key: "actionType", header: "action" },
     { key: "createdAt", header: "date" },
     { key: "campaign", header: "campaign" },
-    { key: "organisation", header: "org" },
+    //    { key: "organisation", header: "org" },
     { key: "lang", header: "lang" },
     { key: "gdpr", header: "gdpr" },
-    { key: "message", header: "comment" },
+    //    { key: "message", header: "comment" },
     { key: "provider", header: "provider" },
+    { key: "location", header: "provider" },
+    { key: "utm_medium", header: "utm_medium" },
+    { key: "utm_source", header: "utm_source" },
+    { key: "utm_campaign", header: "utm_campaign" },
   ];
 
   constructor(options: CsvCRMOptions = {}) {
@@ -39,6 +43,7 @@ class CsvCRM extends CRM {
       process.env.CSV_PATH ||
       options.csvPath ||
       "./data/" + process.env.PROCA_QUEUE + ".csv";
+    console.log("writing to", this.csvPath);
   }
 
   public init = async (): Promise<boolean> => {
@@ -72,8 +77,8 @@ class CsvCRM extends CRM {
 
     const filteredCustomFields = filter(
       action.customFields,
-      "comment",
-      "message",
+      //      "comment",
+      //      "message",
       "emailProvider",
     );
 
