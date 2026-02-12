@@ -59,7 +59,7 @@
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
     "dotenv": "^17.0.0",
-    "i18n-iso-countries": "^7.13.0",
+    "i18n-iso-countries": "^7.14.0",
     "jsforce": "^3.7.0",
     "lodash": "^4.17.23",
     "minimist": "^1.2.8",
