@@ -1,10 +1,10 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
+  type ActionMessage,
+  type handleResult,
   ProcessStatus,
-  Params,
+  type Params,
 } from "../crm";
 import fs from "fs";
 import { stringify } from "csv-stringify/sync";
@@ -16,25 +16,6 @@ type CsvCRMOptions = Params & {
 class CsvCRM extends CRM {
   private csvPath: string;
   private stream: fs.WriteStream | null = null;
-  private columns = [
-    { key: "email", header: "email" },
-    { key: "firstName", header: "firstname" },
-    { key: "lastName", header: "lastname" },
-    { key: "country", header: "country" },
-    { key: "postcode", header: "postcode" },
-    { key: "actionType", header: "action" },
-    { key: "createdAt", header: "date" },
-    { key: "campaign", header: "campaign" },
-    //    { key: "organisation", header: "org" },
-    { key: "lang", header: "lang" },
-    { key: "gdpr", header: "gdpr" },
-    //    { key: "message", header: "comment" },
-    { key: "provider", header: "provider" },
-    { key: "location", header: "provider" },
-    { key: "utm_medium", header: "utm_medium" },
-    { key: "utm_source", header: "utm_source" },
-    { key: "utm_campaign", header: "utm_campaign" },
-  ];
 
   constructor(options: CsvCRMOptions = {}) {
     super(options);
@@ -50,7 +31,17 @@ class CsvCRM extends CRM {
     if (!fs.existsSync(this.csvPath)) {
       const header = stringify([], {
         header: true,
-        columns: this.columns,
+        columns: Object.keys(
+          this.simplify({
+            contact: {},
+            action: {},
+            campaign: {},
+            privacy: {},
+            org: {},
+            actionPage: {},
+            tracking: {},
+          }),
+        ),
       });
       fs.writeFileSync(this.csvPath, header);
     }
@@ -58,64 +49,48 @@ class CsvCRM extends CRM {
     return true;
   };
 
-  public handleContact = async (
-    message: ActionMessage,
-  ): Promise<handleResult> => {
-    const { contact, action } = message;
-
+  simplify = (message) => {
+    const { contact, action, tracking } = message;
     const getgdpr = (privacy) => {
       if (privacy?.emailStatus === "double_opt_in") return "doi";
       if (privacy.optIn === true) return "optin";
       if (privacy.optIn === false) return "optout";
       return "unknown";
     };
-    const filter = (obj, ...propsToExclude) => {
-      const result = { ...obj };
-      propsToExclude.forEach((prop) => delete result[prop]);
-      return result;
-    };
-
-    const filteredCustomFields = filter(
-      action.customFields,
-      //      "comment",
-      //      "message",
-      "emailProvider",
-    );
 
     const record = {
       email: contact.email,
-      firstName: contact.firstName,
-      lastName: contact.lastName,
+      firstname: contact.firstName,
+      lastname: contact.lastName,
       country: contact.country,
       postcode: contact.postcode,
-      actionType: action.actionType,
-      createdAt: action.createdAt,
+      locality: contact.locality,
+      phone: contact.phone,
+      id: message.actionId,
+      actiontype: action.actionType,
+      date: action.createdAt,
       gdpr: getgdpr(message.privacy),
-      provider: action.customFields.emailProvider,
-      message: action.customFields.comment || action.customFields.message,
+      provider: action.customFields?.emailProvider,
+      //      message: action.customFields.comment || action.customFields.message,
       campaign: message.campaign.name,
+      widget: message.actionPage.name,
       organisation: message.org.name,
       lang: message.actionPage.locale,
-      ...filteredCustomFields,
+      utm_campaign: tracking.campaign,
+      utm_medium: tracking.medium,
+      utm_source: tracking.source,
+      location: tracking.location,
     };
+    return record;
+  };
 
-    // Discover new custom fields and add them to the columns
-    const customFieldKeys = Object.keys(action.customFields);
-    const newColumns = customFieldKeys.filter(
-      (key) => !this.columns.find((c) => c.key === key),
-    );
-    if (newColumns.length > 0) {
-      newColumns.forEach((key) => {
-        this.columns.push({ key, header: key });
-      });
-      // We would need to rewrite the file to add new columns to the header.
-      // For simplicity, we will not do that. New fields will be added at the end
-      // without a header. A better implementation would handle this more gracefully.
-    }
-
+  public handleContact = async (
+    message: ActionMessage,
+  ): Promise<handleResult> => {
+    const record = this.simplify(message);
     const csvString = stringify([record], {
       header: false,
-      columns: this.columns,
+      columns: Object.keys(record),
     });
 
     return new Promise((resolve, reject) => {
