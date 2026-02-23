@@ -39,7 +39,7 @@
     "AMQP"
   ],
   "devDependencies": {
-    "@sentry/types": "^9.33.0",
+    "@sentry/types": "^10.22.0",
     "@types/cli-color": "^2.0.6",
     "@types/jsforce": "^1.11.5",
     "@types/mailchimp__mailchimp_marketing": "^3.0.21",
@@ -54,13 +54,13 @@
     "@sendinblue/client": "^3.3.1",
     "@sentry/node": "^9.35.0",
     "@supabase/supabase-js": "^2.50.2",
-    "@topcli/spinner": "^2.1.2",
+    "@topcli/spinner": "^3.0.0",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
     "dotenv": "^17.0.0",
-    "i18n-iso-countries": "^7.13.0",
+    "i18n-iso-countries": "^7.14.0",
     "jsforce": "^3.7.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "minimist": "^1.2.8",
     "node-mailjet": "^6.0.8"
   }
