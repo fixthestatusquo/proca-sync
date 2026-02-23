@@ -1,9 +1,9 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
 
@@ -43,7 +43,7 @@ class SupabaseCRM extends CRM {
       process.exit(1);
     }
 
-    let config: CrmConfigType = {
+    const config: CrmConfigType = {
       server: process.env.CRM_URL || "missing",
       publicKey: process.env.AUTH_ANON_KEY || "missing",
       user: process.env.AUTH_USER,

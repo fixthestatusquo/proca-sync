@@ -98,7 +98,7 @@ export const actionToContactRecord = (
         r.merge_fields[mergeFields[key]] = action.contact[key];
     }
   }
-  if (Boolean(action.campaign.externalId)) {
+  if (action.campaign.externalId) {
     r.tags.push(action.campaign.externalId.toString());
     r.tags.push(action.actionPage.name);
     r.merge_fields.SOURCE = action.campaign.externalId;

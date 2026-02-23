@@ -1,4 +1,4 @@
-import { CRM, CRMType, ActionMessage, handleResult } from "../crm";
+import { CRM, CRMType, type ActionMessage, type handleResult } from "../crm";
 import dotenv from "dotenv";
 
 dotenv.config();

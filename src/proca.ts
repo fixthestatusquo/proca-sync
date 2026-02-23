@@ -25,7 +25,7 @@ export async function graphQL(
       process.env.REACT_APP_API_URL || "https://api.proca.app/api";
 
   let data: ProcaResponse = {};
-  let headers: Header = {
+  const headers: Header = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
@@ -83,8 +83,8 @@ export async function graphQL(
 }
 
 export const fetchCampaign = async (id) => {
-  let variables = {};
-  let query = `query campaign ($id: Int! ) {
+  const variables = {};
+  const query = `query campaign ($id: Int! ) {
   campaign (id:$id) {
     id, name, title, config, externalId
   }

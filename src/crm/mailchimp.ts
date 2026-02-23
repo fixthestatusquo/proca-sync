@@ -1,15 +1,15 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
 import {
   actionToContactRecord as formatAction,
-  Contact,
-  ContactSubscription,
+  type Contact,
+  type ContactSubscription,
 } from "./mailchimp/contact";
 import {
   ping,
@@ -113,7 +113,7 @@ class MailchimpCRM extends CRM {
         actionPayload,
         this.verbose,
       );
-      if (Boolean(r)) {
+      if (r) {
         return r;
       } else {
         console.error("error, should be boolean", r);

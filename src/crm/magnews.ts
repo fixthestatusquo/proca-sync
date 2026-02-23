@@ -2,12 +2,12 @@ import _ from "lodash";
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
 } from "../crm";
 
-import { Contact, ContactValues, ContactOptions } from "./magnews/interfaces";
+import type { Contact, ContactValues, ContactOptions } from "./magnews/interfaces";
 
 import { setClientToken, addContact } from "./magnews/client";
 
@@ -41,7 +41,7 @@ class MagNewsCRM extends CRM {
 
     const member = this.actionToContactRecord(message, camp);
     const r = await addContact(this.clientToken, member);
-    if (!Boolean(r)) {
+    if (!r) {
       //not sure what to do
       return { processed: true };
     }

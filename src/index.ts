@@ -40,7 +40,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig: any = undefined;
+  let envConfig: any;
   if (opt.help) {
     clihelp();
     process.exit(0);
@@ -87,7 +87,6 @@ export const main = async (argv: string[]) => {
       console.log("Caught interrupt signal");
       if (queue) {
         // a close method is not documented, but it's a good practice to have one
-        // @ts-ignore
         await queue.close();
       }
       if (crm.close) {

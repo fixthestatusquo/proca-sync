@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const client_1 = require("./cleverreach/client");
@@ -47,10 +47,10 @@ class CleverreachCRM extends crm_1.CRM {
             }
             // listId might be different for each campaign
             // custom label is different for each campaign
-            if (!((_c = (_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.listId) || !((_f = (_e = (_d = camp.config) === null || _d === void 0 ? void 0 : _d.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.customLabel)) {
+            if (!((_c = (_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.listId) ||
+                !((_f = (_e = (_d = camp.config) === null || _d === void 0 ? void 0 : _d.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.customLabel)) {
                 console.error(`Campaign config params missing, set the listId and custom label for the campaign ${message.campaign.name}`);
             }
-            ;
             yield this.initializeToken();
             const listId = (_j = (_h = (_g = camp.config) === null || _g === void 0 ? void 0 : _g.component) === null || _h === void 0 ? void 0 : _h.sync) === null || _j === void 0 ? void 0 : _j.listId;
             const customLabel = (_m = (_l = (_k = camp.config) === null || _k === void 0 ? void 0 : _k.component) === null || _l === void 0 ? void 0 : _l.sync) === null || _m === void 0 ? void 0 : _m.customLabel;

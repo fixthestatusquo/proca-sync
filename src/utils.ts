@@ -6,8 +6,7 @@ export const pause = (time: number | undefined): Promise<any> => {
   return new Promise((resolve) => setTimeout(() => resolve(time), time));
 };
 
-export const string2map = (string: string) => {
-  //: Record<String, any> =>  {
+export const string2map = (string: string): Record<string, string> => {
   const urlSearchParams = new URLSearchParams(string);
   const params = Object.fromEntries(urlSearchParams.entries());
 

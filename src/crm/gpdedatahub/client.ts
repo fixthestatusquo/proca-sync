@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { GPAction } from "./data";
+import type { GPAction } from "./data";
 dotenv.config();
 
 const url = process.env.CRM_URL;

@@ -20,22 +20,22 @@
   "campaign": {
     "id":"614",
     "contactSchema": "basic",
-    "name": "test-proca",
+    "name": "animalconsult",
     "title": "Pineapple doesn’t belong on pizza!"
   },
   "campaignId": 9,
   "contact": {
     "area": "BE",
     "contactRef": "MDWJu2fbogTgTHgLTLl-OFvRII63xZE76i7w3qHfbbE",
-    "country": "FR",
+    "country": "TR",
     "dupeRank": 0,
-    "email": "sync+2@proca.app",
+    "email": "sync+3@proca.app",
     "street": "42 rue de la paix",
     "locality": "the city",
     "firstName": "Simone",
     "lastName": "de Beauvoir - test",
     "postcode": "75001",
-    "phone": "+42 123456789"
+    "phone": "+41 223456789"
   },
   "org": {
     "name": "your_org",

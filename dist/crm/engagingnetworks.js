@@ -1,16 +1,14 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+});
+var __importDefault = (this && this.__importDefault) || ((mod) => (mod && mod.__esModule) ? mod : { "default": mod });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSupporter = exports.upsertSupporter = exports.getToken = void 0;
 const crm_1 = require("../crm");
@@ -23,15 +21,15 @@ if (!apiUrl || !apiToken) {
     process.exit(1);
 }
 const authHeaders = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
+    Accept: "application/json",
+    "Content-Type": "application/json",
 };
 const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + 'authenticate', {
-            method: 'POST',
+        const response = yield fetch(apiUrl + "authenticate", {
+            method: "POST",
             headers: authHeaders,
-            body: apiToken
+            body: apiToken,
         });
         if (!response.ok) {
             const errorBody = yield response.text();
@@ -39,22 +37,22 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
         }
         const data = yield response.json();
         return {
-            token: data['ens-auth-token'],
-            expires_in: data['expires_in'] || 3600 // Default to 1 hour if not provided
+            token: data["ens-auth-token"],
+            expires_in: data["expires_in"] || 3600, // Default to 1 hour if not provided
         };
     }
     catch (error) {
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
     }
 });
 exports.getToken = getToken;
 const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const response = yield fetch(apiUrl + 'supporter', {
+        const response = yield fetch(apiUrl + "supporter", {
             method: "POST",
             headers: {
-                "Accept": "application/json",
+                Accept: "application/json",
                 "Content-Type": "application/json",
                 "ens-auth-token": token,
             },
@@ -88,12 +86,12 @@ const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, funct
 exports.upsertSupporter = upsertSupporter;
 const getSupporter = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + 'supporter?' + 'email=' + 'brucewayne@example.com', {
+        const response = yield fetch(apiUrl + "supporter?" + "email=" + "brucewayne@example.com", {
             method: "GET",
             headers: {
-                "Accept": "application/json",
+                Accept: "application/json",
                 "ens-auth-token": token,
-            }
+            },
         });
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -124,29 +122,28 @@ class CleverreachCRM extends crm_1.CRM {
             if (!token) {
                 throw new Error("Auth token is missing");
             }
-            const { ["Last Name"]: lastName, City, Postcode, Phone } = yield (0, exports.getSupporter)(message.contact.email, token);
+            const { ["Last Name"]: lastName, City, Postcode, Phone, } = yield (0, exports.getSupporter)(message.contact.email, token);
             const data = {
-                'Email Address': message.contact.email,
-                'First Name': message.contact.firstName,
-                'Last Name': ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.lastName) || lastName || "",
+                "Email Address": message.contact.email,
+                "First Name": message.contact.firstName,
+                "Last Name": ((_a = message.contact) === null || _a === void 0 ? void 0 : _a.lastName) || lastName || "",
                 City: ((_b = message.action.customFields) === null || _b === void 0 ? void 0 : _b.locality) || City || "",
                 Postcode: ((_c = message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
                 Phone: ((_d = message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
-                "questions": {
-                    "Accepts Email": "Y"
-                }
+                questions: {
+                    "Accepts Email": "Y",
+                },
             };
-            if (message.campaign.name === 'naturevoter') {
+            if (message.campaign.name === "naturevoter") {
                 data["questions"]["NatureVoter"] = "Y";
             }
-            ;
             if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
                 data["questions"]["French"] = "Y";
             }
             const response = yield (0, exports.upsertSupporter)(data, token);
             if (response.status === 200) {
-                response.warning ?
-                    console.log(`Message ${message.actionId} removed from the queue: ${response.warning}`)
+                response.warning
+                    ? console.log(`Message ${message.actionId} removed from the queue: ${response.warning}`)
                     : console.log(`Message ${message.actionId} sent`);
             }
             else {

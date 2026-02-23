@@ -2,9 +2,9 @@ import _ from "lodash";
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
 } from "../crm";
 import { writeFileSync } from "fs";
 

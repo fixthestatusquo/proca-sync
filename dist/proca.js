@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchCampaign = void 0;
 exports.graphQL = graphQL;
@@ -20,7 +20,7 @@ function graphQL(operation, query, options) {
             options.apiUrl =
                 process.env.REACT_APP_API_URL || "https://api.proca.app/api";
         let data = {};
-        let headers = {
+        const headers = {
             "Content-Type": "application/json",
             Accept: "application/json",
         };
@@ -78,11 +78,10 @@ function graphQL(operation, query, options) {
         return data;
     });
 }
-;
 const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    let variables = {};
-    let query = `query campaign ($id: Int! ) {
+    const variables = {};
+    const query = `query campaign ($id: Int! ) {
   campaign (id:$id) {
     id, name, title, config, externalId
   }

@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const utils_1 = require("../utils");
@@ -32,14 +32,15 @@ class CiviCRM extends crm_1.CRM {
             }
             else {
                 const r = yield this.crmAPI.get("Group", {
-                    limit: 1, where: [["id", "=", this.group]]
+                    limit: 1,
+                    where: [["id", "=", this.group]],
                 });
                 if (r.count === 0) {
                     console.error("can't access the group, possible missing permission", this.group);
                     process.exit(1); // should we create the contacts without putting them in a group?
                 }
             }
-            let countries = undefined;
+            let countries ;
             try {
                 countries = yield this.crmAPI.get("Country", {
                     select: ["id", "iso_code", "row_count"],
@@ -82,7 +83,7 @@ class CiviCRM extends crm_1.CRM {
         });
         this.getParams = (contact, action, campaign_id, source) => {
             var _a, _b, _c;
-            let params = {
+            const params = {
                 values: {
                     first_name: contact.firstName,
                     last_name: contact.lastName || null,
@@ -122,10 +123,11 @@ class CiviCRM extends crm_1.CRM {
                             values: {
                                 activity_type_id: 32,
                                 source_contact_id: "$id",
-                                subject: ((_a = action.customFields) === null || _a === void 0 ? void 0 : _a.subject) ? action.customFields.subject :
-                                    (contact.dupeRank === 0
+                                subject: ((_a = action.customFields) === null || _a === void 0 ? void 0 : _a.subject)
+                                    ? action.customFields.subject
+                                    : contact.dupeRank === 0
                                         ? source
-                                        : source + " #" + contact.dupeRank),
+                                        : source + " #" + contact.dupeRank,
                                 location: "action_" + action.id,
                                 activity_date_time: action.createdAt,
                                 //              location: action.,
@@ -291,7 +293,11 @@ class CiviCRM extends crm_1.CRM {
                 where: [["name", "=", campaign.name]],
             }, 0);
             if (r.error_code) {
-                throw new Error("can't read campaign " + campaign.name + ':' + r.error_message + ". CHeck your permission on civicampaign");
+                throw new Error("can't read campaign " +
+                    campaign.name +
+                    ":" +
+                    r.error_message +
+                    ". CHeck your permission on civicampaign");
             }
             if (r.count === 1) {
                 console.log("campaign", r.values[0]);
@@ -307,6 +313,7 @@ class CiviCRM extends crm_1.CRM {
                     start_date: now.toISOString(),
                 },
             }, 0);
+            console.log(r);
             if (!r.values.id) {
                 throw new Error("can't get or create campaign " + campaign.name);
             }
@@ -322,7 +329,7 @@ class CiviCRM extends crm_1.CRM {
             console.error("you need to set the url of your api4 endpoint from CiviCRM in the .env.xx");
             process.exit(1);
         }
-        let config = {
+        const config = {
             server: process.env.CIVICRM_URL,
             api_key: process.env.CIVICRM_API_KEY,
         };

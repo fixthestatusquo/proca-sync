@@ -1,4 +1,4 @@
-import { Config, Contact, AddMemberResponse } from "./interfaces";
+import { type Config, type Contact, AddMemberResponse } from "./interfaces";
 
 class magnews {
   protected bearerToken: string = "";
@@ -21,10 +21,8 @@ class magnews {
       method: "POST",
       body: JSON.stringify(member),
     })
-      .then(function (res) {
-        return res;
-      })
-      .catch(function (res) {
+      .then((res) => res)
+      .catch((res) => {
         console.error("addListMember", res.toString());
         throw res;
       });

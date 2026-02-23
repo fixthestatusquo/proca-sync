@@ -1,13 +1,15 @@
 import _ from "lodash";
 import {
-	CRM,
-	CRMType,
-	ActionMessage,
-	handleResult,
-	ProcaCampaign,
+  CRM,
+  CRMType,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
 } from "../crm";
 
+//import {ContactsApi, AccountApiApiKeys, CreateContact} from "@sendinblue/client";
 const SibApiV3Sdk = require("@sendinblue/client");
+import { string2map } from "../utils";
 
 /*
  *
@@ -18,121 +20,139 @@ interface CRM {
 */
 
 class SendInBlueCRM extends CRM {
-	apiInstance = new SibApiV3Sdk.ContactsApi();
-	folderId = 0;
+  apiInstance = new SibApiV3Sdk.ContactsApi();
+  folderId = 0;
+  mapping: undefined | Record<string, string>;
 
-	constructor(opt: {}) {
-		super(opt);
-		this.crmType = CRMType.OptIn;
-		this.apiInstance.setApiKey(
-			SibApiV3Sdk.AccountApiApiKeys.apiKey,
-			process.env.SENDINBLUE_KEY,
-		);
-	}
+  constructor(opt: {}) {
+    super(opt);
+    this.crmType = CRMType.OptIn;
+    this.apiInstance.setApiKey(
+      SibApiV3Sdk.AccountApiApiKeys.apiKey,
+      process.env.SENDINBLUE_KEY,
+    );
 
-	handleContact = async (
-		message: ActionMessage,
-	): Promise<handleResult | boolean> => {
-		let camp;
-		try {
-			camp = await this.campaign(message.campaign);
-		} catch (error) {
-			console.log("failed fetching the campaign", message.campaign);
-			return { processed: false };
-		}
-		console.log(camp.id, message.contact.email);
-		let createContact = new SibApiV3Sdk.CreateContact();
-		createContact.email = message.contact.email;
-		createContact.attributes = {
-			LANG: message.actionPage.locale,
-			FIRSTNAME: message.contact.firstName,
-			LASTNAME: message.contact.lastName || "",
-		};
+    if (typeof process.env.CONTACT_ATTRIBUTES === "string") {
+      this.mapping = string2map(process.env.CONTACT_ATTRIBUTES);
+    }
+  }
 
-		createContact.listIds = [camp.id];
-		createContact.updateEnabled = true;
-		try {
-			const contact = await this.apiInstance.createContact(createContact);
-		} catch (e) {
-			if (e.body) {
-				console.log("error creating", e.body, e.body.code, e.body.message);
-			} else {
-				console.log("error creating no code", e);
-			}
-			//      const error = JSON.parse(e.body);
-			//      console.log(error.code,error.message);
-			return { processed: false };
-		}
-		return { processed: true };
-	};
+  //  mergeFields: any,
+  //  doubleOptIn = false,
 
-	campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
-		let name: string = campaign.name;
-		if (campaign.externalId) {
-			name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
-		}
-		if (!this.campaigns[name]) {
-			this.campaigns[name] = await this.fetchCampaign(campaign);
-		}
-		return Promise.resolve(this.campaigns[name]);
-	};
+  handleContact = async (
+    message: ActionMessage,
+  ): Promise<handleResult | boolean> => {
+    let camp;
+    try {
+      camp = await this.campaign(message.campaign);
+    } catch (error) {
+      console.log("failed fetching the campaign", message.campaign);
+      return { processed: false };
+    }
+    const createContact = new SibApiV3Sdk.CreateContact();
+    createContact.email = message.contact.email;
+    createContact.attributes = {};
+    if (this.mapping) {
+      if (message.contact.phone)
+        message.contact.phone = message.contact.phone.replaceAll(" ", "");
+      for (const key in this.mapping) {
+        if (message.contact[key])
+          createContact.attributes[this.mapping[key]] = message.contact[key];
+      }
+    } else {
+      createContact.attributes = {
+        LANG: message.actionPage.locale,
+        FIRSTNAME: message.contact.firstName,
+        LASTNAME: message.contact.lastName || "",
+      };
+    }
+    createContact.listIds = [camp.id];
+    createContact.updateEnabled = true;
+    console.log(createContact);
+    try {
+      const contact = await this.apiInstance.createContact(createContact);
+    } catch (e) {
+      console.log(e.response.body);
+      if (e.response.body) {
+        console.log("error creating", e.response.body);
+      } else {
+        console.log("error creating no code", e);
+      }
+      //      const error = JSON.parse(e.body);
+      //      console.log(error.code,error.message);
+      return { processed: false };
+    }
+    return { processed: true };
+  };
 
-	fetchCampaigns = async () => {
-		try {
-			let folders = await this.apiInstance.getFolders(10, 0);
-			const name = "proca";
-			if (folders.body.folders) {
-				let procaFolder = folders.body.folders.filter(
-					(d: any) => d.name === name,
-				);
-				if (!procaFolder.length) {
-					const createFolder = new SibApiV3Sdk.CreateUpdateFolder();
-					createFolder.name = name;
-					const data = await this.apiInstance.createFolder(createFolder);
-					procaFolder = data.body;
-				} else {
-					procaFolder = procaFolder[0];
-				}
-				this.folderId = procaFolder.id;
+  campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
+    let name: string = campaign.name;
+    if (campaign.externalId) {
+      name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+    }
+    if (!this.campaigns[name]) {
+      this.campaigns[name] = await this.fetchCampaign(campaign);
+    }
+    return Promise.resolve(this.campaigns[name]);
+  };
 
-				let lists = await this.apiInstance.getLists(50, 0);
-				lists = lists.body.lists;
-				if (lists.length) {
-					lists.forEach((d: any) => (this.campaigns[d.name] = d));
-				}
-			}
-		} catch (e) {
-			console.log("error fetching campaigns", e);
-		}
-	};
+  fetchCampaigns = async () => {
+    try {
+      const folders = await this.apiInstance.getFolders(10, 0);
+      const name = "proca";
+      if (folders.body.folders) {
+        let procaFolder = folders.body.folders.filter(
+          (d: any) => d.name === name,
+        );
+        if (!procaFolder.length) {
+          const createFolder = new SibApiV3Sdk.CreateUpdateFolder();
+          createFolder.name = name;
+          const data = await this.apiInstance.createFolder(createFolder);
+          procaFolder = data.body;
+        } else {
+          procaFolder = procaFolder[0];
+        }
+        this.folderId = procaFolder.id;
 
-	fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-		if (campaign.externalId) {
-			try {
-				const data = await this.apiInstance.getList(campaign.externalId);
-				return data.body;
-			} catch (e) {
-				console.error("can't fetch list", campaign.externalId);
-				throw e;
-			}
-		}
+        let lists = await this.apiInstance.getLists(50, 0);
+        lists = lists.body.lists;
+        if (lists.length) {
+          lists.forEach((d: any) => (this.campaigns[d.name] = d));
+        }
+      }
+    } catch (e) {
+      console.log("error fetching campaigns", e);
+    }
+  };
 
-		if (Object.keys(this.campaigns).length === 0) {
-			await this.fetchCampaigns();
-			if (this.campaigns[campaign.name]) return this.campaigns[campaign.name];
-		}
-		try {
-			const createList = new SibApiV3Sdk.CreateList();
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    if (campaign.externalId) {
+      try {
+        const data = await this.apiInstance.getList(campaign.externalId);
+        return data.body;
+      } catch (e) {
+        console.error("can't fetch list", campaign.externalId);
+        throw e;
+      }
+    }
 
-			createList.name = campaign.name;
-			createList.folderId = this.folderId;
+    if (Object.keys(this.campaigns).length === 0) {
+      await this.fetchCampaigns();
+      if (this.campaigns[campaign.name]) return this.campaigns[campaign.name];
+    }
+    try {
+      const createList = new SibApiV3Sdk.CreateList();
 
-			const data = await this.apiInstance.createList(createList);
-			console.log("fetching campaign " + campaign.name, data.body);
-			return data.body;
-		} catch (e) {
-			console.log(e);
-		}
-	};
+      createList.name = campaign.name;
+      createList.folderId = this.folderId;
+
+      const data = await this.apiInstance.createList(createList);
+      console.log("fetching campaign " + campaign.name, data.body);
+      return data.body;
+    } catch (e) {
+      console.log(e);
+    }
+  };
 }
 export default SendInBlueCRM;

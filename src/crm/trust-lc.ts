@@ -1,9 +1,9 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
 } from "../crm";
 import { formatAction, handleConsent } from "./trust-lc/data";
 import { postAction, verification } from "./trust-lc/client";

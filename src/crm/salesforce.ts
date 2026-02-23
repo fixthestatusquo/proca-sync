@@ -1,9 +1,9 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
 
@@ -18,7 +18,7 @@ import {
   addCampaignContact,
   foo,
   leadByEmail,
-  CrmConfigType,
+  type CrmConfigType,
 } from "./salesforce/client";
 
 import {
@@ -43,7 +43,7 @@ class SalesforceCRM extends CRM {
       process.exit(1);
     }
 
-    let config: CrmConfigType = {
+    const config: CrmConfigType = {
       server: process.env.SALESFORCE_URL || "missing",
       token: process.env.AUTH_TOKEN || "missing",
       user: process.env.AUTH_USER || "missing",

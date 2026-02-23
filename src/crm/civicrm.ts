@@ -1,9 +1,9 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
 
@@ -42,7 +42,7 @@ class CiviCRM extends CRM {
       );
       process.exit(1);
     }
-    let config: CivicrmConfig = {
+    const config: CivicrmConfig = {
       server: process.env.CIVICRM_URL,
       api_key: process.env.CIVICRM_API_KEY,
     };
@@ -99,7 +99,7 @@ class CiviCRM extends CRM {
         process.exit(1); // should we create the contacts without putting them in a group?
       }
     }
-    let countries: any = undefined;
+    let countries: any ;
     try {
       countries = await this.crmAPI.get(
         "Country",
@@ -159,7 +159,7 @@ class CiviCRM extends CRM {
     campaign_id: number,
     source?: string,
   ): Record<string, any> => {
-    let params: Record<string, any> = {
+    const params: Record<string, any> = {
       values: {
         first_name: contact.firstName,
         last_name: contact.lastName || null,

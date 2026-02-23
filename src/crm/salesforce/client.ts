@@ -1,5 +1,5 @@
-import { Connection, Record as SFRecord } from "jsforce";
-import { ActionMessageV2 } from "@proca/queue";
+import { Connection, type Record as SFRecord } from "jsforce";
+import type { ActionMessageV2 } from "@proca/queue";
 
 export type CrmConfigType = {
   server: string;

@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const utils_1 = require("../utils");
@@ -18,7 +18,9 @@ class Mailjet extends crm_1.CRM {
             if (!this.list) {
                 // it will not work without a group, suggesting some
                 console.warn("missing list id, some options:");
-                const r = yield this.mailjet.get("contactslist", { 'version': 'v3', 'limit': 200 }).request();
+                const r = yield this.mailjet
+                    .get("contactslist", { version: "v3", limit: 200 })
+                    .request();
                 r.body.Data.forEach((g) => {
                     console.log(g.ID, g.Name, g.SubscriberCount);
                 });
@@ -29,11 +31,11 @@ class Mailjet extends crm_1.CRM {
         this.addContactToList = (email) => __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield this.mailjet
-                    .post("listrecipient", { 'version': 'v3' })
+                    .post("listrecipient", { version: "v3" })
                     .request({
-                    "IsUnsubscribed": "false",
-                    "ContactAlt": email,
-                    "ListID": this.list
+                    IsUnsubscribed: "false",
+                    ContactAlt: email,
+                    ListID: this.list,
                 });
                 return true;
             }
@@ -45,14 +47,14 @@ class Mailjet extends crm_1.CRM {
         this.updateContactProperties = (message) => __awaiter(this, void 0, void 0, function* () {
             const data = Object.entries(this.contactProperties).map(([sourceField, mailjetField]) => ({
                 Name: mailjetField,
-                Value: message.contact[sourceField] || ""
+                Value: message.contact[sourceField] || "",
             }));
             try {
                 yield this.mailjet
-                    .put("contactdata", { 'version': 'v3' })
+                    .put("contactdata", { version: "v3" })
                     .id(message.contact.email)
                     .request({
-                    "Data": data
+                    Data: data,
                 });
                 return true;
             }
@@ -68,17 +70,17 @@ class Mailjet extends crm_1.CRM {
             }
             try {
                 // create contact
-                const { response: { status } } = yield this.mailjet
-                    .post("contact", { 'version': 'v3' })
-                    .request({
-                    "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName,
-                    "Email": message.contact.email
+                const { response: { status }, } = yield this.mailjet.post("contact", { version: "v3" }).request({
+                    Name: message.contact.lastName
+                        ? message.contact.firstName + " " + message.contact.lastName
+                        : message.contact.firstName,
+                    Email: message.contact.email,
                 });
                 // add properties to the contact
                 const properties = yield this.updateContactProperties(message);
                 // add contact to the list
                 const list = yield this.addContactToList(message.contact.email);
-                return (properties && list);
+                return properties && list;
             }
             catch (e) {
                 if (e.response.statusText.includes("already exists")) {
@@ -93,11 +95,13 @@ class Mailjet extends crm_1.CRM {
         });
         this.updateContact = (message) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const { response: { status } } = yield this.mailjet
-                    .put("contact", { 'version': 'v3' })
+                const { response: { status }, } = yield this.mailjet
+                    .put("contact", { version: "v3" })
                     .id(message.contact.email)
                     .request({
-                    "Name": message.contact.lastName ? message.contact.firstName + " " + message.contact.lastName : message.contact.firstName
+                    Name: message.contact.lastName
+                        ? message.contact.firstName + " " + message.contact.lastName
+                        : message.contact.firstName,
                 });
                 return status === 200 ? true : false;
             }
@@ -127,7 +131,7 @@ class Mailjet extends crm_1.CRM {
             this.list = +process.env.LIST;
         }
         try {
-            this.mailjet = require('node-mailjet').apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
+            this.mailjet = require("node-mailjet").apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
         }
         catch (e) {
             console.log(e.message, "can't connect, check MJ_APIKEY_PUBLIC and PRIVATE?");

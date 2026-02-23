@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const supabase_js_1 = require("@supabase/supabase-js");
@@ -62,7 +62,8 @@ class PublicCommentCRM extends crm_1.CRM {
             if (message.contact.firstName) {
                 data.name = message.contact.firstName.trim();
                 if (message.contact.lastName) {
-                    data.name += " " + message.contact.lastName.charAt(0).toUpperCase().trim();
+                    data.name +=
+                        " " + message.contact.lastName.charAt(0).toUpperCase().trim();
                 }
                 if (message.action.customFields.locality) {
                     data.locality = message.action.customFields.locality.toString();
@@ -84,7 +85,7 @@ class PublicCommentCRM extends crm_1.CRM {
             console.error("you need to set the url of your crm endpoint in the .env.xx");
             process.exit(1);
         }
-        let config = {
+        const config = {
             server: process.env.CRM_URL || "missing",
             publicKey: process.env.AUTH_ANON_KEY || "missing",
             user: process.env.AUTH_USER,

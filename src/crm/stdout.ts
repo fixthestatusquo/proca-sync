@@ -1,9 +1,9 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  Params,
+  type ActionMessage,
+  type handleResult,
+  type Params,
   //  ProcaCampaign,
   //  ProcessStatus,
 } from "../crm";

@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Contact } from "./interfaces";
+import type { Contact } from "./interfaces";
 import magnews from "./magnews";
 
 export const memberHash = (email: string) => {

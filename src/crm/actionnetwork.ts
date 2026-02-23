@@ -1,10 +1,10 @@
-import { ActionMessageV2 } from '@proca/queue';
+import type { ActionMessageV2 } from '@proca/queue';
 import {
-  Contact,
+  type Contact,
   CRM,
   CRMType,
-  handleResult,
-  ProcaCampaign
+  type handleResult,
+  type ProcaCampaign
 } from "../crm";
 import dotenv from "dotenv";
 import { fetchCampaign as procaCampaign }  from '../proca';

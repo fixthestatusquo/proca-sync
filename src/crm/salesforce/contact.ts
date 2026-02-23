@@ -1,11 +1,4 @@
-import { ActionMessageV2, EventMessageV2 } from "@proca/queue";
-
-import countries from "i18n-iso-countries";
-import enCountries from "i18n-iso-countries/langs/en.json";
-
-enCountries.countries["US"].shift(); // remove the United States of America - Salesforce does not understand it - leave United States
-enCountries.countries["VE"] = "Venezuela, Bolivarian Republic of"; // srsly Salesforce....
-countries.registerLocale(enCountries);
+import type { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 
 //                                              allow custom fields vvv
 export interface ContactAttributes
@@ -26,7 +19,7 @@ export interface LeadAttributes
   FirstName: string;
   LastName?: string;
   Phone?: string;
-  Country?: string;
+  CountryCode: string;
   PostalCode?: string;
   Company: string;
   EmailBouncedReason?: string;
@@ -44,12 +37,6 @@ export type RecordOpts = {
   defaultLastName?: string;
 };
 
-export const countryName = (code: string | undefined) => {
-  if (code) {
-    return countries.getName(code.toUpperCase(), "en");
-  }
-  return code;
-};
 
 export const actionToContactRecord = (
   action: ActionMessageV2,
@@ -60,7 +47,7 @@ export const actionToContactRecord = (
     LastName: action.contact.lastName || opts.defaultLastName,
     Email: action.contact.email,
     Phone: action.contact.phone,
-    MailingCountry: countryName(action.contact.country),
+    MailingCountryCode: action.contact.country,
     MailingPostalCode: action.contact.postcode,
   };
 
@@ -82,7 +69,8 @@ export const actionToLeadRecord = (
     LastName: action.contact.lastName || opts.defaultLastName,
     Email: action.contact.email,
     Phone: action.contact.phone,
-    Country: countryName(action.contact.country),
+    //Country: countryName(action.contact.country),
+    CountryCode: action.contact.country,
     PostalCode: action.contact.postcode,
     Company: "[not provided]",
     LeadSource: action.campaign.title,
@@ -101,42 +89,35 @@ export const determineOptIn = (
   privacy: ActionMessageV2["privacy"],
   opts: RecordOpts,
 ) => {
+  let optIn = false;
   if (opts.optInField) {
     // it's always optin, the optout have been filtered out already
     r[opts.optInField] = true;
     return;
   }
-
   // consents
   // explicit DOI = must be subscribe
-  let optIn = false;
-  if (privacy.emailStatus === "double_opt_in") {
+  if (privacy.emailStatus === "double_opt_in") { //deadling with doi
     optIn = true;
     // bouncing - cleaned / banned
   } else if (privacy.emailStatus !== null) {
-    optIn = false;
     r.EmailBouncedReason = privacy.emailStatus;
     if (privacy.emailStatusChanged)
       r.EmailBouncedDate = privacy.emailStatusChanged;
-  } else {
-    // else, lets infer:
-    if (privacy.optIn) {
-      // we have some opt in
-      if (opts.doubleOptIn) {
-        // id DOI, wait
-        optIn = false;
-      } else {
-        // otherwise it's ok
-        optIn = true;
-      }
-    } else {
-      optIn = false;
-    }
+  }
+  if (privacy.optIn && !opts.doubleOptIn) {//regular optin
+    optIn = true;
   }
 
+  console.log("optin", optIn, opts.optInField);
+  if (!opts.optInField) {
+    console.error("you need an optInField");
+    //   return;
+  }
   if (opts.optInField) {
     r[opts.optInField] = optIn;
   }
+  process.exit(1);
 };
 
 export interface EmailStatusAttributes {

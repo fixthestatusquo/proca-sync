@@ -1,30 +1,30 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? ((o, m, k, k2) => {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
+      desc = { enumerable: true, get: () => m[k] };
     }
     Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
+}) : ((o, m, k, k2) => {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? ((o, v) => {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : ((o, v) => {
     o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
+}));
+var __importStar = (this && this.__importStar) || (() => {
+    var ownKeys = (o) => {
+        ownKeys = Object.getOwnPropertyNames || ((o) => {
             var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            for (var k in o) if (Object.hasOwn(o, k)) ar[ar.length] = k;
             return ar;
-        };
+        });
         return ownKeys(o);
     };
-    return function (mod) {
+    return (mod) => {
         if (mod && mod.__esModule) return mod;
         var result = {};
         if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
@@ -32,29 +32,27 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+});
+var __importDefault = (this && this.__importDefault) || ((mod) => (mod && mod.__esModule) ? mod : { "default": mod });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = exports.CRM = exports.CRMType = exports.CampaignUpdatedEvent = exports.ProcaCampaign = exports.EventMessage = exports.ActionMessage = exports.ProcessStatus = void 0;
 const queue_1 = require("@proca/queue");
-Object.defineProperty(exports, "ProcaCampaign", { enumerable: true, get: function () { return queue_1.Campaign; } });
-Object.defineProperty(exports, "ActionMessage", { enumerable: true, get: function () { return queue_1.ActionMessageV2; } });
-Object.defineProperty(exports, "EventMessage", { enumerable: true, get: function () { return queue_1.EventMessageV2; } });
-Object.defineProperty(exports, "CampaignUpdatedEvent", { enumerable: true, get: function () { return queue_1.CampaignUpdatedEventMessage; } });
+Object.defineProperty(exports, "ProcaCampaign", { enumerable: true, get: () => queue_1.Campaign });
+Object.defineProperty(exports, "ActionMessage", { enumerable: true, get: () => queue_1.ActionMessageV2 });
+Object.defineProperty(exports, "EventMessage", { enumerable: true, get: () => queue_1.EventMessageV2 });
+Object.defineProperty(exports, "CampaignUpdatedEvent", { enumerable: true, get: () => queue_1.CampaignUpdatedEventMessage });
 const cli_color_1 = __importDefault(require("cli-color"));
 const spinner_1 = require("./spinner");
 var ProcessStatus;
-(function (ProcessStatus) {
+((ProcessStatus) => {
     ProcessStatus[ProcessStatus["unknown"] = 0] = "unknown";
     ProcessStatus[ProcessStatus["processed"] = 1] = "processed";
     ProcessStatus[ProcessStatus["skipped"] = 2] = "skipped";
@@ -62,7 +60,7 @@ var ProcessStatus;
     ProcessStatus[ProcessStatus["error"] = 4] = "error";
 })(ProcessStatus || (exports.ProcessStatus = ProcessStatus = {}));
 var CRMType;
-(function (CRMType) {
+((CRMType) => {
     CRMType[CRMType["ActionContact"] = 0] = "ActionContact";
     CRMType[CRMType["Contact"] = 1] = "Contact";
     CRMType[CRMType["OptIn"] = 2] = "OptIn";
@@ -72,17 +70,24 @@ class CRM {
     constructor(opt) {
         this.colorStatus = (status) => {
             switch (status) {
-                case ProcessStatus.processed: return cli_color_1.default.green;
-                case ProcessStatus.skipped: return cli_color_1.default.blue;
-                case ProcessStatus.ignored: return cli_color_1.default.magenta;
-                case ProcessStatus.error: return cli_color_1.default.red;
+                case ProcessStatus.processed:
+                    return cli_color_1.default.green;
+                case ProcessStatus.skipped:
+                    return cli_color_1.default.blue;
+                case ProcessStatus.ignored:
+                    return cli_color_1.default.magenta;
+                case ProcessStatus.error:
+                    return cli_color_1.default.red;
             }
-            return ((d) => d);
+            return (d) => d;
         };
         this.log = (text, status) => {
             //  progress: (count: number; suffix: string; color:string);
             const newline = status == ProcessStatus.error || !this.interactive || !text;
-            (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", { wrapper: this.colorStatus(status), newline: newline });
+            (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", {
+                wrapper: this.colorStatus(status),
+                newline: newline,
+            });
             if (status)
                 this.lastStatus = status;
         };
@@ -114,7 +119,11 @@ class CRM {
             throw new Error("you need to implement handleContact in your CRM");
         });
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
-            throw new Error("you need to implement handleCampaignUpdate in your CRM");
+            console.warn("campaign update", message.campaign.name, message.campaign.title);
+            //we need to refetch campaign when it is updated
+            //message is close enough to campaign structure?
+            yield this.fetchCampaign(message.campaign);
+            return true;
         });
         this.formatResult = (result) => {
             if (typeof result === "boolean")
@@ -138,15 +147,22 @@ class CRM {
                         return r;
                     }
                     else {
-                        this.log("Not a privacy+withConsent message, not sent: " + email + " " + actionId, ProcessStatus.error);
+                        this.log(message.action.actionType +
+                            " Not a privacy+withConsent message, not sent: " +
+                            email +
+                            " " +
+                            actionId, ProcessStatus.error);
                         return true;
                     }
-                    this.verbose && (console.log(message));
+                    this.verbose && console.log(message);
                     this.log("don't know how to process " + email + " " + actionId, ProcessStatus.error);
                     break;
                 case CRMType.OptIn:
                     if (!message.privacy.withConsent) {
-                        this.log("no withConsent " + message.actionId + " ," + message.action.actionType, ProcessStatus.skipped);
+                        this.log("no withConsent " +
+                            message.actionId +
+                            " ," +
+                            message.action.actionType, ProcessStatus.skipped);
                         return true;
                     }
                     if (message.privacy.withConsent && message.privacy.optIn) {
@@ -165,11 +181,15 @@ class CRM {
                         return true; //OptOut contact, we don't need to process
                     }
                     if (message.privacy.optIn === true) {
-                        this.log("opt-in, but no withConsent " + actionId + ' ' + ((_b = message.action) === null || _b === void 0 ? void 0 : _b.actionType), ProcessStatus.skipped);
+                        this.log("opt-in, but no withConsent " +
+                            actionId +
+                            " " +
+                            ((_b = message.action) === null || _b === void 0 ? void 0 : _b.actionType), ProcessStatus.skipped);
                         //          this.verbose && console.log('opt-out',message.actionId);
                         return true; //OptOut contact, we don't need to process
                     }
-                    if (((_c = message.privacy) === null || _c === void 0 ? void 0 : _c.emailStatus) === 'double_opt_in') { // double opt-in is optin (eg by email)
+                    if (((_c = message.privacy) === null || _c === void 0 ? void 0 : _c.emailStatus) === "double_opt_in") {
+                        // double opt-in is optin (eg by email)
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
                             this.log("added doi" + email, ProcessStatus.processed);
@@ -180,23 +200,26 @@ class CRM {
                         return r;
                     }
                     if (message.privacy.optIn === null) {
-                        this.log("optIn null (implicit) withConsent " + actionId + ' ' + ((_d = message.action) === null || _d === void 0 ? void 0 : _d.actionType), ProcessStatus.skipped);
+                        this.log("optIn null (implicit) withConsent " +
+                            actionId +
+                            " " +
+                            ((_d = message.action) === null || _d === void 0 ? void 0 : _d.actionType), ProcessStatus.skipped);
                         return true;
                         /*
-                        const r = this.formatResult(await this.handleContact(message));
-                        if (r) {
-                          this.log("added with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
-                        } else {
-                          this.log("failed with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
-                        }
-                        return r; */
+                          const r = this.formatResult(await this.handleContact(message));
+                          if (r) {
+                            this.log("added with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.processed);
+                          } else {
+                            this.log("failed with implicit optin" + message.contact.email+ " "+message.action.createdAt, ProcessStatus.error);
+                          }
+                          return r; */
                     }
                     this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
                     break;
-                case CRMType.DoubleOptIn:
+                case CRMType.DoubleOptIn: {
                     const emailStatus = message.privacy.emailStatus;
-                    if (emailStatus === 'double_opt_in') {
-                        let r = this.formatResult(yield this.handleContact(message));
+                    if (emailStatus === "double_opt_in") {
+                        const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
                             this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
                             return true;
@@ -206,10 +229,10 @@ class CRM {
                             return false;
                         }
                     }
-                    ;
                     this.log("skip sending, it is not double opt in " + email + " " + actionId, ProcessStatus.error);
                     return true;
                     break;
+                }
                 case CRMType.ActionContact:
                     throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");
                 default:
@@ -256,7 +279,7 @@ class CRM {
                         console.log(`Double opt in from ${event.supporter.contact.email}`);
                         yield this.setSubscribed(cont.id, true);
                         //await this.handleEvent(event);
-                        let r = this.formatResult(yield this.handleEvent(event));
+                        const r = this.formatResult(yield this.handleEvent(event));
                         return r;
                     }
                     // Different kinds of problems with email delivery:

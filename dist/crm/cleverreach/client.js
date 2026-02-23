@@ -1,16 +1,14 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+});
+var __importDefault = (this && this.__importDefault) || ((mod) => (mod && mod.__esModule) ? mod : { "default": mod });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upsertContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -24,17 +22,17 @@ if (!tokenUrl || !ID || !apiUrl || !secret) {
     process.exit(1);
 }
 const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
-    const authHeader = 'Basic ' + Buffer.from(`${ID}:${secret}`).toString('base64');
+    const authHeader = "Basic " + Buffer.from(`${ID}:${secret}`).toString("base64");
     try {
         const response = yield fetch(tokenUrl, {
-            method: 'POST',
+            method: "POST",
             headers: {
-                'Authorization': authHeader,
-                'Content-Type': 'application/json'
+                Authorization: authHeader,
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                'grant_type': 'client_credentials'
-            })
+                grant_type: "client_credentials",
+            }),
         });
         if (!response.ok) {
             const errorBody = yield response.text();
@@ -44,18 +42,18 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
         return data.access_token;
     }
     catch (error) {
-        console.error('Error:', error.message);
+        console.error("Error:", error.message);
     }
 });
 exports.getToken = getToken;
 const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const response = yield fetch(apiUrl + `/v3/receivers.json/${email}`, {
-            method: 'GET',
+            method: "GET",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         });
         if (!response.ok) {
             throw new Error(`Get receiver failed: ${response.statusText}`);
@@ -69,19 +67,19 @@ const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function*
         return {};
     }
     catch (error) {
-        console.error('Get contact error:', error.message);
+        console.error("Get contact error:", error.message);
     }
     return false;
 });
 exports.getContact = getContact;
 const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + '/v3/groups/' + listId + '/receivers', {
-            method: 'GET',
+        const response = yield fetch(apiUrl + "/v3/groups/" + listId + "/receivers", {
+            method: "GET",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
         });
         if (!response.ok) {
             throw new Error(`Get groups failed: ${response.statusText}`);
@@ -90,27 +88,27 @@ const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function*
         return data;
     }
     catch (error) {
-        console.error('Get groups contact error:', error.message);
+        console.error("Get groups contact error:", error.message);
     }
 });
 exports.getGroups = getGroups;
 const upsertContact = (token, postData, listId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + '/v3/groups/' + listId + '/receivers/upsert', {
-            method: 'POST',
+        const response = yield fetch(apiUrl + "/v3/groups/" + listId + "/receivers/upsert", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`, //,
-                'name': 'Proca CR Import Export'
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`, //,
+                name: "Proca CR Import Export",
             },
-            body: JSON.stringify(postData)
+            body: JSON.stringify(postData),
         });
         if (response.ok)
             return true;
         return false;
     }
     catch (error) {
-        console.error('Post contact error:', error.message);
+        console.error("Post contact error:", error.message);
     }
 });
 exports.upsertContact = upsertContact;

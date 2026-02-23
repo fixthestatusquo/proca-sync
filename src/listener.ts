@@ -1,18 +1,18 @@
 import {
   syncQueue,
-  ActionMessageV2,
-  EventMessageV2,
-  ConsumerOpts,
+  type ActionMessageV2,
+  type EventMessageV2,
+  type ConsumerOpts,
   count,
-  CampaignUpdatedEventMessage,
+  type CampaignUpdatedEventMessage,
 } from "@proca/queue";
-import { Configuration } from "./config";
-import { CRM } from "./crm";
+import type { Configuration } from "./config";
+import type { CRM } from "./crm";
 import { pause } from "./utils";
-let crm: any = {};
+const crm: any = {};
 
 export const listen = (config: Configuration, crm: CRM) => {
-  let tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
+  const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
   const opts: ConsumerOpts = { tag: tag };
   if (config.concurrency) {
     opts.concurrency = config.concurrency;

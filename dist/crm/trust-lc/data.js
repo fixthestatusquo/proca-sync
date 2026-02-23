@@ -1,4 +1,4 @@
-"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatAction = exports.handleConsent = void 0;
 const handleConsent = (action) => {

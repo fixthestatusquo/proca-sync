@@ -3,9 +3,9 @@ import {
   ActionMessageV2,
   EventMessageV2,
   CampaignUpdatedEventMessage,
-  Counters,
+  type Counters,
 } from "@proca/queue";
-import { Configuration } from "./config";
+import type { Configuration } from "./config";
 import color from "cli-color";
 import { spin } from "./spinner";
 
@@ -319,11 +319,11 @@ export abstract class CRM implements CRMInterface {
         );
         break;
 
-      case CRMType.DoubleOptIn:
+      case CRMType.DoubleOptIn: {
         const emailStatus = message.privacy.emailStatus;
 
         if (emailStatus === "double_opt_in") {
-          let r = this.formatResult(await this.handleContact(message));
+          const r = this.formatResult(await this.handleContact(message));
           if (r) {
             this.log(
               "added doi " + email + " " + actionId,
@@ -344,6 +344,7 @@ export abstract class CRM implements CRMInterface {
         );
         return true;
         break;
+      }
 
       case CRMType.ActionContact:
         throw new Error(
@@ -401,7 +402,7 @@ export abstract class CRM implements CRMInterface {
 
           await this.setSubscribed(cont.id, true);
           //await this.handleEvent(event);
-          let r = this.formatResult(await this.handleEvent(event));
+          const r = this.formatResult(await this.handleEvent(event));
           return r;
         }
 

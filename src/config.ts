@@ -44,7 +44,7 @@ export function configFromOptions(opt: any, argv: any): Configuration {
     verbose: argv.verbose,
     interactive: argv.interactive,
     dryRun: argv["dry-run"],
-    concurrency: parseInt(process.env.concurrency || "1") || 1,
+    concurrency: parseInt(process.env.concurrency || "1", 10) || 1,
   };
 }
 

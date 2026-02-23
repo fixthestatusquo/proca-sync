@@ -1,11 +1,11 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  EventMessage,
-  handleResult,
-  ProcaCampaign,
-  CampaignUpdatedEvent,
+  type ActionMessage,
+  type EventMessage,
+  type handleResult,
+  type ProcaCampaign,
+  type CampaignUpdatedEvent,
 } from "../crm";
 import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";

@@ -1,16 +1,16 @@
 import {
   CRM,
   CRMType,
-  ActionMessage,
-  handleResult,
-  ProcaCampaign,
+  type ActionMessage,
+  type handleResult,
+  type ProcaCampaign,
 } from "../crm";
 import { formatAction } from "./gpdedatahub/data";
 import { postAction } from "./gpdedatahub/client";
 import { fetchCampaign as procaCampaign } from "../proca";
 
 class gpdedatahubCRM extends CRM {
-  constructor(opt: {}) {
+  constructor(opt: object) {
     super(opt);
     this.crmType = CRMType.DoubleOptIn;
   }

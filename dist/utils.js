@@ -1,4 +1,4 @@
-"use strict";
+
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.string2map = exports.pause = void 0;
 const pause = (time) => {
@@ -10,6 +10,7 @@ const pause = (time) => {
 };
 exports.pause = pause;
 const string2map = (string) => {
+    //: Record<String, any> =>  {
     const urlSearchParams = new URLSearchParams(string);
     const params = Object.fromEntries(urlSearchParams.entries());
     return params;

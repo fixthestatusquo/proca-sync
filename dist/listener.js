@@ -1,20 +1,20 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listen = void 0;
 const queue_1 = require("@proca/queue");
 const utils_1 = require("./utils");
-let crm = {};
+const crm = {};
 const listen = (config, crm) => {
-    let tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
+    const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
     const opts = { tag: tag };
     if (config.concurrency) {
         opts.concurrency = config.concurrency;
@@ -55,7 +55,8 @@ const listen = (config, crm) => {
                 // we are processing two types of events "email_status" and "campaign_updated"
                 // We are interested in email status changes
                 // other types mosly need to be processed to be removed from the queue
-                if (event.eventType === "email_status" || event.eventType === "campaign_updated") {
+                if (event.eventType === "email_status" ||
+                    event.eventType === "campaign_updated") {
                     if (crm.pause) {
                         yield (0, utils_1.pause)(3);
                     }

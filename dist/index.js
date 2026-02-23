@@ -1,30 +1,30 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? ((o, m, k, k2) => {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
+      desc = { enumerable: true, get: () => m[k] };
     }
     Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
+}) : ((o, m, k, k2) => {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? ((o, v) => {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
+}) : ((o, v) => {
     o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
+}));
+var __importStar = (this && this.__importStar) || (() => {
+    var ownKeys = (o) => {
+        ownKeys = Object.getOwnPropertyNames || ((o) => {
             var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            for (var k in o) if (Object.hasOwn(o, k)) ar[ar.length] = k;
             return ar;
-        };
+        });
         return ownKeys(o);
     };
-    return function (mod) {
+    return (mod) => {
         if (mod && mod.__esModule) return mod;
         var result = {};
         if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
@@ -32,18 +32,16 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+});
+var __importDefault = (this && this.__importDefault) || ((mod) => (mod && mod.__esModule) ? mod : { "default": mod });
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 // to parse options
@@ -82,7 +80,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             return true;
         },
     });
-    let envConfig = undefined;
+    let envConfig ;
     if (opt.help) {
         clihelp();
         process.exit(0);
@@ -105,7 +103,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         envConfig = { path: opt.env };
     }
     else {
-        if (process.env.NODE_ENV !== 'production') {
+        if (process.env.NODE_ENV !== "production") {
             console.error("missing -e or --env params");
             process.exit(1);
         }
@@ -123,11 +121,11 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         const crm = yield (0, crm_1.init)(config);
         console.log("listening for messages");
         const queue = (0, listener_1.listen)(config, crm);
-        process.on('SIGINT', () => __awaiter(void 0, void 0, void 0, function* () {
-            console.log('Caught interrupt signal');
+        process.on("SIGINT", () => __awaiter(void 0, void 0, void 0, function* () {
+            console.log("Caught interrupt signal");
             if (queue) {
                 // a close method is not documented, but it's a good practice to have one
-                // @ts-ignore
+                // @ts-expect-error
                 yield queue.close();
             }
             if (crm.close) {

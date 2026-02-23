@@ -2,7 +2,7 @@ import crypto from "crypto";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Signature, Verification } from "./data";
+import type { Signature, Verification } from "./data";
 
 const makeHeaders = () => {
   const key = process.env["TRUST_KEY"];

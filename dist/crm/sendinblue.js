@@ -1,13 +1,13 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
+
+var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
+    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
+    return new (P || (P = Promise))((resolve, reject) => {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-};
+});
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const SibApiV3Sdk = require("@sendinblue/client");
@@ -33,9 +33,13 @@ class SendInBlueCRM extends crm_1.CRM {
                 return { processed: false };
             }
             console.log(camp.id, message.contact.email);
-            let createContact = new SibApiV3Sdk.CreateContact();
+            const createContact = new SibApiV3Sdk.CreateContact();
             createContact.email = message.contact.email;
-            createContact.attributes = { "LANG": message.actionPage.locale, "FIRSTNAME": message.contact.firstName, "LASTNAME": message.contact.lastName || "" };
+            createContact.attributes = {
+                LANG: message.actionPage.locale,
+                FIRSTNAME: message.contact.firstName,
+                LASTNAME: message.contact.lastName || "",
+            };
             createContact.listIds = [camp.id];
             createContact.updateEnabled = true;
             try {
@@ -49,7 +53,7 @@ class SendInBlueCRM extends crm_1.CRM {
                     console.log("error creating no code", e);
                 }
                 //      const error = JSON.parse(e.body);
-                //      console.log(error.code,error.message); 
+                //      console.log(error.code,error.message);
                 return { processed: false };
             }
             return { processed: true };
@@ -66,7 +70,7 @@ class SendInBlueCRM extends crm_1.CRM {
         });
         this.fetchCampaigns = () => __awaiter(this, void 0, void 0, function* () {
             try {
-                let folders = yield this.apiInstance.getFolders(10, 0);
+                const folders = yield this.apiInstance.getFolders(10, 0);
                 const name = "proca";
                 if (folders.body.folders) {
                     let procaFolder = folders.body.folders.filter((d) => d.name === name);
@@ -83,7 +87,7 @@ class SendInBlueCRM extends crm_1.CRM {
                     let lists = yield this.apiInstance.getLists(50, 0);
                     lists = lists.body.lists;
                     if (lists.length) {
-                        lists.forEach((d) => this.campaigns[d.name] = d);
+                        lists.forEach((d) => (this.campaigns[d.name] = d));
                     }
                 }
             }
