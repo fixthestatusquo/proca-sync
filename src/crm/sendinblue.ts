@@ -26,14 +26,22 @@ class SendInBlueCRM extends CRM {
 
   constructor(opt: {}) {
     super(opt);
-    this.crmType = CRMType.OptIn;
+    switch (process.env.CRM_TYPE) {
+      case "DOUBLE_OPTIN":
+        this.crmType = CRMType.DoubleOptIn;
+        break;
+      case "OPTIN":
+      default:
+        this.crmType = CRMType.OptIn;
+    }
     this.apiInstance.setApiKey(
       SibApiV3Sdk.AccountApiApiKeys.apiKey,
       process.env.SENDINBLUE_KEY,
     );
 
-    if (typeof process.env.CONTACT_ATTRIBUTES === "string") {
-      this.mapping = string2map(process.env.CONTACT_ATTRIBUTES);
+    const attributes = process.env.CONTACT_ATTRIBUTES;
+    if (attributes !== undefined) {
+      this.mapping = string2map(attributes as string);
     }
   }
 
@@ -67,14 +75,40 @@ class SendInBlueCRM extends CRM {
         LASTNAME: message.contact.lastName || "",
       };
     }
+    if (process.env.OPTIN) {
+      createContact.attributes[process.env.OPTIN] = true;
+    }
+    if (process.env.DOUBLE_OPTIN) {
+      createContact.attributes[process.env.DOUBLE_OPTIN] = true;
+    }
+
     createContact.listIds = [camp.id];
+    if (process.env.LIST) {
+      createContact.listIds.push(parseInt(process.env.LIST, 10));
+    }
     createContact.updateEnabled = true;
     console.log(createContact);
     try {
-      const contact = await this.apiInstance.createContact(createContact);
+      await this.apiInstance.createContact(createContact);
     } catch (e) {
-      console.log(e.response.body);
       if (e.response.body) {
+        if (
+          e.response.body.code === "invalid_parameter" &&
+          e.response.body.message === "Invalid LANDLINE_NUMBER number"
+        ) {
+          try {
+            createContact.attributes["LANDLINE_NUMBER"] = undefined;
+            console.error("Invalid phone number");
+            await this.apiInstance.createContact(createContact);
+            return { processed: true };
+          } catch (e) {
+            console.log(
+              "error creating even after removing phone",
+              e.response.body,
+            );
+            return { processed: false };
+          }
+        }
         console.log("error creating", e.response.body);
       } else {
         console.log("error creating no code", e);
