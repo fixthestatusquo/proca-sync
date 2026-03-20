@@ -79,7 +79,7 @@ class SendInBlueCRM extends CRM {
       createContact.attributes[process.env.OPTIN] = true;
     }
     if (process.env.DOUBLE_OPTIN) {
-      createContact.attributes[process.env.DOUBLE_OPTIN] = true;
+      createContact.attributes[process.env.DOUBLE_OPTIN] = "Yes";
     }
 
     createContact.listIds = [camp.id];
@@ -167,7 +167,7 @@ class SendInBlueCRM extends CRM {
         return data.body;
       } catch (e) {
         console.error("can't fetch list", campaign.externalId);
-        throw e;
+        //        throw e; let's continue and fetch by name "normal"
       }
     }
 
