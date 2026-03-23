@@ -86,6 +86,7 @@ class SendInBlueCRM extends CRM {
     if (process.env.LIST) {
       createContact.listIds.push(parseInt(process.env.LIST, 10));
     }
+    createContact.emailBlacklisted = false;
     createContact.updateEnabled = true;
     console.log(createContact);
     try {
