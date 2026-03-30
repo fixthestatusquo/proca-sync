@@ -207,6 +207,17 @@ class ActiveCampaign extends CRM {
     return data.contact.id;
   };
 
+  syncContact = async (bodyContent: string): Promise<string> => {
+    const res = await fetch(`${this.url}/api/3/contact/sync`, {
+      method: "POST",
+      headers: this.headers,
+      body: bodyContent,
+    });
+    if (!res.ok) throw new Error(`Failed to sync contact: ${res.statusText}`);
+    const data = await res.json();
+    return data.contact.id;
+  };
+
   subscribeToList = async (
     contactid: string,
     listid: string,
@@ -254,18 +265,13 @@ class ActiveCampaign extends CRM {
   handleActionContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    const email = message.contact.email;
-
     console.log(
       "Processing action:",
       message.action.id,
       "testing:",
       message.action.testing,
     );
-
-    if (this.verbose) {
-      console.log(JSON.stringify(message, null, 2));
-    }
+    if (this.verbose) console.log(JSON.stringify(message, null, 2));
 
     try {
       // updates will not be considered!!!
@@ -284,26 +290,15 @@ class ActiveCampaign extends CRM {
         return false;
       }
 
-      let contactid = await this.fetchContact(email);
-
-      // Email is necessary to create contact, but it is redundant for the update
       const contactPayload: ContactPayload = {
-        ...(contactid
-          ? pick(message.contact, [
-              "firstName",
-              "lastName",
-              "contactRef",
-              "phone",
-              "postcode",
-            ])
-          : pick(message.contact, [
-              "email",
-              "firstName",
-              "lastName",
-              "contactRef",
-              "phone",
-              "postcode",
-            ])),
+        ...pick(message.contact, [
+          "email",
+          "firstName",
+          "lastName",
+          "contactRef",
+          "phone",
+          "postcode",
+        ]),
         id: message.action.id,
       };
 
@@ -315,24 +310,18 @@ class ActiveCampaign extends CRM {
         zip_field,
       );
 
-      if (contactid) {
-        console.log("Contact already exists, update:", contactid);
-        contactid = await this.updateContact(contactid, bodyContent);
-      } else {
-        console.log("Creating new contact:", email);
-        contactid = await this.createContact(bodyContent);
-      }
+      const contactid = await this.syncContact(bodyContent);
 
       if (!contactid) {
-        console.error("Failed to create or update contact");
+        console.error("Failed to sync contact, action ID:", message.action.id);
         return false;
       }
 
-      // Subscribe to list
-      await this.subscribeToList(contactid, listid || "1");
+      // Subscribe to list if needed
+      if (listid) await this.subscribeToList(contactid, listid);
 
-      // Add petition-specific tags
-      await this.addTagsToContact(contactid, tagids);
+      // Add petition-specific tags if needed
+      if (tagids) await this.addTagsToContact(contactid, tagids);
 
       console.log("Action contact processed successfully", message.action.id);
       return true;
