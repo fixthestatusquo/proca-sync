@@ -107,8 +107,6 @@ class BrevoCRM extends CRM {
       } else {
         console.log("error creating no code", e);
       }
-      //      const error = JSON.parse(e.body);
-      //      console.log(error.code,error.message);
 
       return { processed: false };
     }

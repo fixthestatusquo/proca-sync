@@ -7,7 +7,11 @@ import {
   type ProcaCampaign,
 } from "../crm";
 
-import type { Contact, ContactValues, ContactOptions } from "./magnews/interfaces";
+import type {
+  Contact,
+  ContactValues,
+  ContactOptions,
+} from "./magnews/interfaces";
 
 import { setClientToken, addContact } from "./magnews/client";
 
@@ -40,7 +44,7 @@ class MagNewsCRM extends CRM {
     const camp = await this.campaign(message.campaign);
 
     const member = this.actionToContactRecord(message, camp);
-    const r = await addContact(this.clientToken, member);
+    const r = (await addContact(this.clientToken, member)) as any;
     if (!r) {
       //not sure what to do
       return { processed: true };

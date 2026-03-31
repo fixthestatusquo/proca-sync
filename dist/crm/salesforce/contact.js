@@ -1,4 +1,4 @@
-
+"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.emailChangedToContactRecord = exports.determineOptIn = exports.actionToLeadRecord = exports.actionToContactRecord = exports.isActionSyncable = void 0;
 const isActionSyncable = (action) => {
