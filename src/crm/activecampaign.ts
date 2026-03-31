@@ -2,6 +2,7 @@ import {
   CRM,
   CRMType,
   type ActionMessage,
+  type EventMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
@@ -11,8 +12,10 @@ import { fetchCampaign as procaCampaign } from "../proca";
 
 dotenv.config();
 
+export type Message = ActionMessage | EventMessage;
+
 type ContactPayload = {
-  email?: string;
+  email: string;
   firstName: string;
   lastName?: string;
   contactRef: string;
@@ -27,15 +30,11 @@ type FieldValue = {
 };
 
 type ActiveCampaignContact = {
-  email?: string;
+  email: string;
   firstName: string;
   lastName?: string;
   phone?: string;
   fieldValues: FieldValue[];
-};
-
-type ActiveCampaignPayload = {
-  contact: ActiveCampaignContact;
 };
 
 class ActiveCampaign extends CRM {
@@ -71,58 +70,45 @@ class ActiveCampaign extends CRM {
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    const r = await procaCampaign(campaign.id);
-    return r;
+    return procaCampaign(campaign.id);
   };
 
-  body = (
-    {
-      email,
-      firstName,
-      lastName,
-      contactRef,
-      id,
-      phone,
-      postcode,
-    }: ContactPayload,
-    data_source: string,
-    action_id_field: string,
-    ref_field: string,
-    zip_field: string | undefined,
-  ) => {
-    const fieldValues = [
-      {
-        field: data_source,
-        value: "proca",
-      },
-      {
-        field: action_id_field,
-        value: id,
-      },
-      {
-        field: ref_field,
-        value: contactRef,
-      },
-    ];
+  private getOrgFieldValues(contact: ContactPayload, sync: any): FieldValue[] {
+    switch (process.env.ORG) {
+      case "duh": {
+        const { data_source, action_id_field, ref_field, zip_field } = sync;
+        if (!data_source || !action_id_field || !ref_field) return [];
 
-    // Add ZIP (postcode) only if it's provided
-    if (postcode && zip_field) {
-      fieldValues.push({
-        field: zip_field,
-        value: postcode,
-      });
+        const fields: FieldValue[] = [
+          { field: data_source, value: "proca" },
+          { field: action_id_field, value: contact.id },
+          { field: ref_field, value: contact.contactRef },
+        ];
+
+        if (contact.postcode && zip_field) {
+          fields.push({ field: zip_field, value: contact.postcode });
+        }
+
+        return fields;
+      }
+      default:
+        return [];
     }
+  }
 
-    const contact: ActiveCampaignContact = {
-      firstName,
+  body = (contact: ContactPayload, sync: any): string => {
+    const fieldValues = this.getOrgFieldValues(contact, sync);
+
+    const ac: ActiveCampaignContact = {
+      firstName: contact.firstName,
+      email: contact.email,
       fieldValues,
     };
 
-    if (email) contact.email = email;
-    if (lastName) contact.lastName = lastName;
-    if (phone) contact.phone = phone;
+    if (contact.lastName) ac.lastName = contact.lastName;
+    if (contact.phone) ac.phone = contact.phone;
 
-    return JSON.stringify({ contact });
+    return JSON.stringify({ contact: ac });
   };
 
   async getActiveCampaignFields() {
@@ -276,19 +262,10 @@ class ActiveCampaign extends CRM {
     try {
       // updates will not be considered!!!
       const camp = await this.campaign(message.campaign);
-      const {
-        listid,
-        tagids,
-        action_id_field,
-        ref_field,
-        data_source,
-        zip_field,
-      } = camp.config?.component?.sync || {};
+      const sync = camp.config?.component?.sync || {};
 
-      if (!tagids || !action_id_field || !ref_field || !data_source) {
-        console.error("Missing required configuration for ActiveCampaign sync");
-        return false;
-      }
+      const listid = sync.listid || process.env.AC_LIST_ID;
+      const tagids = sync.tagids || process.env.AC_TAG_IDS;
 
       const contactPayload: ContactPayload = {
         ...pick(message.contact, [
@@ -302,25 +279,14 @@ class ActiveCampaign extends CRM {
         id: message.action.id,
       };
 
-      const bodyContent = this.body(
-        contactPayload,
-        data_source,
-        action_id_field,
-        ref_field,
-        zip_field,
-      );
-
+      const bodyContent = this.body(contactPayload, sync);
       const contactid = await this.syncContact(bodyContent);
 
       if (!contactid) {
         console.error("Failed to sync contact, action ID:", message.action.id);
         return false;
       }
-
-      // Subscribe to list if needed
       if (listid) await this.subscribeToList(contactid, listid);
-
-      // Add petition-specific tags if needed
       if (tagids) await this.addTagsToContact(contactid, tagids);
 
       console.log("Action contact processed successfully", message.action.id);
