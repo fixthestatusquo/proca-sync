@@ -248,15 +248,27 @@ class ActiveCampaign extends CRM {
     }
   };
 
-  handleActionContact = async (
+  handleAction = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    console.log(
-      "Processing action:",
-      message.action.id,
-      "testing:",
-      message.action.testing,
-    );
+    console.log("Action taken from the queue", message.action.id);
+    return this.handleContact(message);
+  };
+
+  handleEvent = async (
+    message: EventMessage,
+  ): Promise<handleResult | boolean> => {
+    console.log("Event taken from queue", message.actionId);
+    message.contact = message.supporter.contact;
+    message.privacy = message.supporter.privacy;
+    return this.handleContact(message);
+  };
+
+  handleContact = async (message: Message): Promise<handleResult | boolean> => {
+    const actionId = "action" in message ? message.action.id : message.actionId;
+    const testing = "action" in message ? message.action.testing : false;
+
+    console.log("Processing action:", actionId, "testing:", testing);
     if (this.verbose) console.log(JSON.stringify(message, null, 2));
 
     try {
@@ -276,20 +288,20 @@ class ActiveCampaign extends CRM {
           "phone",
           "postcode",
         ]),
-        id: message.action.id,
+        id: actionId,
       };
 
       const bodyContent = this.body(contactPayload, sync);
       const contactid = await this.syncContact(bodyContent);
 
       if (!contactid) {
-        console.error("Failed to sync contact, action ID:", message.action.id);
+        console.error("Failed to sync contact, action ID:", actionId);
         return false;
       }
       if (listid) await this.subscribeToList(contactid, listid);
       if (tagids) await this.addTagsToContact(contactid, tagids);
 
-      console.log("Action contact processed successfully", message.action.id);
+      console.log("Action contact processed successfully", actionId);
       return true;
     } catch (err) {
       console.error("Error handling contact action:", err.message);
