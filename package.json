@@ -54,7 +54,7 @@
     "@proca/queue": "^5.3.0",
     "@sentry/node": "^9.35.0",
     "@supabase/supabase-js": "^2.50.2",
-    "@topcli/spinner": "^3.0.0",
+    "@topcli/spinner": "^4.2.1",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
     "dotenv": "^17.0.0",
