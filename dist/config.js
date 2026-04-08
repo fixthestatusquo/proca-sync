@@ -1,4 +1,4 @@
-
+"use strict";
 /**
  * What info we need to read actions from Proca action queue?
  * */
@@ -36,7 +36,7 @@ function configFromOptions(opt, argv) {
         verbose: argv.verbose,
         interactive: argv.interactive,
         dryRun: argv["dry-run"],
-        concurrency: parseInt(process.env.concurrency || "1") || 1,
+        concurrency: parseInt(process.env.concurrency || "1", 10) || 1,
     };
 }
 // our default queue server

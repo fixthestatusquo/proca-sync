@@ -1,14 +1,16 @@
-
-var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
-    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
-    return new (P || (P = Promise))((resolve, reject) => {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-});
-var __importDefault = (this && this.__importDefault) || ((mod) => (mod && mod.__esModule) ? mod : { "default": mod });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -29,37 +31,37 @@ class ActiveCampaign extends crm_1.CRM {
             return r;
         });
         this.headers = {
-            'Api-Token': token,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            "Api-Token": token,
+            Accept: "application/json",
+            "Content-Type": "application/json",
         };
         // actionid for the last campaign
         // send data source, text field, value "proca"
-        this.body = ({ email, firstName, lastName, contactRef, id, phone, postcode }, data_source, action_id_field, ref_field, zip_field) => {
+        this.body = ({ email, firstName, lastName, contactRef, id, phone, postcode, }, data_source, action_id_field, ref_field, zip_field) => {
             const fieldValues = [
                 {
                     field: data_source, // data_source field ID
-                    value: 'proca'
+                    value: "proca",
                 },
                 {
                     field: action_id_field,
-                    value: id
+                    value: id,
                 },
                 {
                     field: ref_field,
-                    value: contactRef
-                }
+                    value: contactRef,
+                },
             ];
             // Add ZIP (postcode) only if it's provided
             if (postcode && zip_field) {
                 fieldValues.push({
                     field: zip_field, // ZIP field ID, default is 11
-                    value: postcode
+                    value: postcode,
                 });
             }
             const contact = {
                 firstName,
-                fieldValues
+                fieldValues,
             };
             // Conditionally add optional fields
             if (email)
@@ -116,7 +118,7 @@ class ActiveCampaign extends crm_1.CRM {
                     contactList: {
                         list: listid,
                         contact: contactid,
-                        status: 1
+                        status: 1,
                     },
                 }),
             });
@@ -153,17 +155,29 @@ class ActiveCampaign extends crm_1.CRM {
             try {
                 // updates will not be considered!!!
                 const camp = yield this.campaign(message.campaign);
-                const { listid, tagids, action_id_field, ref_field, data_source, zip_field } = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
+                const { listid, tagids, action_id_field, ref_field, data_source, zip_field, } = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
                 if (!tagids || !action_id_field || !ref_field || !data_source) {
                     console.error("Missing required configuration for ActiveCampaign sync");
                     return false;
                 }
-                ;
                 let contactid = yield this.fetchContact(email);
                 // Email is necessary to create contact, but it is redundant for the update
                 const contactPayload = Object.assign(Object.assign({}, (contactid
-                    ? (0, lodash_1.pick)(message.contact, ['firstName', 'lastName', 'contactRef', 'phone', 'postcode'])
-                    : (0, lodash_1.pick)(message.contact, ['email', 'firstName', 'lastName', 'contactRef', 'phone', 'postcode']))), { id: message.action.id });
+                    ? (0, lodash_1.pick)(message.contact, [
+                        "firstName",
+                        "lastName",
+                        "contactRef",
+                        "phone",
+                        "postcode",
+                    ])
+                    : (0, lodash_1.pick)(message.contact, [
+                        "email",
+                        "firstName",
+                        "lastName",
+                        "contactRef",
+                        "phone",
+                        "postcode",
+                    ]))), { id: message.action.id });
                 const bodyContent = this.body(contactPayload, data_source, action_id_field, ref_field, zip_field);
                 if (contactid) {
                     console.log("Contact already exists, update:", contactid);
@@ -178,7 +192,7 @@ class ActiveCampaign extends crm_1.CRM {
                     return false;
                 }
                 // Subscribe to list
-                yield this.subscribeToList(contactid, listid || '1');
+                yield this.subscribeToList(contactid, listid || "1");
                 // Add petition-specific tags
                 yield this.addTagsToContact(contactid, tagids);
                 console.log("Action contact processed successfully", message.action.id);
@@ -195,18 +209,18 @@ class ActiveCampaign extends crm_1.CRM {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch(`${url}/api/3/fields`, {
-                    method: 'GET',
-                    headers: this.headers
+                    method: "GET",
+                    headers: this.headers,
                 });
                 if (!response.ok) {
                     throw new Error(`Error fetching fields: ${response.status} ${response.statusText}`);
                 }
                 const data = yield response.json();
-                console.log('Retrieved fields:', data.fields);
+                console.log("Retrieved fields:", data.fields);
                 return data.fields;
             }
             catch (error) {
-                console.error('Failed to fetch ActiveCampaign fields:', error);
+                console.error("Failed to fetch ActiveCampaign fields:", error);
                 return null;
             }
         });
@@ -215,18 +229,18 @@ class ActiveCampaign extends crm_1.CRM {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch(`${url}/api/3/lists`, {
-                    method: 'GET',
-                    headers: this.headers
+                    method: "GET",
+                    headers: this.headers,
                 });
                 if (!response.ok) {
                     throw new Error(`Error fetching lists: ${response.status} ${response.statusText}`);
                 }
                 const data = yield response.json();
-                console.log('Retrieved lists:', data.lists);
+                console.log("Retrieved lists:", data.lists);
                 return data.lists;
             }
             catch (error) {
-                console.error('Failed to fetch ActiveCampaign lists:', error);
+                console.error("Failed to fetch ActiveCampaign lists:", error);
                 return null;
             }
         });

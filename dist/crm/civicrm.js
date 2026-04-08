@@ -1,13 +1,13 @@
-
-var __awaiter = (this && this.__awaiter) || ((thisArg, _arguments, P, generator) => {
-    function adopt(value) { return value instanceof P ? value : new P((resolve) => { resolve(value); }); }
-    return new (P || (P = Promise))((resolve, reject) => {
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-});
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const utils_1 = require("../utils");
@@ -40,7 +40,7 @@ class CiviCRM extends crm_1.CRM {
                     process.exit(1); // should we create the contacts without putting them in a group?
                 }
             }
-            let countries ;
+            let countries;
             try {
                 countries = yield this.crmAPI.get("Country", {
                     select: ["id", "iso_code", "row_count"],
