@@ -76,7 +76,12 @@ class ActiveCampaign extends CRM {
   private getOrgFieldValues(contact: ContactPayload, sync: any): FieldValue[] {
     switch (process.env.ORG) {
       case "duh": {
-        const { data_source, action_id_field, ref_field, zip_field } = sync;
+        const data_source = sync.data_source || process.env.CRM_DATA_SOURCE;
+        const action_id_field =
+          sync.action_id_field || process.env.CRM_ACTION_ID_FIELD;
+        const ref_field = sync.ref_field || process.env.CRM_REF_FIELD;
+        const zip_field = sync.zip_field || process.env.CRM_ZIP_FIELD;
+
         if (!data_source || !action_id_field || !ref_field) return [];
 
         const fields: FieldValue[] = [
@@ -194,6 +199,8 @@ class ActiveCampaign extends CRM {
   };
 
   syncContact = async (bodyContent: string): Promise<string> => {
+    const fullUrl = `${this.url}/api/3/contact/sync`;
+    console.log("Attempting sync to:", fullUrl);
     const res = await fetch(`${this.url}/api/3/contact/sync`, {
       method: "POST",
       headers: this.headers,
@@ -248,11 +255,11 @@ class ActiveCampaign extends CRM {
     }
   };
 
-  handleAction = async (
+  handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     console.log("Action taken from the queue", message.action.id);
-    return this.handleContact(message);
+    return this.handleMessage(message);
   };
 
   handleEvent = async (
@@ -261,10 +268,10 @@ class ActiveCampaign extends CRM {
     console.log("Event taken from queue", message.actionId);
     message.contact = message.supporter.contact;
     message.privacy = message.supporter.privacy;
-    return this.handleContact(message);
+    return this.handleMessage(message);
   };
 
-  handleContact = async (message: Message): Promise<handleResult | boolean> => {
+  handleMessage = async (message: Message): Promise<handleResult | boolean> => {
     const actionId = "action" in message ? message.action.id : message.actionId;
     const testing = "action" in message ? message.action.testing : false;
 
@@ -276,8 +283,8 @@ class ActiveCampaign extends CRM {
       const camp = await this.campaign(message.campaign);
       const sync = camp.config?.component?.sync || {};
 
-      const listid = sync.listid || process.env.AC_LIST_ID;
-      const tagids = sync.tagids || process.env.AC_TAG_IDS;
+      const listid = sync.listid || process.env.CRM_LIST_ID;
+      const tagids = sync.tagids || process.env.CRM_TAG_IDS;
 
       const contactPayload: ContactPayload = {
         ...pick(message.contact, [
@@ -304,9 +311,13 @@ class ActiveCampaign extends CRM {
       console.log("Action contact processed successfully", actionId);
       return true;
     } catch (err) {
-      console.error("Error handling contact action:", err.message);
+      console.error("Error handling contact action:", err.message, err);
       return false;
     }
+  };
+
+  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+    return true;
   };
 }
 

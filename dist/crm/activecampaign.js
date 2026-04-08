@@ -17,65 +17,29 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const lodash_1 = require("lodash");
 const proca_1 = require("../proca");
 dotenv_1.default.config();
-const url = process.env.CRM_URL;
-const token = process.env.CRM_API_TOKEN;
-if (!url || !token) {
-    console.error("Missing CRM credentials.");
-    process.exit(1);
-}
 class ActiveCampaign extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
-            return r;
+            return (0, proca_1.fetchCampaign)(campaign.id);
         });
-        this.headers = {
-            "Api-Token": token,
-            Accept: "application/json",
-            "Content-Type": "application/json",
-        };
-        // actionid for the last campaign
-        // send data source, text field, value "proca"
-        this.body = ({ email, firstName, lastName, contactRef, id, phone, postcode, }, data_source, action_id_field, ref_field, zip_field) => {
-            const fieldValues = [
-                {
-                    field: data_source, // data_source field ID
-                    value: "proca",
-                },
-                {
-                    field: action_id_field,
-                    value: id,
-                },
-                {
-                    field: ref_field,
-                    value: contactRef,
-                },
-            ];
-            // Add ZIP (postcode) only if it's provided
-            if (postcode && zip_field) {
-                fieldValues.push({
-                    field: zip_field, // ZIP field ID, default is 11
-                    value: postcode,
-                });
-            }
-            const contact = {
-                firstName,
+        this.body = (contact, sync) => {
+            const fieldValues = this.getOrgFieldValues(contact, sync);
+            const ac = {
+                firstName: contact.firstName,
+                email: contact.email,
                 fieldValues,
             };
-            // Conditionally add optional fields
-            if (email)
-                contact.email = email;
-            if (lastName)
-                contact.lastName = lastName;
-            if (phone)
-                contact.phone = phone;
-            return JSON.stringify({ contact });
+            if (contact.lastName)
+                ac.lastName = contact.lastName;
+            if (contact.phone)
+                ac.phone = contact.phone;
+            return JSON.stringify({ contact: ac });
         };
         this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             try {
-                const res = yield fetch(`${url}/api/3/contacts?email=${encodeURIComponent(email)}`, {
+                const res = yield fetch(`${this.url}/api/3/contacts?email=${encodeURIComponent(email)}`, {
                     method: "GET",
                     headers: this.headers,
                 });
@@ -89,7 +53,7 @@ class ActiveCampaign extends crm_1.CRM {
             }
         });
         this.createContact = (bodyContent) => __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${url}/api/3/contacts`, {
+            const res = yield fetch(`${this.url}/api/3/contacts`, {
                 method: "POST",
                 headers: this.headers,
                 body: bodyContent,
@@ -100,7 +64,7 @@ class ActiveCampaign extends crm_1.CRM {
             return data.contact.id;
         });
         this.updateContact = (contactid, bodyContent) => __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${url}/api/3/contacts/${contactid}`, {
+            const res = yield fetch(`${this.url}/api/3/contacts/${contactid}`, {
                 method: "PUT",
                 headers: this.headers,
                 body: bodyContent,
@@ -110,8 +74,21 @@ class ActiveCampaign extends crm_1.CRM {
             const data = yield res.json();
             return data.contact.id;
         });
+        this.syncContact = (bodyContent) => __awaiter(this, void 0, void 0, function* () {
+            const fullUrl = `${this.url}/api/3/contact/sync`;
+            console.log("Attempting sync to:", fullUrl);
+            const res = yield fetch(`${this.url}/api/3/contact/sync`, {
+                method: "POST",
+                headers: this.headers,
+                body: bodyContent,
+            });
+            if (!res.ok)
+                throw new Error(`Failed to sync contact: ${res.statusText}`);
+            const data = yield res.json();
+            return data.contact.id;
+        });
         this.subscribeToList = (contactid, listid) => __awaiter(this, void 0, void 0, function* () {
-            const res = yield fetch(`${url}/api/3/contactLists`, {
+            const res = yield fetch(`${this.url}/api/3/contactLists`, {
                 method: "POST",
                 headers: this.headers,
                 body: JSON.stringify({
@@ -125,11 +102,10 @@ class ActiveCampaign extends crm_1.CRM {
             if (!res.ok)
                 throw new Error(`Failed to subscribe to list: ${res.statusText}`);
         });
-        //The tag must already exist, default?
         this.addTagsToContact = (contactId, tagIds) => __awaiter(this, void 0, void 0, function* () {
             const ids = tagIds.replace(/\s+/g, "").split(",");
             for (const tagId of ids) {
-                const res = yield fetch(`${url}/api/3/contactTags`, {
+                const res = yield fetch(`${this.url}/api/3/contactTags`, {
                     method: "POST",
                     headers: this.headers,
                     body: JSON.stringify({
@@ -145,70 +121,106 @@ class ActiveCampaign extends crm_1.CRM {
                 }
             }
         });
-        this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
+        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            console.log("Action taken from the queue", message.action.id);
+            return this.handleMessage(message);
+        });
+        this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
+            console.log("Event taken from queue", message.actionId);
+            message.contact = message.supporter.contact;
+            message.privacy = message.supporter.privacy;
+            return this.handleMessage(message);
+        });
+        this.handleMessage = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const email = message.contact.email;
-            console.log("Processing action:", message.action.id, "testing:", message.action.testing);
-            if (this.verbose) {
+            const actionId = "action" in message ? message.action.id : message.actionId;
+            const testing = "action" in message ? message.action.testing : false;
+            console.log("Processing action:", actionId, "testing:", testing);
+            if (this.verbose)
                 console.log(JSON.stringify(message, null, 2));
-            }
             try {
                 // updates will not be considered!!!
                 const camp = yield this.campaign(message.campaign);
-                const { listid, tagids, action_id_field, ref_field, data_source, zip_field, } = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
-                if (!tagids || !action_id_field || !ref_field || !data_source) {
-                    console.error("Missing required configuration for ActiveCampaign sync");
-                    return false;
-                }
-                let contactid = yield this.fetchContact(email);
-                // Email is necessary to create contact, but it is redundant for the update
-                const contactPayload = Object.assign(Object.assign({}, (contactid
-                    ? (0, lodash_1.pick)(message.contact, [
-                        "firstName",
-                        "lastName",
-                        "contactRef",
-                        "phone",
-                        "postcode",
-                    ])
-                    : (0, lodash_1.pick)(message.contact, [
-                        "email",
-                        "firstName",
-                        "lastName",
-                        "contactRef",
-                        "phone",
-                        "postcode",
-                    ]))), { id: message.action.id });
-                const bodyContent = this.body(contactPayload, data_source, action_id_field, ref_field, zip_field);
-                if (contactid) {
-                    console.log("Contact already exists, update:", contactid);
-                    contactid = yield this.updateContact(contactid, bodyContent);
-                }
-                else {
-                    console.log("Creating new contact:", email);
-                    contactid = yield this.createContact(bodyContent);
-                }
+                const sync = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
+                const listid = sync.listid || process.env.CRM_LIST_ID;
+                const tagids = sync.tagids || process.env.CRM_TAG_IDS;
+                const contactPayload = Object.assign(Object.assign({}, (0, lodash_1.pick)(message.contact, [
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "contactRef",
+                    "phone",
+                    "postcode",
+                ])), { id: actionId });
+                const bodyContent = this.body(contactPayload, sync);
+                const contactid = yield this.syncContact(bodyContent);
                 if (!contactid) {
-                    console.error("Failed to create or update contact");
+                    console.error("Failed to sync contact, action ID:", actionId);
                     return false;
                 }
-                // Subscribe to list
-                yield this.subscribeToList(contactid, listid || "1");
-                // Add petition-specific tags
-                yield this.addTagsToContact(contactid, tagids);
-                console.log("Action contact processed successfully", message.action.id);
+                if (listid)
+                    yield this.subscribeToList(contactid, listid);
+                if (tagids)
+                    yield this.addTagsToContact(contactid, tagids);
+                console.log("Action contact processed successfully", actionId);
                 return true;
             }
             catch (err) {
-                console.error("Error handling contact action:", err.message);
+                console.error("Error handling contact action:", err.message, err);
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.ActionContact;
+        this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
+            return true;
+        });
+        switch (process.env.CRM_TYPE) {
+            case "DOUBLE_OPTIN":
+                this.crmType = crm_1.CRMType.DoubleOptIn;
+                break;
+            case "ActionContact":
+                this.crmType = crm_1.CRMType.ActionContact;
+                break;
+            default:
+                this.crmType = crm_1.CRMType.DoubleOptIn;
+        }
+        this.url = process.env.CRM_URL || "";
+        this.token = process.env.CRM_API_TOKEN || "";
+        if (!this.url || !this.token) {
+            throw new Error(`Missing CRM_URL or CRM_API_TOKEN`);
+        }
+        this.headers = {
+            "Api-Token": this.token,
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        };
+    }
+    getOrgFieldValues(contact, sync) {
+        switch (process.env.ORG) {
+            case "duh": {
+                const data_source = sync.data_source || process.env.CRM_DATA_SOURCE;
+                const action_id_field = sync.action_id_field || process.env.CRM_ACTION_ID_FIELD;
+                const ref_field = sync.ref_field || process.env.CRM_REF_FIELD;
+                const zip_field = sync.zip_field || process.env.CRM_ZIP_FIELD;
+                if (!data_source || !action_id_field || !ref_field)
+                    return [];
+                const fields = [
+                    { field: data_source, value: "proca" },
+                    { field: action_id_field, value: contact.id },
+                    { field: ref_field, value: contact.contactRef },
+                ];
+                if (contact.postcode && zip_field) {
+                    fields.push({ field: zip_field, value: contact.postcode });
+                }
+                return fields;
+            }
+            default:
+                return [];
+        }
     }
     getActiveCampaignFields() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield fetch(`${url}/api/3/fields`, {
+                const response = yield fetch(`${this.url}/api/3/fields`, {
                     method: "GET",
                     headers: this.headers,
                 });
@@ -228,7 +240,7 @@ class ActiveCampaign extends crm_1.CRM {
     getActiveCampaignLists() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield fetch(`${url}/api/3/lists`, {
+                const response = yield fetch(`${this.url}/api/3/lists`, {
                     method: "GET",
                     headers: this.headers,
                 });
