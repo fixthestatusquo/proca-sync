@@ -53,7 +53,7 @@
     "@proca/crypto": "^3.4.0",
     "@proca/queue": "^6.0.0",
     "@sentry/node": "^9.35.0",
-    "@supabase/supabase-js": "^2.50.2",
+    "@supabase/supabase-js": "^2.103.2",
     "@topcli/spinner": "^4.2.1",
     "civicrm": "^3.2.2",
     "cli-color": "^2.0.4",
