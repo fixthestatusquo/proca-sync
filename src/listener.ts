@@ -34,7 +34,14 @@ export const listen = (config: Configuration, crm: CRM) => {
       // Return nothing to have the message ACKed (removed from queue)
       //
       // What is this?
-
+      console.log(
+        "Received message",
+        actionOrEvent.schema,
+        "with id",
+        "action" in actionOrEvent
+          ? actionOrEvent.action.id
+          : actionOrEvent.actionId,
+      );
       switch (actionOrEvent.schema) {
         case "proca:action:2": {
           // An action done by Supporter

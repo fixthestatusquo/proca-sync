@@ -192,7 +192,11 @@ export abstract class CRM implements CRMInterface {
   handleCampaignUpdate = async (
     message: CampaignUpdatedEventMessage,
   ): Promise<handleResult | boolean> => {
-    console.warn("campaign update", message.campaign.name, message.campaign.title);
+    console.warn(
+      "campaign update",
+      message.campaign.name,
+      message.campaign.title,
+    );
     //we need to refetch campaign when it is updated
     //message is close enough to campaign structure?
     await this.fetchCampaign(message.campaign);
@@ -229,10 +233,10 @@ export abstract class CRM implements CRMInterface {
         } else {
           this.log(
             message.action.actionType +
-            " Not a privacy+withConsent message, not sent: " +
-            email +
-            " " +
-            actionId,
+              " Not a privacy+withConsent message, not sent: " +
+              email +
+              " " +
+              actionId,
             ProcessStatus.error,
           );
           return true;
@@ -247,9 +251,9 @@ export abstract class CRM implements CRMInterface {
         if (!message.privacy.withConsent) {
           this.log(
             "no withConsent " +
-            message.actionId +
-            " ," +
-            message.action.actionType,
+              message.actionId +
+              " ," +
+              message.action.actionType,
             ProcessStatus.skipped,
           );
           return true;
@@ -277,9 +281,9 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.optIn === true) {
           this.log(
             "opt-in, but no withConsent " +
-            actionId +
-            " " +
-            message.action?.actionType,
+              actionId +
+              " " +
+              message.action?.actionType,
             ProcessStatus.skipped,
           );
           //          this.verbose && console.log('opt-out',message.actionId);
@@ -298,9 +302,9 @@ export abstract class CRM implements CRMInterface {
         if (message.privacy.optIn === null) {
           this.log(
             "optIn null (implicit) withConsent " +
-            actionId +
-            " " +
-            message.action?.actionType,
+              actionId +
+              " " +
+              message.action?.actionType,
             ProcessStatus.skipped,
           );
           return true;
@@ -381,6 +385,7 @@ export abstract class CRM implements CRMInterface {
     // 4. Event message arrives, We set Contact as bounced
 
     // events unrelated to CRM are handled separately
+
     if (event.eventType === "campaign_updated") {
       const r = await this.handleCampaignUpdate(event);
       return r;
@@ -392,7 +397,13 @@ export abstract class CRM implements CRMInterface {
       const cont = await this.fetchContact(event.supporter.contact.email);
 
       // if not, ignore the event about non-existing contact
-      if (!cont) return true;
+      if (!cont) {
+        console.log(
+          "contact not found for email status change, ignoring",
+          event,
+        );
+        return false;
+      }
 
       switch (event.supporter.privacy.emailStatus) {
         // do this if you want to change the subscription based on opt in in email
@@ -407,9 +418,16 @@ export abstract class CRM implements CRMInterface {
         }
 
         // Different kinds of problems with email delivery:
-        case "bounce": // bounce
-        case "blocked": // pre-blocked by our transactional email provider (malformed etc)
-        case "spam": // supporter clicked "this is spam" on our email
+        case "bounce": {
+          console.log("bounce", event.supporter.contact.email);
+        }
+        case "blocked": {
+          console.log("blocked", event.supporter.contact.email);
+        } // pre-blocked by our transactional email provider (malformed etc)
+        case "spam": {
+          console.log(`marked as spam from ${event.supporter.contact.email}`);
+        }
+        // supporter clicked "this is spam" on our email
         case "unsub": {
           // supporter clicked "unsubscribe" on our email (if provided by Gmail etc)
           console.log(
@@ -421,7 +439,8 @@ export abstract class CRM implements CRMInterface {
         }
       }
     }
-    return true;
+    console.log("Unhandled event type", event);
+    return false;
   };
 
   handleEvent = async (
