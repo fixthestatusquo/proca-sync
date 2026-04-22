@@ -9,18 +9,15 @@ import {
 import type { Configuration } from "./config";
 import type { CRM } from "./crm";
 import { pause } from "./utils";
-const crm: any = {};
 
-export const listen = (config: Configuration, crm: CRM) => {
+export const listen = async (config: Configuration, crm: CRM) => {
   const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
   const opts: ConsumerOpts = { tag: tag };
   if (config.concurrency) {
     opts.concurrency = config.concurrency;
   }
-
   crm.count = count;
-
-  return syncQueue(
+  return await syncQueue(
     config.url,
     config.queue,
     async (actionOrEvent) => {
@@ -34,7 +31,16 @@ export const listen = (config: Configuration, crm: CRM) => {
       // Return nothing to have the message ACKed (removed from queue)
       //
       // What is this?
-
+      console.log(
+        "Received message",
+        actionOrEvent.schema,
+        "with id",
+        actionOrEvent.schema === "proca:action:2"
+          ? actionOrEvent.action.id
+          : "actionId" in actionOrEvent
+            ? actionOrEvent.actionId
+            : actionOrEvent.eventType,
+      );
       switch (actionOrEvent.schema) {
         case "proca:action:2": {
           // An action done by Supporter

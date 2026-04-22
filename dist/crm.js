@@ -45,12 +45,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = exports.CRM = exports.CRMType = exports.CampaignUpdatedEvent = exports.ProcaCampaign = exports.EventMessage = exports.ActionMessage = exports.ProcessStatus = void 0;
-const queue_1 = require("@proca/queue");
-Object.defineProperty(exports, "ProcaCampaign", { enumerable: true, get: function () { return queue_1.Campaign; } });
-Object.defineProperty(exports, "ActionMessage", { enumerable: true, get: function () { return queue_1.ActionMessageV2; } });
-Object.defineProperty(exports, "EventMessage", { enumerable: true, get: function () { return queue_1.EventMessageV2; } });
-Object.defineProperty(exports, "CampaignUpdatedEvent", { enumerable: true, get: function () { return queue_1.CampaignUpdatedEventMessage; } });
+exports.init = exports.CRM = exports.CRMType = exports.ProcessStatus = void 0;
 const cli_color_1 = __importDefault(require("cli-color"));
 const spinner_1 = require("./spinner");
 var ProcessStatus;
@@ -262,6 +257,7 @@ class CRM {
             // OR:
             // 3. Supporter email bounces (invalid email)
             // 4. Event message arrives, We set Contact as bounced
+            var _a;
             // events unrelated to CRM are handled separately
             if (event.eventType === "campaign_updated") {
                 const r = yield this.handleCampaignUpdate(event);
@@ -270,10 +266,12 @@ class CRM {
             if (event.eventType === "email_status") {
                 // handle only email status updates
                 // check if we have that contact in CRM
-                const cont = yield this.fetchContact(event.supporter.contact.email);
+                const cont = (_a = event.supporter) === null || _a === void 0 ? void 0 : _a.contact;
                 // if not, ignore the event about non-existing contact
-                if (!cont)
-                    return true;
+                if (!cont) {
+                    console.log("contact not found for email status change, ignoring", event);
+                    return false;
+                }
                 switch (event.supporter.privacy.emailStatus) {
                     // do this if you want to change the subscription based on opt in in email
                     // the timestamp of this opt in is in event.supporter.privacy.emailStatusChanged
@@ -285,9 +283,16 @@ class CRM {
                         return r;
                     }
                     // Different kinds of problems with email delivery:
-                    case "bounce": // bounce
-                    case "blocked": // pre-blocked by our transactional email provider (malformed etc)
-                    case "spam": // supporter clicked "this is spam" on our email
+                    case "bounce": {
+                        console.log("bounce", event.supporter.contact.email);
+                    }
+                    case "blocked": {
+                        console.log("blocked", event.supporter.contact.email);
+                    } // pre-blocked by our transactional email provider (malformed etc)
+                    case "spam": {
+                        console.log(`marked as spam from ${event.supporter.contact.email}`);
+                    }
+                    // supporter clicked "this is spam" on our email
                     case "unsub": {
                         // supporter clicked "unsubscribe" on our email (if provided by Gmail etc)
                         console.log(`${event.supporter.privacy.emailStatus} from ${event.supporter.contact.email}`);
@@ -296,7 +301,8 @@ class CRM {
                     }
                 }
             }
-            return true;
+            console.log("Unhandled event type", event);
+            return false;
         });
         this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
             return Promise.resolve({ processed: false });

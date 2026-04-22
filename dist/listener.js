@@ -12,15 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.listen = void 0;
 const queue_1 = require("@proca/queue");
 const utils_1 = require("./utils");
-const crm = {};
-const listen = (config, crm) => {
+const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
     const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
     const opts = { tag: tag };
     if (config.concurrency) {
         opts.concurrency = config.concurrency;
     }
     crm.count = queue_1.count;
-    return (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield (0, queue_1.syncQueue)(config.url, config.queue, (actionOrEvent) => __awaiter(void 0, void 0, void 0, function* () {
         //export type SyncCallback = (action: ActionMessageV2 | EventMessageV2) => Promise<SyncResult | boolean>;
         //export type SyncResult = {processed: boolean;}
         //export type handleResult = { processed: boolean};
@@ -30,6 +29,11 @@ const listen = (config, crm) => {
         // Return nothing to have the message ACKed (removed from queue)
         //
         // What is this?
+        console.log("Received message", actionOrEvent.schema, "with id", actionOrEvent.schema === "proca:action:2"
+            ? actionOrEvent.action.id
+            : "actionId" in actionOrEvent
+                ? actionOrEvent.actionId
+                : actionOrEvent.eventType);
         switch (actionOrEvent.schema) {
             case "proca:action:2": {
                 // An action done by Supporter
@@ -84,5 +88,5 @@ const listen = (config, crm) => {
             }
         }
     }), opts);
-};
+});
 exports.listen = listen;

@@ -81,14 +81,13 @@ export const main = async (argv: string[]) => {
     }
     const crm = await init(config);
     console.log("listening for messages");
-    const queue = listen(config, crm);
+
+    const queue = await listen(config, crm);
 
     process.on("SIGINT", async () => {
       console.log("Caught interrupt signal");
-      if (queue) {
-        // a close method is not documented, but it's a good practice to have one
-        await queue.close();
-      }
+      await queue.close();
+
       if (crm.close) {
         await crm.close();
       }
