@@ -126,10 +126,13 @@ class ActiveCampaign extends crm_1.CRM {
             return this.handleMessage(message);
         });
         this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log("Event taken from queue", message.actionId);
-            message.contact = message.supporter.contact;
-            message.privacy = message.supporter.privacy;
-            return this.handleMessage(message);
+            var _a, _b;
+            if (message.eventType !== "email_status")
+                return true;
+            console.log("Event taken from queue", (_a = message.action) === null || _a === void 0 ? void 0 : _a.id);
+            // build a compatible message shape for handleMessage
+            const normalized = Object.assign(Object.assign({}, message), { contact: message.supporter.contact, privacy: message.supporter.privacy, actionId: (_b = message.action) === null || _b === void 0 ? void 0 : _b.id });
+            return this.handleMessage(normalized);
         });
         this.handleMessage = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;

@@ -265,13 +265,22 @@ class ActiveCampaign extends CRM {
   handleEvent = async (
     message: EventMessage,
   ): Promise<handleResult | boolean> => {
-    console.log("Event taken from queue", message.actionId);
-    message.contact = message.supporter.contact;
-    message.privacy = message.supporter.privacy;
-    return this.handleMessage(message);
+    if (message.eventType !== "email_status") return true;
+
+    console.log("Event taken from queue", message.action?.id);
+
+    // build a compatible message shape for handleMessage
+    const normalized = {
+      ...message,
+      contact: message.supporter.contact,
+      privacy: message.supporter.privacy,
+      actionId: message.action?.id,
+    };
+
+    return this.handleMessage(normalized as any);
   };
 
-  handleMessage = async (message: Message): Promise<handleResult | boolean> => {
+  handleMessage = async (message: any): Promise<handleResult | boolean> => {
     const actionId = "action" in message ? message.action.id : message.actionId;
     const testing = "action" in message ? message.action.testing : false;
 
