@@ -51,7 +51,7 @@
     "@getbrevo/brevo": "^5.0.1",
     "@mailchimp/mailchimp_marketing": "^3.0.80",
     "@proca/crypto": "^3.4.0",
-    "@proca/queue": "^6.0.0",
+    "@proca/queue": "^6.3.0",
     "@sentry/node": "^9.35.0",
     "@supabase/supabase-js": "^2.103.2",
     "@topcli/spinner": "^4.2.1",
