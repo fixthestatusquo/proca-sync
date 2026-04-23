@@ -153,7 +153,9 @@ class BrevoCRM extends CRM {
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
     if (campaign.externalId) {
       try {
-        const data = await this.brevo.contacts.getList(campaign.externalId);
+        const data = await this.brevo.contacts.getList({
+          listId: campaign.externalId,
+        });
         return data;
       } catch {
         console.error("can't fetch list by externalId", campaign.externalId);
