@@ -115,7 +115,7 @@ class BrevoCRM extends CRM {
   campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
     let name: string = campaign.name;
     if (campaign.externalId) {
-      name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+      name = "proca.externalId:" + campaign.externalId;
     }
     if (!this.campaigns[name]) {
       this.campaigns[name] = await this.fetchCampaign(campaign);
@@ -138,33 +138,32 @@ class BrevoCRM extends CRM {
         })) as any;
       }
 
-      this.folderId = procaFolder!.id; // <-- non-null assertion
+      this.folderId = procaFolder!.id;
 
       const lists = await this.brevo.contacts.getLists({
         limit: 50,
         offset: 0,
       });
-      lists.lists?.forEach((d: any) => (this.campaigns[d.name] = d));
+      lists.lists?.forEach((d: any) => {
+        this.campaigns[d.name] = d;
+        this.campaigns[d.id] = d;
+      });
     } catch (e) {
       console.log("error fetching campaigns", e);
     }
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    if (campaign.externalId) {
-      try {
-        const data = await this.brevo.contacts.getList({
-          listId: campaign.externalId,
-        });
-        return data;
-      } catch {
-        console.error("can't fetch list by externalId", campaign.externalId);
-      }
-    }
-
     if (Object.keys(this.campaigns).length === 0) {
       await this.fetchCampaigns();
-      if (this.campaigns[campaign.name]) return this.campaigns[campaign.name];
+    }
+
+    if (campaign.externalId && this.campaigns[campaign.externalId]) {
+      return this.campaigns[campaign.externalId];
+    }
+
+    if (this.campaigns[campaign.name]) {
+      return this.campaigns[campaign.name];
     }
 
     try {
