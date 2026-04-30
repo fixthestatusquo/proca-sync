@@ -90,7 +90,7 @@ class BrevoCRM extends crm_1.CRM {
         this.campaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             let name = campaign.name;
             if (campaign.externalId) {
-                name = "proca.externalId:" + campaign.externalId; // hopefully prefix never used anywhere
+                name = "proca.externalId:" + campaign.externalId;
             }
             if (!this.campaigns[name]) {
                 this.campaigns[name] = yield this.fetchCampaign(campaign);
@@ -112,31 +112,29 @@ class BrevoCRM extends crm_1.CRM {
                         name: "proca",
                     }));
                 }
-                this.folderId = procaFolder.id; // <-- non-null assertion
+                this.folderId = procaFolder.id;
                 const lists = yield this.brevo.contacts.getLists({
                     limit: 50,
                     offset: 0,
                 });
-                (_a = lists.lists) === null || _a === void 0 ? void 0 : _a.forEach((d) => (this.campaigns[d.name] = d));
+                (_a = lists.lists) === null || _a === void 0 ? void 0 : _a.forEach((d) => {
+                    this.campaigns[d.name] = d;
+                    this.campaigns[d.id] = d;
+                });
             }
             catch (e) {
                 console.log("error fetching campaigns", e);
             }
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            if (campaign.externalId) {
-                try {
-                    const data = yield this.brevo.contacts.getList(campaign.externalId);
-                    return data;
-                }
-                catch (_a) {
-                    console.error("can't fetch list by externalId", campaign.externalId);
-                }
-            }
             if (Object.keys(this.campaigns).length === 0) {
                 yield this.fetchCampaigns();
-                if (this.campaigns[campaign.name])
-                    return this.campaigns[campaign.name];
+            }
+            if (campaign.externalId && this.campaigns[campaign.externalId]) {
+                return this.campaigns[campaign.externalId];
+            }
+            if (this.campaigns[campaign.name]) {
+                return this.campaigns[campaign.name];
             }
             try {
                 const data = yield this.brevo.contacts.createList({
