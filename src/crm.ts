@@ -197,9 +197,8 @@ export abstract class CRM implements CRMInterface {
       message.campaign.name,
       message.campaign.title,
     );
-    //we need to refetch campaign when it is updated
-    //message is close enough to campaign structure?
-    await this.fetchCampaign(message.campaign);
+    //we need to refetch campaign when it is updated, clear the cache
+    delete this.campaign[message.campaign.name];
     return true;
   };
 
