@@ -4,10 +4,13 @@ import {
   type ActionMessage,
   type handleResult,
   ProcessStatus,
+  type ProcaCampaign,
   type Params,
 } from "../crm";
 import fs from "fs";
 import { stringify } from "csv-stringify/sync";
+import { fetchCampaign as procaCampaign } from "../proca";
+import { string2map } from "../utils";
 
 type CsvCRMOptions = Params & {
   csvPath?: string;
@@ -16,10 +19,14 @@ type CsvCRMOptions = Params & {
 class CsvCRM extends CRM {
   private csvPath: string;
   private stream: fs.WriteStream | null = null;
+  private mergeFields = {};
 
   constructor(options: CsvCRMOptions = {}) {
     super(options);
     this.crmType = CRMType.Contact;
+    if (typeof process.env.MERGE_FIELDS === "string") {
+      this.mergeFields = string2map(process.env.MERGE_FIELDS);
+    }
     this.csvPath =
       process.env.CSV_PATH ||
       options.csvPath ||
@@ -29,20 +36,26 @@ class CsvCRM extends CRM {
 
   public init = async (): Promise<boolean> => {
     if (!fs.existsSync(this.csvPath)) {
+      const columns = Object.keys(
+        this.simplify({
+          contact: {},
+          action: {},
+          campaign: {},
+          privacy: {},
+          org: {},
+          actionPage: {},
+          tracking: {},
+        }),
+      );
+      for (let extra in this.mergeFields) {
+        columns.push(extra);
+      }
+
       const header = stringify([], {
         header: true,
-        columns: Object.keys(
-          this.simplify({
-            contact: {},
-            action: {},
-            campaign: {},
-            privacy: {},
-            org: {},
-            actionPage: {},
-            tracking: {},
-          }),
-        ),
+        columns,
       });
+
       fs.writeFileSync(this.csvPath, header);
     }
     this.stream = fs.createWriteStream(this.csvPath, { flags: "a" });
@@ -84,10 +97,22 @@ class CsvCRM extends CRM {
     return record;
   };
 
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    return procaCampaign(campaign.id);
+  };
+
   public handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult> => {
     const record = this.simplify(message);
+    const camp = await this.campaign(message.campaign);
+    const sync = camp.config?.component?.sync || {};
+
+    if (sync) {
+      for (let key in sync) {
+        record[key] = sync[key];
+      }
+    }
     const csvString = stringify([record], {
       header: false,
       columns: Object.keys(record),
