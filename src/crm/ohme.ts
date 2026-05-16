@@ -5,7 +5,7 @@ import {
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-
+import { fetchCampaign as procaCampaign } from "../proca";
 class RateLimiter {
   private timestamps: number[] = [];
   private readonly maxPerMinute: number;
@@ -221,6 +221,8 @@ class OhmeCRM extends CRM {
   ): Promise<handleResult | boolean> => {
     const email = message.contact.email;
 
+    const camp = await this.campaign(message.campaign);
+
     try {
       let upsertResult: OhmeUpsertResult;
       try {
@@ -271,8 +273,8 @@ class OhmeCRM extends CRM {
     }
   };
 
-  fetchCampaign = async (_campaign: ProcaCampaign): Promise<any> => {
-    return _campaign;
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    return procaCampaign(campaign.id);
   };
 
   setSubscribed = async (_id: any, _subscribed: boolean): Promise<boolean> => {
