@@ -98,7 +98,9 @@ class OhmeCRM extends CRM {
     this.user = process.env.CRM_API_USERNAME || "";
     this.token = process.env.CRM_API_TOKEN || "";
     this.client = (process.env.OHME_CLIENT || "").toLowerCase();
-    this.rateLimiter = new RateLimiter(80);
+    this.rateLimiter = new RateLimiter(
+      parseInt(process.env.OHME_RATE_LIMIT || "80", 10),
+    );
 
     if (!this.user || !this.token) {
       throw new Error(
