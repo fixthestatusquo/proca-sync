@@ -63,17 +63,21 @@ export type OhmeContactPayload = {
   firstname: string;
   lastname: string;
   source?: string;
+  Language?: string;
+  petitionnaire?: string;
+  centre_interet?: string;
+  "opt-in"?: string;
   [key: string]: any;
 };
-
 export type OhmeInteractionPayload = {
   date: string;
   interaction_type_name: string;
-  contact: { id: number };
-  app_name?: string;
   interaction_category_name?: string;
   interaction_label_name?: string;
-  comment?: string;
+  utm_medium1?: string;
+  utm_source1?: string;
+  utm_campaign1?: string;
+  contact: { id: number };
   [key: string]: any;
 };
 
@@ -178,17 +182,20 @@ class OhmeCRM extends CRM {
       email: message.contact.email,
       firstname: message.contact.firstName,
       lastname: message.contact.lastName || "",
+      Language: message.actionPage.locale,
+      //"opt-in": "oui",
     };
 
     switch (this.client) {
       case "pollinis": {
-        const campaignValue = message.campaign.title || message.campaign.name;
         const petitionField =
           process.env.OHME_PETITIONNAIRE_FIELD || "petitionnaire";
         const interestField =
           process.env.OHME_CENTRE_INTERET_FIELD || "centre_interet";
-        payload[petitionField] = [campaignValue];
-        payload[interestField] = [campaignValue];
+
+        // CHECK THIS!!
+        payload[petitionField] = "petitionnaire";
+        payload[interestField] = message.campaign.name;
         break;
       }
     }
@@ -196,26 +203,25 @@ class OhmeCRM extends CRM {
     return payload;
   }
 
-  private getSource(message: ActionMessage): string {
-    return (
-      process.env.OHME_SOURCE || message.campaign.title || message.campaign.name
-    );
-  }
-
   private buildInteractionPayload(
     message: ActionMessage,
     contact: OhmeContact,
   ): OhmeInteractionPayload {
-    const base: OhmeInteractionPayload = {
+    return {
       date: message.action.createdAt.split("T")[0],
       interaction_type_name:
-        process.env.OHME_INTERACTION_TYPE || "Signature pétition",
-      app_name: process.env.OHME_APP_NAME || "proca",
-      interaction_label_name: message.campaign.title || message.campaign.name,
+        process.env.OHME_INTERACTION_TYPE || "Signature de Pétition",
+      interaction_category_name:
+        process.env.OHME_INTERACTION_CATEGORY || "Pétition",
+      interaction_label_name: message.campaign.name,
+      utm_medium1: message.tracking?.medium,
+      utm_source1: message.tracking?.source,
+      utm_campaign1: message.tracking?.campaign,
       contact: { id: contact.id },
     };
-
-    return base;
+  }
+  private getSource(message: ActionMessage): string {
+    return process.env.OHME_SOURCE || message.campaign.name;
   }
 
   handleContact = async (
@@ -224,6 +230,7 @@ class OhmeCRM extends CRM {
     const email = message.contact.email;
 
     const camp = await this.campaign(message.campaign);
+    console.log("campaign", camp);
 
     try {
       let upsertResult: OhmeUpsertResult;
