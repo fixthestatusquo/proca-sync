@@ -95,7 +95,21 @@ class OhmeCRM extends CRM {
 
   constructor(opt: {}) {
     super(opt);
-    this.crmType = CRMType.OptIn;
+
+    switch (process.env.CRM_TYPE) {
+      case "DOUBLE_OPTIN":
+        this.crmType = CRMType.DoubleOptIn;
+        break;
+      case "CONTACT":
+        this.crmType = CRMType.Contact;
+        break;
+      case "ACTION_CONTACT":
+        this.crmType = CRMType.ActionContact;
+        break;
+      default:
+        // 'OPTIN'
+        this.crmType = CRMType.OptIn;
+    }
 
     this.ohmeUrl =
       process.env.CRM_API_URL || "https://api-ohme.oneheart.fr/api/v1";
@@ -185,6 +199,9 @@ class OhmeCRM extends CRM {
       Language: message.actionPage.locale,
       //"opt-in": "oui",
     };
+    if (this.crmType === CRMType.OptIn) {
+      payload["opt-in"] = "oui";
+    }
 
     switch (this.client) {
       case "pollinis": {
