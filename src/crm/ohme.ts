@@ -5,6 +5,7 @@ import {
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
+import { string2map } from "../utils";
 import { fetchCampaign as procaCampaign } from "../proca";
 class RateLimiter {
   private timestamps: number[] = [];
@@ -62,10 +63,7 @@ export type OhmeContactPayload = {
   email: string;
   firstname: string;
   lastname: string;
-  source?: string;
-  Language?: string;
-  petitionnaire?: string;
-  centre_interet?: string;
+  language?: string;
   [key: string]: any;
 };
 
@@ -74,9 +72,6 @@ export type OhmeInteractionPayload = {
   interaction_type_name: string;
   interaction_category_name?: string;
   interaction_label_name?: string;
-  utm_medium1?: string;
-  utm_source1?: string;
-  utm_campaign1?: string;
   contact: { id: number };
   [key: string]: any;
 };
@@ -90,9 +85,10 @@ class OhmeCRM extends CRM {
   private readonly ohmeUrl: string;
   private readonly user: string;
   private readonly token: string;
-  private readonly client: string;
   private readonly rateLimiter: RateLimiter;
   private readonly sourceField: string;
+  private readonly contactExtraFields: Record<string, string> | undefined;
+  private readonly interactionExtraFields: Record<string, string> | undefined;
 
   constructor(opt: {}) {
     super(opt);
@@ -116,8 +112,14 @@ class OhmeCRM extends CRM {
       process.env.CRM_API_URL || "https://api-ohme.oneheart.fr/api/v1";
     this.user = process.env.CRM_API_USERNAME || "";
     this.token = process.env.CRM_API_TOKEN || "";
-    this.client = (process.env.ORG || "").toLowerCase();
     this.sourceField = process.env.CRM_SOURCE || "";
+    this.contactExtraFields = process.env.CONTACT_EXTRA_FIELDS
+      ? string2map(process.env.CONTACT_EXTRA_FIELDS)
+      : undefined;
+    this.interactionExtraFields = process.env.INTERACTION_EXTRA_FIELDS
+      ? string2map(process.env.INTERACTION_EXTRA_FIELDS)
+      : undefined;
+
     this.rateLimiter = new RateLimiter(
       parseInt(process.env.OHME_RATE_LIMIT || "80", 10),
     );
@@ -127,6 +129,63 @@ class OhmeCRM extends CRM {
         "[ohme] Missing CRM_API_USERNAME or CRM_API_TOKEN in env",
       );
     }
+  }
+
+  private resolveValue(path: string, message: ActionMessage, camp: any): any {
+    const context = { message, camp };
+    return path.split(".").reduce((obj: any, key) => obj?.[key], context);
+  }
+
+  private buildContactPayload(
+    message: ActionMessage,
+    camp: any,
+  ): OhmeContactPayload {
+    const payload: OhmeContactPayload = {
+      email: message.contact.email,
+      firstname: message.contact.firstName,
+      lastname: message.contact.lastName || "",
+      language: message.actionPage.locale,
+    };
+
+    if (this.contactExtraFields) {
+      for (const [ohmeField, path] of Object.entries(this.contactExtraFields)) {
+        const value = this.resolveValue(path, message, camp);
+        if (value !== undefined && value !== null) {
+          payload[ohmeField] = value;
+        }
+      }
+    }
+
+    return payload;
+  }
+
+  private buildInteractionPayload(
+    message: ActionMessage,
+    contact: OhmeContact,
+    camp: any,
+  ): OhmeInteractionPayload {
+    const payload: OhmeInteractionPayload = {
+      date: message.action.createdAt.split("T")[0],
+      interaction_type_name:
+        process.env.OHME_INTERACTION_TYPE || "Signature de Pétition",
+      interaction_category_name:
+        process.env.OHME_INTERACTION_CATEGORY || "Pétition",
+      interaction_label_name: message.campaign.name,
+      contact: { id: contact.id },
+    };
+
+    if (this.interactionExtraFields) {
+      for (const [ohmeField, path] of Object.entries(
+        this.interactionExtraFields,
+      )) {
+        const value = this.resolveValue(path, message, camp);
+        if (value !== undefined && value !== null) {
+          payload[ohmeField] = value;
+        }
+      }
+    }
+
+    return payload;
   }
 
   private headers(): Record<string, string> {
@@ -193,48 +252,6 @@ class OhmeCRM extends CRM {
     return data[0] ?? null;
   };
 
-  private buildContactPayload(
-    message: ActionMessage,
-    category: string | null = null,
-  ): OhmeContactPayload {
-    const payload: OhmeContactPayload = {
-      email: message.contact.email,
-      firstname: message.contact.firstName,
-      lastname: message.contact.lastName || "",
-      language: message.actionPage.locale,
-    };
-
-    switch (this.client) {
-      case "assopollinis": {
-        // payload.petitionnaire = "tests-pesticides-europe";
-        payload.petitionnaire = message.campaign.name;
-        payload.centre_interet = category || "Pesticides";
-        payload.opt_in = message.privacy.optIn;
-
-        break;
-      }
-    }
-    return payload;
-  }
-
-  private buildInteractionPayload(
-    message: ActionMessage,
-    contact: OhmeContact,
-  ): OhmeInteractionPayload {
-    return {
-      date: message.action.createdAt.split("T")[0],
-      interaction_type_name:
-        process.env.OHME_INTERACTION_TYPE || "Signature de Pétition",
-      interaction_category_name:
-        process.env.OHME_INTERACTION_CATEGORY || "Pétition",
-      interaction_label_name: message.campaign.name,
-      utm_medium1: message.tracking?.medium,
-      utm_source1: message.tracking?.source,
-      utm_campaign1: message.tracking?.campaign,
-      contact: { id: contact.id },
-    };
-  }
-
   handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
@@ -246,12 +263,12 @@ class OhmeCRM extends CRM {
     try {
       let upsertResult: OhmeUpsertResult;
       try {
-        console.log("Payload for contact", this.buildContactPayload(message));
+        console.log(
+          "Payload for contact",
+          this.buildContactPayload(message, camp),
+        );
         upsertResult = await this.upsertContact(
-          this.buildContactPayload(
-            message,
-            camp?.config?.component?.sync?.category,
-          ),
+          this.buildContactPayload(message, camp),
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
@@ -275,7 +292,7 @@ class OhmeCRM extends CRM {
 
       try {
         await this.createInteraction(
-          this.buildInteractionPayload(message, contact),
+          this.buildInteractionPayload(message, contact, camp),
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
