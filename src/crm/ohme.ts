@@ -66,9 +66,9 @@ export type OhmeContactPayload = {
   Language?: string;
   petitionnaire?: string;
   centre_interet?: string;
-  "opt-in"?: string;
   [key: string]: any;
 };
+
 export type OhmeInteractionPayload = {
   date: string;
   interaction_type_name: string;
@@ -115,7 +115,7 @@ class OhmeCRM extends CRM {
       process.env.CRM_API_URL || "https://api-ohme.oneheart.fr/api/v1";
     this.user = process.env.CRM_API_USERNAME || "";
     this.token = process.env.CRM_API_TOKEN || "";
-    this.client = (process.env.OHME_CLIENT || "").toLowerCase();
+    this.client = (process.env.ORG || "").toLowerCase();
     this.rateLimiter = new RateLimiter(
       parseInt(process.env.OHME_RATE_LIMIT || "80", 10),
     );
@@ -191,32 +191,28 @@ class OhmeCRM extends CRM {
     return data[0] ?? null;
   };
 
-  private buildContactPayload(message: ActionMessage): OhmeContactPayload {
+  private buildContactPayload(
+    message: ActionMessage,
+    category: string | null = null,
+  ): OhmeContactPayload {
     const payload: OhmeContactPayload = {
       email: message.contact.email,
       firstname: message.contact.firstName,
       lastname: message.contact.lastName || "",
-      Language: message.actionPage.locale,
-      //"opt-in": "oui",
+      language: message.actionPage.locale,
     };
-    if (this.crmType === CRMType.OptIn) {
-      payload["opt-in"] = "oui";
-    }
 
     switch (this.client) {
-      case "pollinis": {
-        const petitionField =
-          process.env.OHME_PETITIONNAIRE_FIELD || "petitionnaire";
-        const interestField =
-          process.env.OHME_CENTRE_INTERET_FIELD || "centre_interet";
+      case "assopollinis": {
+        // CHECK this!
+        payload.petitionnaire = "tests-pesticides-europe";
+        // payload.petitionnaire = message.campaign.name;
+        payload.centre_interet = category || "Pesticides";
+        payload.opt_in = message.privacy.optIn;
 
-        // CHECK THIS!!
-        payload[petitionField] = "petitionnaire";
-        payload[interestField] = message.campaign.name;
         break;
       }
     }
-
     return payload;
   }
 
@@ -237,8 +233,8 @@ class OhmeCRM extends CRM {
       contact: { id: contact.id },
     };
   }
-  private getSource(message: ActionMessage): string {
-    return process.env.OHME_SOURCE || message.campaign.name;
+  private getSource(source: string): string {
+    return process.env.OHME_SOURCE || source;
   }
 
   handleContact = async (
@@ -247,13 +243,17 @@ class OhmeCRM extends CRM {
     const email = message.contact.email;
 
     const camp = await this.campaign(message.campaign);
-    console.log("campaign", camp);
+    console.log("campaign", camp.config.component?.sync);
 
     try {
       let upsertResult: OhmeUpsertResult;
       try {
+        console.log("Payload for contact", this.buildContactPayload(message));
         upsertResult = await this.upsertContact(
-          this.buildContactPayload(message),
+          this.buildContactPayload(
+            message,
+            camp?.config?.component?.sync?.category,
+          ),
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
