@@ -92,6 +92,7 @@ class OhmeCRM extends CRM {
   private readonly token: string;
   private readonly client: string;
   private readonly rateLimiter: RateLimiter;
+  private readonly sourceField: string;
 
   constructor(opt: {}) {
     super(opt);
@@ -116,6 +117,7 @@ class OhmeCRM extends CRM {
     this.user = process.env.CRM_API_USERNAME || "";
     this.token = process.env.CRM_API_TOKEN || "";
     this.client = (process.env.ORG || "").toLowerCase();
+    this.sourceField = process.env.CRM_SOURCE || "";
     this.rateLimiter = new RateLimiter(
       parseInt(process.env.OHME_RATE_LIMIT || "80", 10),
     );
@@ -204,9 +206,8 @@ class OhmeCRM extends CRM {
 
     switch (this.client) {
       case "assopollinis": {
-        // CHECK this!
-        payload.petitionnaire = "tests-pesticides-europe";
-        // payload.petitionnaire = message.campaign.name;
+        // payload.petitionnaire = "tests-pesticides-europe";
+        payload.petitionnaire = message.campaign.name;
         payload.centre_interet = category || "Pesticides";
         payload.opt_in = message.privacy.optIn;
 
@@ -232,9 +233,6 @@ class OhmeCRM extends CRM {
       utm_campaign1: message.tracking?.campaign,
       contact: { id: contact.id },
     };
-  }
-  private getSource(source: string): string {
-    return process.env.OHME_SOURCE || source;
   }
 
   handleContact = async (
@@ -263,10 +261,10 @@ class OhmeCRM extends CRM {
 
       const { contact, isNew } = upsertResult;
 
-      if (isNew) {
+      if (isNew && this.sourceField) {
         try {
           await this.ohmeRequest("PUT", `/contacts/${contact.id}`, {
-            source: this.getSource(message),
+            [this.sourceField]: message.campaign.name,
           });
         } catch (e: any) {
           this.error(
