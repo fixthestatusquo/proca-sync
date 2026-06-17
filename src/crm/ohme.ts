@@ -230,12 +230,19 @@ class OhmeCRM extends CRM {
   private async upsertContact(
     payload: OhmeContactPayload,
   ): Promise<OhmeUpsertResult> {
-    const { status, data } = await this.ohmeRequest<OhmeContact>(
+    // GET first: Ohme's PUT requires the contact ID,
+    // and POST will creates a new contact if, for example, last name is updated
+    const existing = await this.fetchContact(payload.email);
+    if (existing) {
+      await this.ohmeRequest("PUT", `/contacts/${existing.id}`, payload);
+      return { contact: existing, isNew: false };
+    }
+    const { data } = await this.ohmeRequest<OhmeContact>(
       "POST",
       "/contacts",
       payload,
     );
-    return { contact: data, isNew: status === 201 };
+    return { contact: data, isNew: true };
   }
 
   private async createInteraction(
@@ -272,7 +279,9 @@ class OhmeCRM extends CRM {
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
-        this.error(`[ohme] upsert failed for ${email}: ${JSON.stringify(e)}`);
+        this.error(
+          `[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`,
+        );
         return { processed: false };
       }
 
