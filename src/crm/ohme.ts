@@ -132,6 +132,8 @@ class OhmeCRM extends CRM {
   }
 
   private resolveValue(path: string, message: ActionMessage, camp: any): any {
+    if (path === "true") return true;
+    if (path === "false") return false;
     const context = { message, camp };
     return path.split(".").reduce((obj: any, key) => obj?.[key], context);
   }
@@ -155,7 +157,6 @@ class OhmeCRM extends CRM {
         }
       }
     }
-
     return payload;
   }
 
@@ -265,15 +266,10 @@ class OhmeCRM extends CRM {
     const email = message.contact.email;
 
     const camp = await this.campaign(message.campaign);
-    console.log("campaign", camp.config.component?.sync);
 
     try {
       let upsertResult: OhmeUpsertResult;
       try {
-        console.log(
-          "Payload for contact",
-          this.buildContactPayload(message, camp),
-        );
         upsertResult = await this.upsertContact(
           this.buildContactPayload(message, camp),
         );
