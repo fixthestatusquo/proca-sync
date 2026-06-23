@@ -117,9 +117,8 @@ class CRM {
         });
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
             console.warn("campaign update", message.campaign.name, message.campaign.title);
-            //we need to refetch campaign when it is updated
-            //message is close enough to campaign structure?
-            yield this.fetchCampaign(message.campaign);
+            //we need to refetch campaign when it is updated, clear the cache
+            delete this.campaign[message.campaign.name];
             return true;
         });
         this.formatResult = (result) => {
