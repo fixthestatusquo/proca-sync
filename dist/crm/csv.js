@@ -15,23 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
 const fs_1 = __importDefault(require("fs"));
 const sync_1 = require("csv-stringify/sync");
+const proca_1 = require("../proca");
+const utils_1 = require("../utils");
 class CsvCRM extends crm_1.CRM {
     constructor(options = {}) {
         super(options);
         this.stream = null;
+        this.mergeFields = {};
         this.init = () => __awaiter(this, void 0, void 0, function* () {
             if (!fs_1.default.existsSync(this.csvPath)) {
+                const columns = Object.keys(this.simplify({
+                    contact: {},
+                    action: {},
+                    campaign: {},
+                    privacy: {},
+                    org: {},
+                    actionPage: {},
+                    tracking: {},
+                }));
+                for (let extra in this.mergeFields) {
+                    columns.push(extra);
+                }
                 const header = (0, sync_1.stringify)([], {
                     header: true,
-                    columns: Object.keys(this.simplify({
-                        contact: {},
-                        action: {},
-                        campaign: {},
-                        privacy: {},
-                        org: {},
-                        actionPage: {},
-                        tracking: {},
-                    })),
+                    columns,
                 });
                 fs_1.default.writeFileSync(this.csvPath, header);
             }
@@ -75,8 +82,19 @@ class CsvCRM extends crm_1.CRM {
             };
             return record;
         };
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            return (0, proca_1.fetchCampaign)(campaign.id);
+        });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             const record = this.simplify(message);
+            const camp = yield this.campaign(message.campaign);
+            const sync = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
+            if (sync) {
+                for (let key in sync) {
+                    record[key] = sync[key];
+                }
+            }
             const csvString = (0, sync_1.stringify)([record], {
                 header: false,
                 columns: Object.keys(record),
@@ -114,6 +132,9 @@ class CsvCRM extends crm_1.CRM {
             });
         };
         this.crmType = crm_1.CRMType.Contact;
+        if (typeof process.env.MERGE_FIELDS === "string") {
+            this.mergeFields = (0, utils_1.string2map)(process.env.MERGE_FIELDS);
+        }
         this.csvPath =
             process.env.CSV_PATH ||
                 options.csvPath ||

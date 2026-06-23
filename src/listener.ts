@@ -83,6 +83,11 @@ export const listen = async (config: Configuration, crm: CRM) => {
 
             if (typeof r === "boolean") return r;
             return true;
+          } else if (event.eventType === "confirm_created") {
+            console.log(
+              "Ignoring and removing from the queue confirm_created event",
+            );
+            return true;
           } else {
             if (crm.pause) {
               console.log("pause event...");
