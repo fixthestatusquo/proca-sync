@@ -48,7 +48,10 @@ class ActiveCampaign extends CRM {
       case "DOUBLE_OPTIN":
         this.crmType = CRMType.DoubleOptIn;
         break;
-      case "ActionContact":
+      case "CONTACT":
+        this.crmType = CRMType.Contact;
+        break;
+      case "ACTION_CONTACT":
         this.crmType = CRMType.ActionContact;
         break;
       default:
@@ -259,6 +262,21 @@ class ActiveCampaign extends CRM {
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     console.log("Action taken from the queue", message.action.id);
+    const camp = await this.campaign(message.campaign);
+    const sync = camp.config?.component?.sync || {};
+
+    const isDoubleOptIn = message.privacy?.emailStatus === "double_opt_in";
+    const statusTagId = isDoubleOptIn
+      ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
+      : sync.tag_confirmed || process.env.CRM_TAG_CONFIRMED;
+
+    return this.handleMessage(message, statusTagId);
+  };
+
+  handleActionContact = async (
+    message: ActionMessage,
+  ): Promise<handleResult | boolean> => {
+    console.log("Action contact taken from the queue", message.action.id);
     return this.handleMessage(message);
   };
 
@@ -280,7 +298,10 @@ class ActiveCampaign extends CRM {
     return this.handleMessage(normalized as any);
   };
 
-  handleMessage = async (message: any): Promise<handleResult | boolean> => {
+  handleMessage = async (
+    message: any,
+    statusTagId?: string,
+  ): Promise<handleResult | boolean> => {
     const actionId = "action" in message ? message.action.id : message.actionId;
     const testing = "action" in message ? message.action.testing : false;
 
@@ -316,6 +337,7 @@ class ActiveCampaign extends CRM {
       }
       if (listid) await this.subscribeToList(contactid, listid);
       if (tagids) await this.addTagsToContact(contactid, tagids);
+      if (statusTagId) await this.addTagsToContact(contactid, statusTagId);
 
       console.log("Action contact processed successfully", actionId);
       return true;
