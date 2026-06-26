@@ -329,8 +329,11 @@ class ActiveCampaign extends CRM {
         return false;
       }
       if (listid) await this.subscribeToList(contactid, listid);
-      if (tagids) await this.addTagsToContact(contactid, tagids);
-      if (statusTagId) await this.addTagsToContact(contactid, statusTagId);
+      const allTagIds = [tagids, statusTagId].filter(Boolean).join(",");
+      if (allTagIds) {
+        console.log(`[ac] applying tags: ${allTagIds}`);
+        await this.addTagsToContact(contactid, allTagIds);
+      }
 
       console.log("Action contact processed successfully", actionId);
       return true;
