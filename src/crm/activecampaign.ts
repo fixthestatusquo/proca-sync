@@ -261,23 +261,16 @@ class ActiveCampaign extends CRM {
   handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    console.log("Action taken from the queue", message.action.id);
+    const emailStatus = message.privacy?.emailStatus;
     const camp = await this.campaign(message.campaign);
     const sync = camp.config?.component?.sync || {};
 
-    const isDoubleOptIn = message.privacy?.emailStatus === "double_opt_in";
+    const isDoubleOptIn = emailStatus === "double_opt_in";
     const statusTagId = isDoubleOptIn
       ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
       : sync.tag_confirmed || process.env.CRM_TAG_CONFIRMED;
 
     return this.handleMessage(message, statusTagId);
-  };
-
-  handleActionContact = async (
-    message: ActionMessage,
-  ): Promise<handleResult | boolean> => {
-    console.log("Action contact taken from the queue", message.action.id);
-    return this.handleMessage(message);
   };
 
   handleEvent = async (
