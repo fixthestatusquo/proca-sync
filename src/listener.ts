@@ -93,7 +93,7 @@ export const listen = async (config: Configuration, crm: CRM) => {
               console.log("pause event...");
               await pause(3);
             }
-            throw new Error("Unknown event type: " + event.eventType);
+            throw new Error("Unknown event type: " + (event as any).eventType);
           }
         }
         default: {
