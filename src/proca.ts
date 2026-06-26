@@ -90,8 +90,8 @@ export const fetchCampaign = async (id) => {
   }
 }`;
 
-  const data: any = await graphQL("campaign", query, { variables: { id: id } });
-  if (!data?.campaign) throw new Error(data);
+  const data: any = await graphQL("campaign", query, { variables: { id: parseInt(id, 10) } });
+  if (!data?.campaign) throw new Error(JSON.stringify(data));
 
   if (data?.campaign?.config)
     data.campaign.config = JSON.parse(data.campaign.config);
