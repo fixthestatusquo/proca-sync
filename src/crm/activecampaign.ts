@@ -265,10 +265,9 @@ class ActiveCampaign extends CRM {
     const camp = await this.campaign(message.campaign);
     const sync = camp.config?.component?.sync || {};
 
-    const isDoubleOptIn = emailStatus === "double_opt_in";
-    const statusTagId = isDoubleOptIn
+    const statusTagId = emailStatus === "double_opt_in"
       ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
-      : sync.tag_confirmed || process.env.CRM_TAG_CONFIRMED;
+      : undefined;
 
     return this.handleMessage(message, statusTagId);
   };
@@ -280,7 +279,6 @@ class ActiveCampaign extends CRM {
 
     console.log("Event taken from queue", message.action?.id);
 
-    // build a compatible message shape for handleMessage
     const normalized = {
       ...message,
       contact: message.supporter.contact,
@@ -288,7 +286,7 @@ class ActiveCampaign extends CRM {
       actionId: message.action?.id,
     };
 
-    return this.handleMessage(normalized as any);
+    return this.handleContact(normalized as any);
   };
 
   handleMessage = async (
