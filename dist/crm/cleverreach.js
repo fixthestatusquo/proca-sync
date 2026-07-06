@@ -20,12 +20,17 @@ class CleverreachCRM extends crm_1.CRM {
         this.campaignCache = new Map(); // Store campaigns in memory
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
             //we need to refetch campaign when it is updated
-            yield this.fetchCampaign(message.campaignId);
+            yield this.fetchCampaign({
+                id: message.campaignId,
+                name: message.campaign.name,
+                title: message.campaign.title,
+                externalId: message.campaign.externalId,
+            });
             return true;
         });
-        this.fetchCampaign = (id) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(id);
-            this.campaignCache.set(id, r);
+        this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
+            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            this.campaignCache.set(campaign.id, r);
             return r;
         });
         this.initializeToken = () => __awaiter(this, void 0, void 0, function* () {
@@ -43,7 +48,7 @@ class CleverreachCRM extends crm_1.CRM {
             }
             let camp = this.campaignCache.get(message.campaign.id);
             if (!camp) {
-                camp = yield this.fetchCampaign(message.campaign.id);
+                camp = yield this.fetchCampaign(message.campaign);
             }
             // listId might be different for each campaign
             // custom label is different for each campaign
@@ -71,10 +76,15 @@ class CleverreachCRM extends crm_1.CRM {
             return this.handleMessage(message);
         });
         this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log("Event taken from queue", message.actionId);
-            message.contact = message.supporter.contact;
-            message.privacy = message.supporter.privacy;
-            return this.handleMessage(message);
+            var _a, _b;
+            if (message.eventType === "campaign_updated") {
+                return this.handleCampaignUpdate(message);
+            }
+            if (message.eventType !== "email_status")
+                return true;
+            console.log("Event taken from queue", (_a = message.action) === null || _a === void 0 ? void 0 : _a.id);
+            const normalized = Object.assign(Object.assign({}, message), { contact: message.supporter.contact, privacy: message.supporter.privacy, actionId: (_b = message.action) === null || _b === void 0 ? void 0 : _b.id });
+            return this.handleMessage(normalized);
         });
         this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
             return true;

@@ -1,5 +1,7 @@
 import type { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 
+type EmailStatusEvent = Extract<EventMessageV2, { eventType: "email_status" }>;
+
 //                                              allow custom fields vvv
 export interface ContactAttributes
   extends Record<string, string | boolean | undefined> {
@@ -127,7 +129,7 @@ export interface EmailStatusAttributes {
 }
 
 export const emailChangedToContactRecord = (
-  event: EventMessageV2,
+  event: EmailStatusEvent,
   optInField: string,
 ): (EmailStatusAttributes & Record<string, string | boolean>) | null => {
   const emailStatus = event.supporter.privacy.emailStatus;

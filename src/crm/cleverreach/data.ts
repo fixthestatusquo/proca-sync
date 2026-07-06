@@ -1,4 +1,4 @@
-import type { Message } from "../cleverreach";
+import type { ActionMessage } from "../../crm";
 
 type Attributes = Record<"created_at", string>;
 
@@ -32,7 +32,7 @@ type ContactInfo = (Omit<
   Partial<Record<"quelle", string>>) & { [key: string]: string };
 
 export const formatAction = (
-  message: Message,
+  message: ActionMessage,
   hasValues: any,
   customLabel: string,
 ): Contact => {

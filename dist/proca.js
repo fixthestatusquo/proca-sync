@@ -86,9 +86,9 @@ const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     id, name, title, config, externalId
   }
 }`;
-    const data = yield graphQL("campaign", query, { variables: { id: id } });
+    const data = yield graphQL("campaign", query, { variables: { id: parseInt(id, 10) } });
     if (!(data === null || data === void 0 ? void 0 : data.campaign))
-        throw new Error(data);
+        throw new Error(JSON.stringify(data));
     if ((_a = data === null || data === void 0 ? void 0 : data.campaign) === null || _a === void 0 ? void 0 : _a.config)
         data.campaign.config = JSON.parse(data.campaign.config);
     return data === null || data === void 0 ? void 0 : data.campaign;

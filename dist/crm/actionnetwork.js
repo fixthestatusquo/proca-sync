@@ -25,11 +25,9 @@ if (!url || !token) {
     console.error("Missing CRM credentials.");
     process.exit(1);
 }
-;
 if (!testToken) {
     console.error("Missing test credentials, defaulting to prod");
 }
-;
 const customizePersonAttrs = (message, attrs) => {
     switch (process.env.PROCA_USERNAME) {
         case "greens": {
@@ -41,26 +39,31 @@ const customizePersonAttrs = (message, attrs) => {
     }
 };
 const actionToPerson = (message, tags, status) => {
-    const { contactRef, email, firstName, lastName, phone, postcode, country, area } = message.contact;
+    const { contactRef, email, firstName, lastName, phone, postcode, country, area, } = message.contact;
     const lang = (message.actionPage.locale.split("_")[0] || "en").toLowerCase();
-    const person = Object.assign(Object.assign({ identifiers: [`proca:${contactRef}`], given_name: firstName, family_name: lastName, email_addresses: [{ address: email, status }], languages_spoken: [lang] }, (phone && { phone_numbers: [{ number: phone, status }] })), (postcode || country || area ? {
-        postal_addresses: [
-            ...(postcode ? [{ postal_code: postcode }] : []),
-            ...(country || area ? [{ country: country || area }] : []),
-        ]
-    } : {}));
+    const person = Object.assign(Object.assign({ identifiers: [`proca:${contactRef}`], given_name: firstName, family_name: lastName, email_addresses: [{ address: email, status }], languages_spoken: [lang] }, (phone && { phone_numbers: [{ number: phone, status }] })), (postcode || country || area
+        ? {
+            postal_addresses: [
+                ...(postcode ? [{ postal_code: postcode }] : []),
+                ...(country || area ? [{ country: country || area }] : []),
+            ],
+        }
+        : {}));
     customizePersonAttrs(message, person);
     return { person, add_tags: tags };
 };
 const adjustStatus = (personPayload, exists, contact) => {
     var _a, _b;
-    const existingEmail = (_a = exists === null || exists === void 0 ? void 0 : exists.email_addresses) === null || _a === void 0 ? void 0 : _a.find(e => e.address.toLowerCase() === contact.email);
+    const existingEmail = (_a = exists === null || exists === void 0 ? void 0 : exists.email_addresses) === null || _a === void 0 ? void 0 : _a.find((e) => e.address.toLowerCase() === contact.email);
     if (existingEmail && existingEmail.status === "subscribed") {
         personPayload.person.email_addresses[0].status = "subscribed";
     }
-    if ((contact === null || contact === void 0 ? void 0 : contact.phone) && ((_b = exists === null || exists === void 0 ? void 0 : exists.phone_numbers) === null || _b === void 0 ? void 0 : _b.length)) {
-        const existingPhone = exists.phone_numbers.find(p => p.number.replace(/\D/g, "") === contact.phone.replace(/\D/g, ""));
-        if (existingPhone && existingPhone.status === "subscribed" && personPayload.person.phone_numbers) {
+    const phone = contact === null || contact === void 0 ? void 0 : contact.phone;
+    if (phone && ((_b = exists === null || exists === void 0 ? void 0 : exists.phone_numbers) === null || _b === void 0 ? void 0 : _b.length)) {
+        const existingPhone = exists.phone_numbers.find((p) => p.number.replace(/\D/g, "") === phone.replace(/\D/g, ""));
+        if (existingPhone &&
+            existingPhone.status === "subscribed" &&
+            personPayload.person.phone_numbers) {
             personPayload.person.phone_numbers[0].status = "subscribed";
         }
     }
@@ -205,8 +208,8 @@ class ActionNetwork extends crm_1.CRM {
                 if (!personUri)
                     throw new Error("No person URI returned");
                 const f = test
-                    ? (((_d = (_c = campaign.config.component) === null || _c === void 0 ? void 0 : _c.sync) === null || _d === void 0 ? void 0 : _d.test_form) || testFormID || formID)
-                    : (((_f = (_e = campaign.config.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.form) || formID);
+                    ? ((_d = (_c = campaign.config.component) === null || _c === void 0 ? void 0 : _c.sync) === null || _d === void 0 ? void 0 : _d.test_form) || testFormID || formID
+                    : ((_f = (_e = campaign.config.component) === null || _e === void 0 ? void 0 : _e.sync) === null || _f === void 0 ? void 0 : _f.form) || formID;
                 if (test && !((_h = (_g = campaign.config.component) === null || _g === void 0 ? void 0 : _g.sync) === null || _h === void 0 ? void 0 : _h.test_form) && !testFormID) {
                     console.warn("Test mode enabled but no test form configured – falling back to prod form");
                 }
@@ -236,7 +239,7 @@ class ActionNetwork extends crm_1.CRM {
             try {
                 const res = yield fetch(`${url}/forms/${id}`, {
                     method: "GET",
-                    headers: getHeaders(test)
+                    headers: getHeaders(test),
                 });
                 if (!res.ok) {
                     throw new Error(`Failed to fetch form: ${res.status} ${res.statusText}`);

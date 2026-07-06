@@ -1,13 +1,7 @@
-import type { ActionMessageV2 } from '@proca/queue';
-import {
-  type Contact,
-  CRM,
-  CRMType,
-  type handleResult,
-  type ProcaCampaign
-} from "../crm";
+import type { ActionMessageV2 } from "@proca/queue";
+import { CRM, CRMType, type handleResult, type ProcaCampaign } from "../crm";
 import dotenv from "dotenv";
-import { fetchCampaign as procaCampaign }  from '../proca';
+import { fetchCampaign as procaCampaign } from "../proca";
 dotenv.config();
 
 const url = process.env.CRM_URL as string;
@@ -20,17 +14,17 @@ const testFormID = process.env.CRM_TEST_FORM as string;
 if (!url || !token) {
   console.error("Missing CRM credentials.");
   process.exit(1);
-};
+}
 
 if (!testToken) {
-  console.error("Missing test credentials, defaulting to prod")
-};
+  console.error("Missing test credentials, defaulting to prod");
+}
 
 type ANPerson = {
   given_name?: string;
   family_name?: string;
-  email_addresses: { address: string, status: string }[];
-  phone_numbers?: { number: string, status: string }[];
+  email_addresses: { address: string; status: string }[];
+  phone_numbers?: { number: string; status: string }[];
   postal_addresses?: { postal_code?: string }[];
   identifiers?: string[];
   languages_spoken?: string[];
@@ -44,16 +38,29 @@ type ANPersonPayload = {
 const customizePersonAttrs = (message: ActionMessageV2, attrs: any) => {
   switch (process.env.PROCA_USERNAME) {
     case "greens": {
-        const lang = message.actionPage.locale.split("_")[0].toLowerCase(); // en_GB → en
-        attrs.custom_fields ||= {};
-        attrs.custom_fields[`speaks_${lang}`] = "1";
+      const lang = message.actionPage.locale.split("_")[0].toLowerCase(); // en_GB → en
+      attrs.custom_fields ||= {};
+      attrs.custom_fields[`speaks_${lang}`] = "1";
       break;
     }
   }
 };
 
-const actionToPerson = (message: ActionMessageV2, tags: string[], status: "subscribed" | "unsubscribed"): ANPersonPayload => {
-  const { contactRef, email, firstName, lastName, phone, postcode, country, area } = message.contact;
+const actionToPerson = (
+  message: ActionMessageV2,
+  tags: string[],
+  status: "subscribed" | "unsubscribed",
+): ANPersonPayload => {
+  const {
+    contactRef,
+    email,
+    firstName,
+    lastName,
+    phone,
+    postcode,
+    country,
+    area,
+  } = message.contact;
   const lang = (message.actionPage.locale.split("_")[0] || "en").toLowerCase();
 
   const person: ANPerson = {
@@ -63,34 +70,43 @@ const actionToPerson = (message: ActionMessageV2, tags: string[], status: "subsc
     email_addresses: [{ address: email, status }],
     languages_spoken: [lang],
     ...(phone && { phone_numbers: [{ number: phone, status }] }),
-    ...(postcode || country || area ? {
-      postal_addresses: [
-        ...(postcode ? [{ postal_code: postcode }] : []),
-        ...(country || area ? [{ country: country || area }] : []),
-      ]
-    } : {})
+    ...(postcode || country || area
+      ? {
+          postal_addresses: [
+            ...(postcode ? [{ postal_code: postcode }] : []),
+            ...(country || area ? [{ country: country || area }] : []),
+          ],
+        }
+      : {}),
   };
 
   customizePersonAttrs(message, person);
   return { person, add_tags: tags };
 };
 
-
-const adjustStatus = (personPayload: ANPersonPayload, exists: any, contact: Contact & { phone: string }) => {
-
+const adjustStatus = (
+  personPayload: ANPersonPayload,
+  exists: any,
+  contact: { email: string; phone?: string },
+) => {
   const existingEmail = exists?.email_addresses?.find(
-    e => e.address.toLowerCase() === contact.email
+    (e) => e.address.toLowerCase() === contact.email,
   );
 
   if (existingEmail && existingEmail.status === "subscribed") {
     personPayload.person.email_addresses[0].status = "subscribed";
   }
 
-  if (contact?.phone && exists?.phone_numbers?.length) {
+  const phone = contact?.phone;
+  if (phone && exists?.phone_numbers?.length) {
     const existingPhone = exists.phone_numbers.find(
-      p => p.number.replace(/\D/g, "") === contact.phone.replace(/\D/g, "")
+      (p) => p.number.replace(/\D/g, "") === phone.replace(/\D/g, ""),
     );
-    if (existingPhone && existingPhone.status === "subscribed" && personPayload.person.phone_numbers) {
+    if (
+      existingPhone &&
+      existingPhone.status === "subscribed" &&
+      personPayload.person.phone_numbers
+    ) {
       personPayload.person.phone_numbers[0].status = "subscribed";
     }
   }
@@ -113,11 +129,11 @@ class ActionNetwork extends CRM {
   }
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-     const r = await procaCampaign(campaign.id);
+    const r = await procaCampaign(campaign.id);
     return r;
-  }
+  };
 
-    async fetchForm(id, test): Promise<any> {
+  async fetchForm(id, test): Promise<any> {
     if (!id) {
       throw new Error("Form ID is missing");
     }
@@ -126,14 +142,16 @@ class ActionNetwork extends CRM {
     if (this.formCache.has(id)) {
       return this.formCache.get(id);
     }
-      try {
-        const res = await fetch(`${url}/forms/${id}`, {
-          method: "GET",
-          headers: getHeaders(test)
-        });
+    try {
+      const res = await fetch(`${url}/forms/${id}`, {
+        method: "GET",
+        headers: getHeaders(test),
+      });
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch form: ${res.status} ${res.statusText}`);
+        throw new Error(
+          `Failed to fetch form: ${res.status} ${res.statusText}`,
+        );
       }
 
       const formData = await res.json();
@@ -145,14 +163,13 @@ class ActionNetwork extends CRM {
     }
   }
 
-
   // submit an action (form submission) for a given person
   submitAction = async (
     form: any,
     personUri: string,
     action: ActionMessageV2,
     test,
-    autoresponse = true
+    autoresponse = true,
   ) => {
     const submissionUrl = form._links?.["osdi:submissions"]?.href;
     if (!submissionUrl) throw new Error("Form has no submissions link");
@@ -166,7 +183,8 @@ class ActionNetwork extends CRM {
 
     if (action.tracking?.source) {
       const rd: any = {
-        source: action.tracking.source === "a/n" ? "unknown" : action.tracking.source,
+        source:
+          action.tracking.source === "a/n" ? "unknown" : action.tracking.source,
       };
       if (action.tracking.source === "referrer") {
         rd.website = action.tracking.campaign;
@@ -176,28 +194,32 @@ class ActionNetwork extends CRM {
 
     const res = await fetch(submissionUrl, {
       method: "POST",
-      headers:  getHeaders(test),
+      headers: getHeaders(test),
       body: JSON.stringify(data),
     });
 
     if (!res.ok) {
       const errText = await res.text();
       throw new Error(
-        `Error submitting action: ${res.status} ${res.statusText} - ${errText}`
+        `Error submitting action: ${res.status} ${res.statusText} - ${errText}`,
       );
     }
     return await res.json();
   };
 
-
-fetchContact = async (email: string, test): Promise<any> => {
+  fetchContact = async (email: string, test): Promise<any> => {
     try {
-      const res = await fetch(`${url}/people?filter=email_address eq '${encodeURIComponent(email)}'`, {
-        headers: getHeaders(test),
-      });
+      const res = await fetch(
+        `${url}/people?filter=email_address eq '${encodeURIComponent(email)}'`,
+        {
+          headers: getHeaders(test),
+        },
+      );
 
       if (!res.ok) {
-        throw new Error(`ActionNetwork API error: ${res.status} ${res.statusText}`);
+        throw new Error(
+          `ActionNetwork API error: ${res.status} ${res.statusText}`,
+        );
       }
       const data = await res.json();
       // People are in _embedded["osdi:people"]
@@ -207,13 +229,17 @@ fetchContact = async (email: string, test): Promise<any> => {
       }
       return null;
     } catch (err: any) {
-      console.error(`Error fetching contact from ActionNetwork: ${err.message}`);
+      console.error(
+        `Error fetching contact from ActionNetwork: ${err.message}`,
+      );
       return null;
     }
   };
 
-  upsertContact = async (person: ANPersonPayload, test: boolean): Promise<any> => {
-
+  upsertContact = async (
+    person: ANPersonPayload,
+    test: boolean,
+  ): Promise<any> => {
     try {
       const res = await fetch(`${url}/people`, {
         method: "POST",
@@ -222,7 +248,9 @@ fetchContact = async (email: string, test): Promise<any> => {
       });
 
       if (!res.ok) {
-        throw new Error(`ActionNetwork API error: ${res.status} ${res.statusText}`);
+        throw new Error(
+          `ActionNetwork API error: ${res.status} ${res.statusText}`,
+        );
       }
       return await res.json();
     } catch (err: any) {
@@ -232,40 +260,52 @@ fetchContact = async (email: string, test): Promise<any> => {
   };
 
   setTags = async (tagNames: string[], test: boolean): Promise<void> => {
-  for (const tagName of tagNames) {
-    try {
-      if (this.tagCache.has(tagName)) continue;
+    for (const tagName of tagNames) {
+      try {
+        if (this.tagCache.has(tagName)) continue;
 
-      // Try fetching the tag
-      const res = await fetch(`${url}/tags?filter=name eq '${encodeURIComponent(tagName)}'`, {
-        headers: getHeaders(test),
-      });
+        // Try fetching the tag
+        const res = await fetch(
+          `${url}/tags?filter=name eq '${encodeURIComponent(tagName)}'`,
+          {
+            headers: getHeaders(test),
+          },
+        );
 
-      if (!res.ok) throw new Error(`Failed to fetch tag "${tagName}": ${res.status}`);
+        if (!res.ok)
+          throw new Error(`Failed to fetch tag "${tagName}": ${res.status}`);
 
-      const data = await res.json();
-      let tag = data?._embedded?.["osdi:tags"]?.find((t: any) => t.name === tagName) || null;
+        const data = await res.json();
+        let tag =
+          data?._embedded?.["osdi:tags"]?.find(
+            (t: any) => t.name === tagName,
+          ) || null;
 
-      // If no tag, create it
-      if (!tag) {
-        const createRes = await fetch(`${url}/tags`, {
-          method: "POST",
-          headers: getHeaders(test),
-          body: JSON.stringify({ name: tagName, origin_system: "Proca" }),
-        });
-        if (!createRes.ok) throw new Error(`Failed to create tag "${tagName}": ${createRes.status} ${createRes.statusText}`);
-        tag = await createRes.json();
+        // If no tag, create it
+        if (!tag) {
+          const createRes = await fetch(`${url}/tags`, {
+            method: "POST",
+            headers: getHeaders(test),
+            body: JSON.stringify({ name: tagName, origin_system: "Proca" }),
+          });
+          if (!createRes.ok)
+            throw new Error(
+              `Failed to create tag "${tagName}": ${createRes.status} ${createRes.statusText}`,
+            );
+          tag = await createRes.json();
+        }
+
+        // Cache the tag
+        this.tagCache.set(tagName, tag);
+      } catch (err: any) {
+        throw new Error(`Error ensuring tag "${tagName}": ${err.message}`);
       }
-
-      // Cache the tag
-      this.tagCache.set(tagName, tag);
-    } catch (err: any) {
-      throw new Error(`Error ensuring tag "${tagName}": ${err.message}`);
     }
-  }
-};
+  };
 
-  handleContact = async (message: ActionMessageV2): Promise<handleResult | boolean> => {
+  handleContact = async (
+    message: ActionMessageV2,
+  ): Promise<handleResult | boolean> => {
     const test = message.action.testing;
     console.log("Processing action:", message.action.id, "testing:", test);
 
@@ -291,11 +331,13 @@ fetchContact = async (email: string, test): Promise<any> => {
       if (!personUri) throw new Error("No person URI returned");
 
       const f = test
-      ? (campaign.config.component?.sync?.test_form || testFormID || formID)
-      : (campaign.config.component?.sync?.form || formID);
+        ? campaign.config.component?.sync?.test_form || testFormID || formID
+        : campaign.config.component?.sync?.form || formID;
 
       if (test && !campaign.config.component?.sync?.test_form && !testFormID) {
-        console.warn("Test mode enabled but no test form configured – falling back to prod form");
+        console.warn(
+          "Test mode enabled but no test form configured – falling back to prod form",
+        );
       }
       const form = await this.fetchForm(f, test);
       await this.submitAction(form, personUri, message, test);
@@ -307,6 +349,5 @@ fetchContact = async (email: string, test): Promise<any> => {
     }
   };
 }
-
 
 export default ActionNetwork;

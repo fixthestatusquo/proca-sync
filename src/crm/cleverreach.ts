@@ -11,11 +11,9 @@ import { getToken, upsertContact, getContact } from "./cleverreach/client";
 import { formatAction } from "./cleverreach/data";
 import { fetchCampaign as procaCampaign } from "../proca";
 
-export type Message = ActionMessage | EventMessage;
-
 class CleverreachCRM extends CRM {
   token: string | null = null;
-  campaignCache = new Map<number, ProcaCampaign>(); // Store campaigns in memory
+  campaignCache = new Map<number, any>(); // Store campaigns in memory
 
   constructor(opt: {}) {
     super(opt);
@@ -27,13 +25,18 @@ class CleverreachCRM extends CRM {
     message: CampaignUpdatedEvent,
   ): Promise<handleResult | boolean> => {
     //we need to refetch campaign when it is updated
-    await this.fetchCampaign(message.campaignId);
+    await this.fetchCampaign({
+      id: message.campaignId,
+      name: message.campaign.name,
+      title: message.campaign.title,
+      externalId: message.campaign.externalId,
+    });
     return true;
   };
 
-  fetchCampaign = async (id: number): Promise<any> => {
-    const r = await procaCampaign(id);
-    this.campaignCache.set(id, r);
+  fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
+    const r = await procaCampaign(campaign.id!);
+    this.campaignCache.set(campaign.id!, r);
     return r;
   };
 
@@ -45,13 +48,13 @@ class CleverreachCRM extends CRM {
     }
   };
 
-  handleMessage = async (message: Message) => {
+  handleMessage = async (message: ActionMessage) => {
     if (this.verbose) {
       console.log(message);
     }
-    let camp = this.campaignCache.get(message.campaign.id);
+    let camp = this.campaignCache.get(message.campaign.id!);
     if (!camp) {
-      camp = await this.fetchCampaign(message.campaign.id);
+      camp = await this.fetchCampaign(message.campaign);
     }
 
     // listId might be different for each campaign
@@ -99,11 +102,20 @@ class CleverreachCRM extends CRM {
   handleEvent = async (
     message: EventMessage,
   ): Promise<handleResult | boolean> => {
-    console.log("Event taken from queue", message.actionId);
+    if (message.eventType === "campaign_updated") {
+      return this.handleCampaignUpdate(message);
+    }
+    if (message.eventType !== "email_status") return true;
 
-    message.contact = message.supporter.contact;
-    message.privacy = message.supporter.privacy;
-    return this.handleMessage(message);
+    console.log("Event taken from queue", message.action?.id);
+
+    const normalized = {
+      ...message,
+      contact: message.supporter.contact,
+      privacy: message.supporter.privacy,
+      actionId: message.action?.id,
+    };
+    return this.handleMessage(normalized as any);
   };
 
   fetchContact = async (email: string, context?: any): Promise<any> => {

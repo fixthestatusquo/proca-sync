@@ -122,19 +122,24 @@ class ActiveCampaign extends crm_1.CRM {
             }
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.log("Action taken from the queue", message.action.id);
-            return this.handleMessage(message);
+            var _a, _b, _c;
+            const emailStatus = (_a = message.privacy) === null || _a === void 0 ? void 0 : _a.emailStatus;
+            const camp = yield this.campaign(message.campaign);
+            const sync = ((_c = (_b = camp.config) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.sync) || {};
+            const statusTagId = emailStatus === "double_opt_in"
+                ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
+                : undefined;
+            return this.handleMessage(message, statusTagId);
         });
         this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             if (message.eventType !== "email_status")
                 return true;
             console.log("Event taken from queue", (_a = message.action) === null || _a === void 0 ? void 0 : _a.id);
-            // build a compatible message shape for handleMessage
             const normalized = Object.assign(Object.assign({}, message), { contact: message.supporter.contact, privacy: message.supporter.privacy, actionId: (_b = message.action) === null || _b === void 0 ? void 0 : _b.id });
-            return this.handleMessage(normalized);
+            return this.handleContact(normalized);
         });
-        this.handleMessage = (message) => __awaiter(this, void 0, void 0, function* () {
+        this.handleMessage = (message, statusTagId) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             const actionId = "action" in message ? message.action.id : message.actionId;
             const testing = "action" in message ? message.action.testing : false;
@@ -163,8 +168,11 @@ class ActiveCampaign extends crm_1.CRM {
                 }
                 if (listid)
                     yield this.subscribeToList(contactid, listid);
-                if (tagids)
-                    yield this.addTagsToContact(contactid, tagids);
+                const allTagIds = [tagids, statusTagId].filter(Boolean).join(",");
+                if (allTagIds) {
+                    console.log(`[ac] applying tags: ${allTagIds}`);
+                    yield this.addTagsToContact(contactid, allTagIds);
+                }
                 console.log("Action contact processed successfully", actionId);
                 return true;
             }
@@ -180,7 +188,10 @@ class ActiveCampaign extends crm_1.CRM {
             case "DOUBLE_OPTIN":
                 this.crmType = crm_1.CRMType.DoubleOptIn;
                 break;
-            case "ActionContact":
+            case "CONTACT":
+                this.crmType = crm_1.CRMType.Contact;
+                break;
+            case "ACTION_CONTACT":
                 this.crmType = crm_1.CRMType.ActionContact;
                 break;
             default:

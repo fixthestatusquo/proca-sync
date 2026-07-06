@@ -1,5 +1,7 @@
 import type { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 
+type EmailStatusEvent = Extract<EventMessageV2, { eventType: "email_status" }>;
+
 export const isActionSyncable = (
   action: ActionMessageV2,
   onlyOptIn: boolean,
@@ -139,7 +141,7 @@ export const actionToContactRecord = (
 };
 
 export const emailChangedToContactRecord = (
-  event: EventMessageV2,
+  event: EmailStatusEvent,
 ): ContactSubscription | null => {
   const emailStatus = event.supporter.privacy.emailStatus;
   const emailStatusChanged = event.supporter.privacy.emailStatusChanged;
