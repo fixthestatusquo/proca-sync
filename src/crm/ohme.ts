@@ -1,6 +1,7 @@
 import {
   CRM,
   CRMType,
+  ProcessStatus,
   type ActionMessage,
   type handleResult,
   type ProcaCampaign,
@@ -275,6 +276,15 @@ class OhmeCRM extends CRM {
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
+        // 422 + errors.email means Ohme rejected the address itself (e.g. "a..b@x.com") —
+        // permanently invalid, so skip instead of requeuing forever
+        if (e.status === 422 && e.body?.errors?.email) {
+          this.log(
+            `[ohme] invalid email, skipping: ${email} (${e.body?.message})`,
+            ProcessStatus.skipped,
+          );
+          return { processed: true };
+        }
         this.error(
           `[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`,
         );

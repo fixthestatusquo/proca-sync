@@ -59,6 +59,7 @@ class OhmeCRM extends crm_1.CRM {
             return (_a = data[0]) !== null && _a !== void 0 ? _a : null;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             const email = message.contact.email;
             const camp = yield this.campaign(message.campaign);
             try {
@@ -69,6 +70,12 @@ class OhmeCRM extends crm_1.CRM {
                 catch (e) {
                     if (e.status === 429)
                         throw e;
+                    // 422 + errors.email means Ohme rejected the address itself (e.g. "a..b@x.com") —
+                    // permanently invalid, so skip instead of requeuing forever
+                    if (e.status === 422 && ((_b = (_a = e.body) === null || _a === void 0 ? void 0 : _a.errors) === null || _b === void 0 ? void 0 : _b.email)) {
+                        this.log(`[ohme] invalid email, skipping: ${email} (${(_c = e.body) === null || _c === void 0 ? void 0 : _c.message})`, crm_1.ProcessStatus.skipped);
+                        return { processed: true };
+                    }
                     this.error(`[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`);
                     return { processed: false };
                 }
