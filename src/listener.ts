@@ -30,17 +30,6 @@ export const listen = async (config: Configuration, crm: CRM) => {
       // Throw an error if you want to NACK the message and make it re-deliver again.
       // Return nothing to have the message ACKed (removed from queue)
       //
-      // What is this?
-      console.log(
-        "Received message",
-        actionOrEvent.schema,
-        "with id",
-        actionOrEvent.schema === "proca:action:2"
-          ? actionOrEvent.action.id
-          : "actionId" in actionOrEvent
-            ? actionOrEvent.actionId
-            : actionOrEvent.eventType,
-      );
       switch (actionOrEvent.schema) {
         case "proca:action:2": {
           // An action done by Supporter
@@ -55,11 +44,9 @@ export const listen = async (config: Configuration, crm: CRM) => {
             return false;
           }
           if (typeof r === "object" && "processed" in r) {
-            //          spin (count.ack + count.nack, "processed");
             return !!r.processed;
           }
 
-          //        spin (count.ack + count.nack, "bool processed");
           return !!r;
         }
 
