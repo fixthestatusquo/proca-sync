@@ -1,7 +1,6 @@
 import {
   CRM,
   CRMType,
-  ProcessStatus,
   type ActionMessage,
   type handleResult,
   type ProcaCampaign,
@@ -279,13 +278,12 @@ class OhmeCRM extends CRM {
         // 422 + errors.email means Ohme rejected the address itself (e.g. "a..b@x.com") —
         // permanently invalid, so skip instead of requeuing forever
         if (e.status === 422 && e.body?.errors?.email) {
-          this.log(
+          console.log(
             `[ohme] invalid email, skipping: ${email} (${e.body?.message})`,
-            ProcessStatus.skipped,
           );
           return { processed: true };
         }
-        this.error(
+        console.error(
           `[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`,
         );
         return { processed: false };
@@ -299,7 +297,7 @@ class OhmeCRM extends CRM {
             [this.sourceField]: message.campaign.name,
           });
         } catch (e: any) {
-          this.error(
+          console.error(
             `[ohme] failed to set source for ${email}: ${JSON.stringify(e)}`,
           );
         }
@@ -311,20 +309,20 @@ class OhmeCRM extends CRM {
         );
       } catch (e: any) {
         if (e.status === 429) throw e;
-        this.error(
+        console.error(
           `[ohme] interaction failed for ${email}: ${JSON.stringify(e)}`,
         );
         return { processed: false };
       }
 
-      this.log(`[ohme] ${isNew ? "created" : "updated"} ${email}`, undefined);
+      console.log(`[ohme] ${isNew ? "created" : "updated"} ${email}`);
       return { processed: true };
     } catch (e: any) {
       if (e.status === 429) {
-        this.error(`[ohme] 429 received, halting`);
+        console.error(`[ohme] 429 received, halting`);
         return { processed: false };
       }
-      this.error(`[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`);
+      console.error(`[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`);
       return { processed: false };
     }
   };

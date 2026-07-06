@@ -73,10 +73,10 @@ class OhmeCRM extends crm_1.CRM {
                     // 422 + errors.email means Ohme rejected the address itself (e.g. "a..b@x.com") —
                     // permanently invalid, so skip instead of requeuing forever
                     if (e.status === 422 && ((_b = (_a = e.body) === null || _a === void 0 ? void 0 : _a.errors) === null || _b === void 0 ? void 0 : _b.email)) {
-                        this.log(`[ohme] invalid email, skipping: ${email} (${(_c = e.body) === null || _c === void 0 ? void 0 : _c.message})`, crm_1.ProcessStatus.skipped);
+                        console.log(`[ohme] invalid email, skipping: ${email} (${(_c = e.body) === null || _c === void 0 ? void 0 : _c.message})`);
                         return { processed: true };
                     }
-                    this.error(`[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`);
+                    console.error(`[ohme] upsert failed for ${email} (no existing contact found): ${JSON.stringify(e)}`);
                     return { processed: false };
                 }
                 const { contact, isNew } = upsertResult;
@@ -87,7 +87,7 @@ class OhmeCRM extends crm_1.CRM {
                         });
                     }
                     catch (e) {
-                        this.error(`[ohme] failed to set source for ${email}: ${JSON.stringify(e)}`);
+                        console.error(`[ohme] failed to set source for ${email}: ${JSON.stringify(e)}`);
                     }
                 }
                 try {
@@ -96,18 +96,18 @@ class OhmeCRM extends crm_1.CRM {
                 catch (e) {
                     if (e.status === 429)
                         throw e;
-                    this.error(`[ohme] interaction failed for ${email}: ${JSON.stringify(e)}`);
+                    console.error(`[ohme] interaction failed for ${email}: ${JSON.stringify(e)}`);
                     return { processed: false };
                 }
-                this.log(`[ohme] ${isNew ? "created" : "updated"} ${email}`, undefined);
+                console.log(`[ohme] ${isNew ? "created" : "updated"} ${email}`);
                 return { processed: true };
             }
             catch (e) {
                 if (e.status === 429) {
-                    this.error(`[ohme] 429 received, halting`);
+                    console.error(`[ohme] 429 received, halting`);
                     return { processed: false };
                 }
-                this.error(`[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`);
+                console.error(`[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`);
                 return { processed: false };
             }
         });
