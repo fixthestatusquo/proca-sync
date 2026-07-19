@@ -42,7 +42,7 @@
     "@sentry/types": "^10.38.0",
     "@types/cli-color": "^2.0.6",
     "@types/jsforce": "^1.11.6",
-    "@types/mailchimp__mailchimp_marketing": "^3.0.21",
+    "@types/mailchimp__mailchimp_marketing": "^3.0.22",
     "@types/minimist": "^1.2.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
