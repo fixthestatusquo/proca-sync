@@ -3,6 +3,7 @@ import {
   ActionMessageV2,
   EventMessageV2,
   CampaignUpdatedEventMessage,
+  //  ActionPage as Widget,
   type Counters,
 } from "@proca/queue";
 import type { Configuration } from "./config";
@@ -28,25 +29,15 @@ export { CampaignUpdatedEventMessage as CampaignUpdatedEvent };
 
 type ProcaCampaign = Campaign;
 
-//export type ProcaCampaign = { [key: string]: any }; // TODO export from proca queue
-/*export type ProcaCampaign = {
-    contactSchema: string,
-    externalId?: number,
-    name: string,
-    title: string,
-    id?: number,
-};
-*/
+export type ProcaWidget = {
+  //TODO export from proca queue
 
-/*
-  "campaign": {
-    "contactSchema": "basic",
-    "externalId": 1984,
-    "name": "test-proca",
-    "title": "Pineapple doesn’t belong on pizza!"
-  },
-  "campaignId": 9,
-*/
+  locale: string; // language or full locale eg: pl, de_AT
+  name: string; // technical name
+  thankYouTemplate: string; // name of thank you template
+  thankYouTemplateRef: string; // backwards compatibility - id of tempalte resolved from Mailjet etc
+  id?: number; //convenience, copy of actionPageId set elsewhere in the message
+};
 
 export type Contact = {
   area: string;
@@ -97,6 +88,8 @@ interface CRMInterface {
   ) => Promise<handleResult | boolean>;
   campaign: (campaign: ProcaCampaign) => Promise<any>; // get the extra data from the campaign
   fetchCampaign?: (campaign: ProcaCampaign) => Promise<any>; // fetch the campaign extra data and store it locally
+  widget: (widget: ProcaWidget) => Promise<any>; // get the extra data from the widget
+  fetchWidget?: (widget: ProcaWidget) => Promise<any>; // fetch the widget extra data and store it locally
   fetchContact?: (email: string, context?: any) => Promise<any>; // fetch the contact, mostly for debug
   setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
@@ -112,6 +105,7 @@ export enum CRMType {
 }
 export abstract class CRM implements CRMInterface {
   public campaigns: Record<string, any>;
+  public widgets: Record<string, any>; // not used by default
   public crmType: CRMType;
   public verbose: boolean;
   public interactive: boolean;
@@ -124,6 +118,7 @@ export abstract class CRM implements CRMInterface {
     this.pause = opt?.pause || false;
     this.interactive = opt?.interactive || false;
     this.campaigns = {};
+    this.widgets = {};
     this.crmType = CRMType.ActionContact;
     this.count = opt.count || { ack: 0, nack: 0, queued: 0 };
     this.lastStatus = ProcessStatus.unknown;
@@ -170,6 +165,10 @@ export abstract class CRM implements CRMInterface {
     // by campaign, we mean whatever your CRM uses to segment contacts and actions, it might be named list, segment...
 
     return Promise.resolve(campaign);
+  };
+
+  fetchWidget = async (widget: ProcaWidget): Promise<any> => {
+    return Promise.resolve(widget);
   };
 
   fetchContact = async (email: string, context?: any): Promise<any> => {
@@ -366,6 +365,14 @@ export abstract class CRM implements CRMInterface {
       this.campaigns[name] = await this.fetchCampaign(campaign);
     }
     return Promise.resolve(this.campaigns[name]);
+  };
+
+  widget = async (widget: ProcaWidget): Promise<Record<string, any>> => {
+    const name: string = widget.name;
+    if (!this.widgets[name]) {
+      this.widgets[name] = await this.fetchWidget(widget);
+    }
+    return Promise.resolve(this.widgets[name]);
   };
 
   handleEmailStatusChange = async (

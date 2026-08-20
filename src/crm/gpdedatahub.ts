@@ -4,10 +4,15 @@ import {
   type ActionMessage,
   type handleResult,
   type ProcaCampaign,
+  type ProcaWidget,
 } from "../crm";
 import { formatAction } from "./gpdedatahub/data";
 import { postAction } from "./gpdedatahub/client";
-import { fetchCampaign as procaCampaign } from "../proca";
+import { deepMerge } from "../utils";
+import {
+  fetchCampaign as procaCampaign,
+  fetchWidget as procaWidget,
+} from "../proca";
 
 class gpdedatahubCRM extends CRM {
   constructor(opt: object) {
@@ -20,11 +25,27 @@ class gpdedatahubCRM extends CRM {
     return r;
   };
 
+  fetchWidget = async (widget: ProcaWidget): Promise<any> => {
+    return procaWidget(widget.id);
+  };
   // CRM will take double actions and respond with 200 status
   handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
+    console.log(message.tracking);
+    if (message.tracking.content && camp.config.import?.includes("ABTest")) {
+      const widget = await this.widget(message.actionPage);
+
+      const variant = widget.config.component?.test?.find(
+        (d) => d.name === message.tracking.content,
+      );
+      if (variant)
+        camp.config = deepMerge(camp.config, { component: variant.component });
+      else
+        console.error("utm_content isn't a variant in config.component.test");
+      console.log(camp.config);
+    }
     console.log(
       "Taken from the queue",
       message.action.id,

@@ -12,3 +12,18 @@ export const string2map = (string: string): Record<string, string> => {
 
   return params;
 };
+
+const isObject = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+export const deepMerge = <T>(target: T, source: any): T => {
+  const out: any = Array.isArray(target) ? [...target] : { ...target };
+  for (const key of Object.keys(source)) {
+    if (isObject(out[key]) && isObject(source[key])) {
+      out[key] = deepMerge(out[key], source[key]);
+    } else {
+      out[key] = source[key];
+    }
+  }
+  return out;
+};

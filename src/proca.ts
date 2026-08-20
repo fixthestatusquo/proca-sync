@@ -82,6 +82,22 @@ export async function graphQL(
   return data;
 }
 
+export const fetchWidget = async (id) => {
+  const query = `query widget ($id: Int! ) {
+  actionPage (id:$id) {
+    id, name, config
+  }
+}`;
+
+  const data: any = await graphQL("widget", query, {
+    variables: { id: parseInt(id, 10) },
+  });
+  if (!data?.actionPage) throw new Error(JSON.stringify(data));
+
+  if (data?.actionPage?.config)
+    data.actionPage.config = JSON.parse(data.actionPage.config);
+  return data?.actionPage;
+};
 export const fetchCampaign = async (id) => {
   const variables = {};
   const query = `query campaign ($id: Int! ) {
@@ -90,7 +106,9 @@ export const fetchCampaign = async (id) => {
   }
 }`;
 
-  const data: any = await graphQL("campaign", query, { variables: { id: parseInt(id, 10) } });
+  const data: any = await graphQL("campaign", query, {
+    variables: { id: parseInt(id, 10) },
+  });
   if (!data?.campaign) throw new Error(JSON.stringify(data));
 
   if (data?.campaign?.config)
