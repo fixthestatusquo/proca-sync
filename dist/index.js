@@ -82,7 +82,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             return true;
         },
     });
-    let envConfig;
+    let envConfig = {};
     if (opt.help) {
         clihelp();
         process.exit(0);
