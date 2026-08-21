@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
+//import dotenv from "dotenv";
 import type { GPAction } from "./data";
-dotenv.config();
+//dotenv.config();
 
 const url = process.env.CRM_URL;
 const username = process.env.CRM_USERNAME;

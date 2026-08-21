@@ -91,16 +91,16 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         opt.env = opt._.shift();
     }
     if (opt.env) {
-        console.log("trying with", opt.env);
         if (!(0, fs_1.existsSync)(opt.env)) {
             const env = ".env." + opt.env;
-            process.env.PROCA_ENV = opt.env;
-            if ((0, fs_1.existsSync)(env))
+            if ((0, fs_1.existsSync)(env)) {
+                process.env.PROCA_ENV = opt.env;
                 opt.env = env;
-        }
-        else {
-            console.error("missing env", opt.env);
-            process.exit(1);
+            }
+            else {
+                console.error("missing env", opt.env);
+                process.exit(1);
+            }
         }
         envConfig = { path: opt.env };
     }
@@ -110,6 +110,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             process.exit(1);
         }
     }
+    envConfig.quiet = true; // removes the ad
     const conf = dotenv_1.default.config(envConfig);
     if (process.env.SENTRY_URL) {
         Sentry.init({ dsn: process.env.SENTRY_URL });

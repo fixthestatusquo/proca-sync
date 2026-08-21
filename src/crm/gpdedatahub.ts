@@ -33,7 +33,6 @@ class gpdedatahubCRM extends CRM {
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
     const camp = await this.campaign(message.campaign);
-    console.log(message.tracking);
     if (message.tracking.content && camp.config.import?.includes("ABTest")) {
       const widget = await this.widget(message.actionPage);
 
@@ -44,7 +43,7 @@ class gpdedatahubCRM extends CRM {
         camp.config = deepMerge(camp.config, { component: variant.component });
       else
         console.error("utm_content isn't a variant in config.component.test");
-      console.log(camp.config);
+      console.log("AB TEST variant", variant.name, camp.config.component.sync);
     }
     console.log(
       "Taken from the queue",

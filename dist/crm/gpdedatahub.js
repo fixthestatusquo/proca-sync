@@ -28,7 +28,6 @@ class gpdedatahubCRM extends crm_1.CRM {
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
             const camp = yield this.campaign(message.campaign);
-            console.log(message.tracking);
             if (message.tracking.content && ((_a = camp.config.import) === null || _a === void 0 ? void 0 : _a.includes("ABTest"))) {
                 const widget = yield this.widget(message.actionPage);
                 const variant = (_c = (_b = widget.config.component) === null || _b === void 0 ? void 0 : _b.test) === null || _c === void 0 ? void 0 : _c.find((d) => d.name === message.tracking.content);
@@ -36,7 +35,7 @@ class gpdedatahubCRM extends crm_1.CRM {
                     camp.config = (0, utils_1.deepMerge)(camp.config, { component: variant.component });
                 else
                     console.error("utm_content isn't a variant in config.component.test");
-                console.log(camp.config);
+                console.log("AB TEST variant", variant.name, camp.config.component.sync);
             }
             console.log("Taken from the queue", message.action.id, "test:", message.action.testing);
             const actionPayload = (0, data_1.formatAction)(message, camp.config);
