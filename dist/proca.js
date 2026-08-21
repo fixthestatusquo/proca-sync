@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchCampaign = void 0;
+exports.fetchCampaign = exports.fetchWidget = void 0;
 exports.graphQL = graphQL;
 //export const graphQL: Promise<ProcaResponse> = async (operation, query, options) => {
 function graphQL(operation, query, options) {
@@ -78,6 +78,23 @@ function graphQL(operation, query, options) {
         return data;
     });
 }
+const fetchWidget = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const query = `query widget ($id: Int! ) {
+  actionPage (id:$id) {
+    id, name, config
+  }
+}`;
+    const data = yield graphQL("widget", query, {
+        variables: { id: parseInt(id, 10) },
+    });
+    if (!(data === null || data === void 0 ? void 0 : data.actionPage))
+        throw new Error(JSON.stringify(data));
+    if ((_a = data === null || data === void 0 ? void 0 : data.actionPage) === null || _a === void 0 ? void 0 : _a.config)
+        data.actionPage.config = JSON.parse(data.actionPage.config);
+    return data === null || data === void 0 ? void 0 : data.actionPage;
+});
+exports.fetchWidget = fetchWidget;
 const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const variables = {};
@@ -86,7 +103,9 @@ const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     id, name, title, config, externalId
   }
 }`;
-    const data = yield graphQL("campaign", query, { variables: { id: parseInt(id, 10) } });
+    const data = yield graphQL("campaign", query, {
+        variables: { id: parseInt(id, 10) },
+    });
     if (!(data === null || data === void 0 ? void 0 : data.campaign))
         throw new Error(JSON.stringify(data));
     if ((_a = data === null || data === void 0 ? void 0 : data.campaign) === null || _a === void 0 ? void 0 : _a.config)

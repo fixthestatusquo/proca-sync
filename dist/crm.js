@@ -103,6 +103,9 @@ class CRM {
             // by campaign, we mean whatever your CRM uses to segment contacts and actions, it might be named list, segment...
             return Promise.resolve(campaign);
         });
+        this.fetchWidget = (widget) => __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve(widget);
+        });
         this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement fetchContact in your CRM");
         });
@@ -244,6 +247,13 @@ class CRM {
             }
             return Promise.resolve(this.campaigns[name]);
         });
+        this.widget = (widget) => __awaiter(this, void 0, void 0, function* () {
+            const name = widget.name;
+            if (!this.widgets[name]) {
+                this.widgets[name] = yield this.fetchWidget(widget);
+            }
+            return Promise.resolve(this.widgets[name]);
+        });
         this.handleEmailStatusChange = (event) => __awaiter(this, void 0, void 0, function* () {
             // If we want to detect supporter clicking on opt in link in email, we can do this here
             // this happens after the action was done, timeline:
@@ -310,6 +320,7 @@ class CRM {
         this.pause = (opt === null || opt === void 0 ? void 0 : opt.pause) || false;
         this.interactive = (opt === null || opt === void 0 ? void 0 : opt.interactive) || false;
         this.campaigns = {};
+        this.widgets = {};
         this.crmType = CRMType.ActionContact;
         this.count = opt.count || { ack: 0, nack: 0, queued: 0 };
         this.lastStatus = ProcessStatus.unknown;

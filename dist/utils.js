@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.string2map = exports.pause = void 0;
+exports.deepMerge = exports.string2map = exports.pause = void 0;
 const pause = (time) => {
     const min = !time || time >= 7 ? 7 : time / 2;
     const max = time || 42; // wait between min and max
@@ -15,3 +15,17 @@ const string2map = (string) => {
     return params;
 };
 exports.string2map = string2map;
+const isObject = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+const deepMerge = (target, source) => {
+    const out = Array.isArray(target) ? [...target] : Object.assign({}, target);
+    for (const key of Object.keys(source)) {
+        if (isObject(out[key]) && isObject(source[key])) {
+            out[key] = (0, exports.deepMerge)(out[key], source[key]);
+        }
+        else {
+            out[key] = source[key];
+        }
+    }
+    return out;
+};
+exports.deepMerge = deepMerge;
