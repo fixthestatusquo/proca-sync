@@ -27,6 +27,10 @@ class gpdedatahubCRM extends crm_1.CRM {
         // CRM will take double actions and respond with 200 status
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c;
+            if (message.contact.dupeRank > 0) {
+                console.log("Skipping duplicate action", message.actionId, "dupeRank:", message.contact.dupeRank);
+                return true;
+            }
             const camp = yield this.campaign(message.campaign);
             if (message.tracking.content && ((_a = camp.config.import) === null || _a === void 0 ? void 0 : _a.includes("ABTest"))) {
                 const widget = yield this.widget(message.actionPage);

@@ -32,6 +32,15 @@ class gpdedatahubCRM extends CRM {
   handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
+    if (message.contact.dupeRank > 0) {
+      console.log(
+        "Skipping duplicate action",
+        message.actionId,
+        "dupeRank:",
+        message.contact.dupeRank,
+      );
+      return true;
+    }
     const camp = await this.campaign(message.campaign);
     if (message.tracking.content && camp.config.import?.includes("ABTest")) {
       const widget = await this.widget(message.actionPage);
