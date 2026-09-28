@@ -73,6 +73,7 @@ export const main = async (argv: string[]) => {
     Sentry.init({ dsn: process.env.SENTRY_URL });
   }
 
+  let step = "configuration";
   try {
     const config = configFromOptions(conf, opt);
     if (opt.dump) {
@@ -81,10 +82,12 @@ export const main = async (argv: string[]) => {
       );
       process.env.CRM = "file";
     }
+    step = `CRM (${process.env.CRM}) init`;
     const crm = await init(config);
-    console.log("listening for messages");
 
+    step = `queue connection (${config.queue})`;
     const queue = await listen(config, crm);
+    console.log("listening for messages");
 
     process.on("SIGINT", async () => {
       console.log("Caught interrupt signal");
@@ -96,9 +99,10 @@ export const main = async (argv: string[]) => {
       process.exit(0);
     });
   } catch (er) {
-    console.error(`Problem: ${er}`);
+    console.error(`${step} failed: ${er}`);
     Sentry.captureException(er);
-    help();
+    if (step === "configuration") help();
+    process.exit(1);
   }
 };
 
