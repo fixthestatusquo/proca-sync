@@ -32,7 +32,40 @@ if you want to use an existing CRM integration:
 
 if you want to create an integration with an new CRM, it's almost the same, gut please clone and PR.
 
-# test and develop
+# new CRM
+
+create a new file in /src/crm/YourCrm.ts, the easiest is to start by copying src/crm/StdOut.ts and rename the class to YourCrm and export it as default.
+
+the method handleContact is going to be called everytime there is a new action to process as long as you run the program. You don't have to run it 24/7, next time you run it all the new actions that you haven't processed will be waiting for you.
+
+if it returns true, the action is considered processed and we remove it from the queue. if you return false, it means you failed to process it and it will stay in the queue (we might pause it for 15 minutes and put it at the back of the queue to avoid having a single action that blocks the processing of all the other actions).
+
+to run it, add in your .env:
+
+    CRM=YourCrm
+    PROCA_USERNAME='xxx'
+    PROCA_PASSWORD='secret'
+    PROCA_QUEUE='yyy'
+
+you can also add the credential to your CRM 
+
+to run it and test from the queue, run
+
+    $npm run start
+
+having to connect to the server, and potentially creating new actions is a bit tedious during the development. 
+
+    $npm run test 
+
+instead of opening a connection to the server, it takes the event from data/petition_optin.json (or any other dump of one event you want to use) and runs it with your handleContact 
+
+
+
+
+
+
+
+
 
 read the queue and process it
 
