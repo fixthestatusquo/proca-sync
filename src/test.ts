@@ -40,7 +40,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig: any ;
+  let envConfig: any;
   if (opt.help) {
     clihelp();
     process.exit(0);
