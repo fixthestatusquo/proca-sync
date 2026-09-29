@@ -1,18 +1,23 @@
-proca is the most advanced opensource campaign tool (petition, twitterstorm, mailtotarget...).
-
-Even if you use our SaaS services, you will want to automatically push supporters and actions into your CRM or mailinglist tool.
-
-Doing it manually is cumbersome and time consuming. We do provide some synchronisation "out of the box", but because your CRM (or the way you configured it) is unique, it might make sense to have your own synchronisation system.
-
-This code is meant to be forked and should let you develop a custom synchronisation more easily without having to write a lot of boilerplate code that is basically the same, no matter the CRM
-
 # Overview
 
-proca is sending all the actions taken by your supporters (signing a petition, sharing on a social media, confirming their email if double opt-in...) into a queue service (RabbitMQ software). they will stay there until you process them (using this code). You can process them as or slowy or fast as your CRM can handle them, RabbitMQ can easily handle million of actions without any problem.
+proca-sync is a template for synchronising proca (the most advanced opensource online campaign tool) with your CRM or mailing-list tool. If your CRM is missing, fork it and adapt the CRM connector to your own setup.
 
-Read more about how actions are processed and what is the format of the data [here](https://docs.proca.app/processing.html#action-message).
+## How it works
 
-We provide node packages to help with passing messages from queue to your callback, and handle the ack, nack automatically, and graceful shutdown of synchronisation.
+proca publishes every action taken by your supporters (petition signature, social share, double opt-in confirmation, etc.) to a RabbitMQ queue. Messages stay in the queue until proca-sync consumes them and passes them to your CRM.
+
+- **You control the pace.** Consume as slowly or as quickly as your CRM accepts data. Messages wait in the queue until they are acknowledged. you can increase the concurrency to process more messages in parallel (default 1)
+- **No REST API load.** Data is pushed to the queue, so you do not need to poll the proca REST API or request repeated exports.
+- **Reliable delivery.** The provided node packages pass each message to your callback and handle ack/nack and graceful shutdown.
+- **Volume.** RabbitMQ handles millions of queued actions.
+
+The message format is documented at https://docs.proca.app/processing.html#action-message or use the data folder that contains examples.
+
+## CRM connectors
+
+Each connector lives in `src/crm/{yourcrm}.ts`. Its constructor declares which events to process: only opt-in contacts, all contacts, or contacts and events.
+
+To use an existing connector, set `CRM={yourcrm}` in your `.env` file. To support a new CRM, add a connector and open a pull request.
 
 # setup
 
@@ -37,9 +42,9 @@ $ npm run start -- [-e yourorg]
 
 if you want to save the messages received into the data folder, set CRM=file or yarn start --dump
 
-Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `pip install proca` as root.
+Now sign some actions (you can use proca cli `proca action` command to do this from command line quickly). To install the cli do `npm install proca`
 
-_tip: instead of reading from the queue, read the message from a file_
+_tip: instead of reading from the queue, read the message from a file_ during the development, it's way way more enjoyable and you can replay with the same data as often as needed.
 
 ```
 $npm run test data/petition_optin.json  [-e yourorg]
@@ -55,7 +60,7 @@ $npm run start --dump [-e yourorg]
 
 by default, the name of the files are not clear, we suggest to rename them based on the type of action/context you want to test (eg an opt-in, opt-out, existing contact, new one...)
 
-_please do not git add these files, they are likely to contain personal data_
+_please remove any personal data if you add your examples to git, , they are likely to contain personal data_
 
 # build for production
 
@@ -88,8 +93,7 @@ the construtor of your CRM should set the type of events it want to process (eg 
 
 ## add custom queue
 
-on Proca cli `proca org:set --custom-deliver ORGNAME`
-create user on RabbitMQ, set permissions
+We need to set up the custom delivery queue for your organisation if we are hosting your campaign, please contact us to do it for you
 
 ## ssh tunnel for development
 
