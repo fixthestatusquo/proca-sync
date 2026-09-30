@@ -11,7 +11,8 @@ const actionToContactRecord = (action, opts) => {
         LastName: action.contact.lastName || opts.defaultLastName,
         Email: action.contact.email,
         Phone: action.contact.phone,
-        MailingCountryCode: action.contact.country,
+        // ZZ = unknown in Proca is rejected by Salesforce picklist
+        MailingCountryCode: action.contact.country !== "ZZ" ? action.contact.country : undefined,
         MailingPostalCode: action.contact.postcode,
     };
     (0, exports.determineOptIn)(c, action.privacy, opts);
@@ -27,8 +28,7 @@ const actionToLeadRecord = (action, opts) => {
         LastName: action.contact.lastName || opts.defaultLastName,
         Email: action.contact.email,
         Phone: action.contact.phone,
-        //Country: countryName(action.contact.country),
-        CountryCode: action.contact.country,
+        CountryCode: action.contact.country !== "ZZ" ? action.contact.country : undefined, // ZZ = unknown in Proca, rejected by Salesforce picklist
         PostalCode: action.contact.postcode,
         Company: "[not provided]",
         LeadSource: action.campaign.title,
@@ -49,7 +49,8 @@ const determineOptIn = (r, privacy, opts) => {
     }
     // consents
     // explicit DOI = must be subscribe
-    if (privacy.emailStatus === "double_opt_in") { //deadling with doi
+    if (privacy.emailStatus === "double_opt_in") {
+        //deadling with doi
         optIn = true;
         // bouncing - cleaned / banned
     }
@@ -58,7 +59,8 @@ const determineOptIn = (r, privacy, opts) => {
         if (privacy.emailStatusChanged)
             r.EmailBouncedDate = privacy.emailStatusChanged;
     }
-    if (privacy.optIn && !opts.doubleOptIn) { //regular optin
+    if (privacy.optIn && !opts.doubleOptIn) {
+        //regular optin
         optIn = true;
     }
     console.log("optin", optIn, opts.optInField);

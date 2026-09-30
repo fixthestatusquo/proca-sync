@@ -3,8 +3,10 @@ import type { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 type EmailStatusEvent = Extract<EventMessageV2, { eventType: "email_status" }>;
 
 //                                              allow custom fields vvv
-export interface ContactAttributes
-  extends Record<string, string | boolean | undefined> {
+export interface ContactAttributes extends Record<
+  string,
+  string | boolean | undefined
+> {
   Email: string;
   FirstName: string;
   LastName?: string;
@@ -15,13 +17,15 @@ export interface ContactAttributes
   EmailBouncedDate?: string;
 }
 
-export interface LeadAttributes
-  extends Record<string, string | boolean | undefined> {
+export interface LeadAttributes extends Record<
+  string,
+  string | boolean | undefined
+> {
   Email: string;
   FirstName: string;
   LastName?: string;
   Phone?: string;
-  CountryCode: string;
+  CountryCode?: string;
   PostalCode?: string;
   Company: string;
   EmailBouncedReason?: string;
@@ -39,7 +43,6 @@ export type RecordOpts = {
   defaultLastName?: string;
 };
 
-
 export const actionToContactRecord = (
   action: ActionMessageV2,
   opts: RecordOpts,
@@ -49,7 +52,9 @@ export const actionToContactRecord = (
     LastName: action.contact.lastName || opts.defaultLastName,
     Email: action.contact.email,
     Phone: action.contact.phone,
-    MailingCountryCode: action.contact.country,
+    // ZZ = unknown in Proca is rejected by Salesforce picklist
+    MailingCountryCode:
+      action.contact.country !== "ZZ" ? action.contact.country : undefined,
     MailingPostalCode: action.contact.postcode,
   };
 
@@ -71,8 +76,8 @@ export const actionToLeadRecord = (
     LastName: action.contact.lastName || opts.defaultLastName,
     Email: action.contact.email,
     Phone: action.contact.phone,
-    //Country: countryName(action.contact.country),
-    CountryCode: action.contact.country,
+    CountryCode:
+      action.contact.country !== "ZZ" ? action.contact.country : undefined, // ZZ = unknown in Proca, rejected by Salesforce picklist
     PostalCode: action.contact.postcode,
     Company: "[not provided]",
     LeadSource: action.campaign.title,
@@ -99,7 +104,8 @@ export const determineOptIn = (
   }
   // consents
   // explicit DOI = must be subscribe
-  if (privacy.emailStatus === "double_opt_in") { //deadling with doi
+  if (privacy.emailStatus === "double_opt_in") {
+    //deadling with doi
     optIn = true;
     // bouncing - cleaned / banned
   } else if (privacy.emailStatus !== null) {
@@ -107,7 +113,8 @@ export const determineOptIn = (
     if (privacy.emailStatusChanged)
       r.EmailBouncedDate = privacy.emailStatusChanged;
   }
-  if (privacy.optIn && !opts.doubleOptIn) {//regular optin
+  if (privacy.optIn && !opts.doubleOptIn) {
+    //regular optin
     optIn = true;
   }
 

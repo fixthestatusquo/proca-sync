@@ -115,15 +115,18 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     if (process.env.SENTRY_URL) {
         Sentry.init({ dsn: process.env.SENTRY_URL });
     }
+    let step = "configuration";
     try {
         const config = (0, config_1.configFromOptions)(conf, opt);
         if (opt.dump) {
             console.warn("saving into data folder instead of using " + process.env.CRM);
             process.env.CRM = "file";
         }
+        step = `CRM (${process.env.CRM}) init`;
         const crm = yield (0, crm_1.init)(config);
-        console.log("listening for messages");
+        step = `queue connection (${config.queue})`;
         const queue = yield (0, listener_1.listen)(config, crm);
+        console.log("listening for messages");
         process.on("SIGINT", () => __awaiter(void 0, void 0, void 0, function* () {
             console.log("Caught interrupt signal");
             yield queue.close();
@@ -134,9 +137,11 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         }));
     }
     catch (er) {
-        console.error(`Problem: ${er}`);
+        console.error(`${step} failed: ${er}`);
         Sentry.captureException(er);
-        (0, config_1.help)();
+        if (step === "configuration")
+            (0, config_1.help)();
+        process.exit(1);
     }
 });
 exports.main = main;
