@@ -21,7 +21,7 @@ if (!tokenUrl || !ID || !apiUrl || !secret) {
     process.exit(1);
 }
 const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
-    const authHeader = "Basic " + Buffer.from(`${ID}:${secret}`).toString("base64");
+    const authHeader = `Basic ${Buffer.from(`${ID}:${secret}`).toString("base64")}`;
     try {
         const response = yield fetch(tokenUrl, {
             method: "POST",
@@ -47,7 +47,7 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
 exports.getToken = getToken;
 const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + `/v3/receivers.json/${email}`, {
+        const response = yield fetch(`${apiUrl}/v3/receivers.json/${email}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -73,7 +73,7 @@ const getContact = (email, token) => __awaiter(void 0, void 0, void 0, function*
 exports.getContact = getContact;
 const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + "/v3/groups/" + listId + "/receivers", {
+        const response = yield fetch(`${apiUrl}/v3/groups/${listId}/receivers`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -93,7 +93,7 @@ const getGroups = (token, listId) => __awaiter(void 0, void 0, void 0, function*
 exports.getGroups = getGroups;
 const upsertContact = (token, postData, listId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + "/v3/groups/" + listId + "/receivers/upsert", {
+        const response = yield fetch(`${apiUrl}/v3/groups/${listId}/receivers/upsert`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

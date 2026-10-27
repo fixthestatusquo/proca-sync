@@ -18,7 +18,7 @@ const authHeaders = {
 
 export const getToken = async () => {
   try {
-    const response = await fetch(apiUrl + "authenticate", {
+    const response = await fetch(`${apiUrl}authenticate`, {
       method: "POST",
       headers: authHeaders,
       body: apiToken,
@@ -34,7 +34,7 @@ export const getToken = async () => {
     const data = await response.json();
     return {
       token: data["ens-auth-token"],
-      expires_in: data["expires_in"] || 3600, // Default to 1 hour if not provided
+      expires_in: data.expires_in || 3600, // Default to 1 hour if not provided
     };
   } catch (error) {
     console.error("Error:", error.message);
@@ -43,7 +43,7 @@ export const getToken = async () => {
 
 export const upsertSupporter = async (data, token: string) => {
   try {
-    const response = await fetch(apiUrl + "supporter", {
+    const response = await fetch(`${apiUrl}supporter`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -86,7 +86,7 @@ export const upsertSupporter = async (data, token: string) => {
 export const getSupporter = async (email, token: string) => {
   try {
     const response = await fetch(
-      apiUrl + "supporter?" + "email=" + "brucewayne@example.com",
+      `${apiUrl}supporter?email=brucewayne@example.com`,
       {
         method: "GET",
         headers: {
@@ -151,12 +151,15 @@ class CleverreachCRM extends CRM {
     }
 
     const {
-      ["Last Name"]: lastName,
+      "Last Name": lastName,
       City,
       Postcode,
       Phone,
     } = await getSupporter(message.contact.email, token);
 
+    const questions: Record<string, string> = {
+      "Accepts Email": "Y",
+    };
     const data = {
       "Email Address": message.contact.email,
       "First Name": message.contact.firstName,
@@ -164,17 +167,15 @@ class CleverreachCRM extends CRM {
       City: message.action.customFields?.locality || City || "",
       Postcode: message.contact?.postcode || Postcode || "",
       Phone: message.contact?.phone || Phone || "",
-      questions: {
-        "Accepts Email": "Y",
-      },
+      questions,
     };
 
     if (message.campaign.name === "naturevoter") {
-      data["questions"]["NatureVoter"] = "Y";
+      data.questions.NatureVoter = "Y";
     }
 
     if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
-      data["questions"]["French"] = "Y";
+      data.questions.French = "Y";
     }
 
     const response = await upsertSupporter(data, token);

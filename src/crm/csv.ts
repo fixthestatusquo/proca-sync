@@ -1,5 +1,5 @@
+import fs from "node:fs";
 import { stringify } from "csv-stringify/sync";
-import fs from "fs";
 import {
   type ActionMessage,
   CRM,
@@ -7,7 +7,6 @@ import {
   type handleResult,
   type Params,
   type ProcaCampaign,
-  ProcessStatus,
 } from "../crm";
 import { fetchCampaign as procaCampaign } from "../proca";
 import { string2map } from "../utils";
@@ -30,7 +29,7 @@ class CsvCRM extends CRM {
     this.csvPath =
       process.env.CSV_PATH ||
       options.csvPath ||
-      "./data/" + process.env.PROCA_QUEUE + ".csv";
+      `./data/${process.env.PROCA_QUEUE}.csv`;
     console.log("writing to", this.csvPath);
   }
 

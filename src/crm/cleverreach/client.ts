@@ -13,8 +13,7 @@ if (!tokenUrl || !ID || !apiUrl || !secret) {
 }
 
 export const getToken = async () => {
-  const authHeader =
-    "Basic " + Buffer.from(`${ID}:${secret}`).toString("base64");
+  const authHeader = `Basic ${Buffer.from(`${ID}:${secret}`).toString("base64")}`;
 
   try {
     const response = await fetch(tokenUrl, {
@@ -47,7 +46,7 @@ export const getContact = async (
   token: string,
 ): Promise<any> => {
   try {
-    const response = await fetch(apiUrl + `/v3/receivers.json/${email}`, {
+    const response = await fetch(`${apiUrl}/v3/receivers.json/${email}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -76,16 +75,13 @@ export const getContact = async (
 
 export const getGroups = async (token: string, listId: number) => {
   try {
-    const response = await fetch(
-      apiUrl + "/v3/groups/" + listId + "/receivers",
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+    const response = await fetch(`${apiUrl}/v3/groups/${listId}/receivers`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    );
+    });
 
     if (!response.ok) {
       throw new Error(`Get groups failed: ${response.statusText}`);
@@ -105,7 +101,7 @@ export const upsertContact = async (
 ) => {
   try {
     const response = await fetch(
-      apiUrl + "/v3/groups/" + listId + "/receivers/upsert",
+      `${apiUrl}/v3/groups/${listId}/receivers/upsert`,
       {
         method: "POST",
         headers: {

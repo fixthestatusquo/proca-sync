@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findMember = exports.memberHash = exports.upsertList = exports.allCampaigns = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
+const node_crypto_1 = __importDefault(require("node:crypto"));
 const mailchimp_marketing_1 = __importDefault(require("@mailchimp/mailchimp_marketing"));
-const crypto_1 = __importDefault(require("crypto"));
 const makeClient = () => {
     if (process.env.AUTH_TOKEN) {
         const [tok, srv] = process.env.AUTH_TOKEN.split("-");
@@ -46,10 +46,9 @@ const allCampaigns = (client, list, category) => __awaiter(void 0, void 0, void 
         const r = yield client.lists.getListInterestCategories(list);
         const categories = r.categories || [];
         console.log(categories);
-        categories &&
-            categories.forEach((d) => {
-                console.log(d.id, d.title);
-            });
+        categories === null || categories === void 0 ? void 0 : categories.forEach((d) => {
+            console.log(d.id, d.title);
+        });
         return { interests: [] };
     }
     const response = yield client.lists.listInterestCategoryInterests(list, category);
@@ -93,7 +92,7 @@ const upsertList = (client, name, templateName) => __awaiter(void 0, void 0, voi
 });
 exports.upsertList = upsertList;
 const memberHash = (email) => {
-    const hash = crypto_1.default.createHash("md5").update(email).digest("hex");
+    const hash = node_crypto_1.default.createHash("md5").update(email).digest("hex");
     return hash;
 };
 exports.memberHash = memberHash;

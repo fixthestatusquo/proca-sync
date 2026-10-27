@@ -63,9 +63,9 @@ class CiviCRM extends crm_1.CRM {
             if (this.verbose) {
                 console.log("processing...", message);
             }
-            let source = "proca " + message.action.actionType + " @" + message.actionPage.name;
+            let source = `proca ${message.action.actionType} @${message.actionPage.name}`;
             if (message.action.testing)
-                source = "testing " + source;
+                source = `testing ${source}`;
             //    customFields: { comment: 'This is a comment', emailProvider: 'gmail.com' },
             const action = message.action;
             action.id = message.actionId;
@@ -126,8 +126,8 @@ class CiviCRM extends crm_1.CRM {
                                     ? action.customFields.subject
                                     : contact.dupeRank === 0
                                         ? source
-                                        : source + " #" + contact.dupeRank,
-                                location: "action_" + action.id,
+                                        : `${source} #${contact.dupeRank}`,
+                                location: `action_${action.id}`,
                                 activity_date_time: action.createdAt,
                                 //              location: action.,
                                 campaign_id: campaign_id,
@@ -173,7 +173,7 @@ class CiviCRM extends crm_1.CRM {
             // we do not overwrite existing contact data, we do not set the source
             delete params.values.source;
             delete params.chain.email;
-            params.values["is_opt_out"] = false;
+            params.values.is_opt_out = false;
             ["first_name", "last_name"].forEach((d) => {
                 if (crmContact[d]) {
                     delete params.values[d];
@@ -181,7 +181,7 @@ class CiviCRM extends crm_1.CRM {
             });
             if (crmContact["address.id"]) {
                 ["street_address", "country_id", "city", "postal_code"].forEach((d) => {
-                    if (crmContact["address." + d])
+                    if (crmContact[`address.${d}`])
                         delete params.chain.address[2].values[d];
                 });
                 params.chain.address[1] = "update";
@@ -195,7 +195,7 @@ class CiviCRM extends crm_1.CRM {
                 params.chain.group[1] = "update";
                 params.chain.group[2].where = [
                     ["group_id", "=", this.group],
-                    ["contact_id", "=", crmContact["id"]],
+                    ["contact_id", "=", crmContact.id],
                 ];
                 params.chain.group[2].values = { status: "Added" };
             }
@@ -266,12 +266,8 @@ class CiviCRM extends crm_1.CRM {
                         "LEFT",
                         "ActivityContact",
                         ["activity.campaign_id", "=", context.campaign_id],
-                        [
-                            "activity.activity_date_time",
-                            "=",
-                            '"' + context.action.createdAt + '"',
-                        ],
-                        ["activity.location", "=", '"action_' + context.action.id + '"'],
+                        ["activity.activity_date_time", "=", `"${context.action.createdAt}"`],
+                        ["activity.location", "=", `"action_${context.action.id}"`],
                     ],
                 ],
                 where: [["email.email", "=", email]],
@@ -314,7 +310,7 @@ class CiviCRM extends crm_1.CRM {
             }, 0);
             console.log(r);
             if (!r.values.id) {
-                throw new Error("can't get or create campaign " + campaign.name);
+                throw new Error(`can't get or create campaign ${campaign.name}`);
             }
             return r.values;
         });

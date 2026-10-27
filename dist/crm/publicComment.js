@@ -62,12 +62,11 @@ class PublicCommentCRM extends crm_1.CRM {
             if (message.contact.firstName) {
                 data.name = message.contact.firstName.trim();
                 if (message.contact.lastName) {
-                    data.name +=
-                        " " + message.contact.lastName.charAt(0).toUpperCase().trim();
+                    data.name += ` ${message.contact.lastName.charAt(0).toUpperCase().trim()}`;
                 }
                 if (message.action.customFields.locality) {
                     data.locality = message.action.customFields.locality.toString();
-                    data.name = data.name + ", " + data.locality;
+                    data.name = `${data.name}, ${data.locality}`;
                 }
             }
             console.log(data);

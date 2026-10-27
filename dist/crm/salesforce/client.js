@@ -26,10 +26,10 @@ const campaignByName = (conn, name, opt) => __awaiter(void 0, void 0, void 0, fu
     const r = yield conn.sobject("Campaign").find({ name: name });
     // fail hard on missing campaign
     if (r.length === 0) {
-        console.log("will try to create " + name);
+        console.log(`will try to create ${name}`);
         const cattr = { name: name, Type: "Proca" };
         if (campaignTypeId)
-            cattr["RecordTypeId"] = campaignTypeId;
+            cattr.RecordTypeId = campaignTypeId;
         const n = yield conn.sobject("Campaign").create(cattr); //  'Proca online campaign'
         if (!n.success)
             throw Error(`Cannot create campaign ${name}: ${n.errors}`);

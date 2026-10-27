@@ -19,7 +19,6 @@ class BrevoCRM extends CRM {
       case "DOUBLE_OPTIN":
         this.crmType = CRMType.DoubleOptIn;
         break;
-      case "OPTIN":
       default:
         this.crmType = CRMType.OptIn;
     }
@@ -40,7 +39,7 @@ class BrevoCRM extends CRM {
     let camp: any;
     try {
       camp = await this.campaign(message.campaign);
-    } catch (error) {
+    } catch (_error) {
       console.log("failed fetching the campaign", message.campaign);
       return { processed: false };
     }
@@ -94,7 +93,7 @@ class BrevoCRM extends CRM {
           e.body.message === "Invalid LANDLINE_NUMBER number"
         ) {
           try {
-            payload.attributes["LANDLINE_NUMBER"] = undefined;
+            payload.attributes.LANDLINE_NUMBER = undefined;
             await this.brevo.contacts.createContact(payload);
             console.error("Invalid phone number");
             return { processed: true };
@@ -115,7 +114,7 @@ class BrevoCRM extends CRM {
   campaign = async (campaign: ProcaCampaign): Promise<Record<string, any>> => {
     let name: string = campaign.name;
     if (campaign.externalId) {
-      name = "proca.externalId:" + campaign.externalId;
+      name = `proca.externalId:${campaign.externalId}`;
     }
     if (!this.campaigns[name]) {
       this.campaigns[name] = await this.fetchCampaign(campaign);
@@ -131,14 +130,16 @@ class BrevoCRM extends CRM {
       });
       if (!folders.folders) return;
 
-      let procaFolder = folders.folders.find((d: any) => d.name === "proca");
+      let procaFolder: any = folders.folders.find(
+        (d: any) => d.name === "proca",
+      );
       if (!procaFolder) {
         procaFolder = (await this.brevo.contacts.createFolder({
           name: "proca",
         })) as any;
       }
 
-      this.folderId = procaFolder!.id;
+      this.folderId = procaFolder.id;
 
       const lists = await this.brevo.contacts.getLists({
         limit: 50,

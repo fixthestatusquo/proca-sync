@@ -38,10 +38,10 @@ export const campaignByName = async (
 
   // fail hard on missing campaign
   if (r.length === 0) {
-    console.log("will try to create " + name);
+    console.log(`will try to create ${name}`);
     const cattr: Record<string, string> = { name: name, Type: "Proca" };
 
-    if (campaignTypeId) cattr["RecordTypeId"] = campaignTypeId;
+    if (campaignTypeId) cattr.RecordTypeId = campaignTypeId;
     const n = await conn.sobject("Campaign").create(cattr); //  'Proca online campaign'
     if (!n.success) throw Error(`Cannot create campaign ${name}: ${n.errors}`);
     campaign = await conn.sobject("Campaign").retrieve(n.id);

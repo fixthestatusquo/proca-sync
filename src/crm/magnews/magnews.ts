@@ -1,4 +1,4 @@
-import { AddMemberResponse, type Config, type Contact } from "./interfaces";
+import type { Config, Contact } from "./interfaces";
 
 class magnews {
   protected bearerToken: string = "";
@@ -16,7 +16,7 @@ class magnews {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       },
       method: "POST",
       body: JSON.stringify(member),

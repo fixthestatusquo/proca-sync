@@ -71,7 +71,7 @@ class Mailjet extends CRM {
 
   addContactToList = async (email: string): Promise<boolean> => {
     try {
-      const response = await this.mailjet
+      const _response = await this.mailjet
         .post("listrecipient", { version: "v3" })
         .request({
           IsUnsubscribed: "false",
@@ -126,11 +126,9 @@ class Mailjet extends CRM {
 
     try {
       // create contact
-      const {
-        response: { status },
-      } = await this.mailjet.post("contact", { version: "v3" }).request({
+      await this.mailjet.post("contact", { version: "v3" }).request({
         Name: message.contact.lastName
-          ? message.contact.firstName + " " + message.contact.lastName
+          ? `${message.contact.firstName} ${message.contact.lastName}`
           : message.contact.firstName,
         Email: message.contact.email,
       });
@@ -160,11 +158,11 @@ class Mailjet extends CRM {
         .id(message.contact.email)
         .request({
           Name: message.contact.lastName
-            ? message.contact.firstName + " " + message.contact.lastName
+            ? `${message.contact.firstName} ${message.contact.lastName}`
             : message.contact.firstName,
         });
 
-      return status === 200 ? true : false;
+      return status === 200;
     } catch (error: any) {
       // mailjet returns error 304 when there is nothing to change
       if (error.statusCode === 304) {

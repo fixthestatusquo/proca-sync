@@ -13,9 +13,6 @@ import {
   //  addContactToList,
   findMember,
   makeClient,
-  ping,
-  senders,
-  upsertList,
 } from "./mailchimp/client";
 import {
   type Contact,
@@ -84,10 +81,9 @@ class MailchimpCRM extends CRM {
       console.log("fetching exisiting lists");
       const r = await allLists(this.client);
       const lists = r.lists || [];
-      lists &&
-        lists.forEach((d: any) => {
-          console.log(d.id, d.name);
-        });
+      lists?.forEach((d: any) => {
+        console.log(d.id, d.name);
+      });
       return false;
     }
     const r = await allCampaigns(this.client, this.list, this.group);
@@ -164,7 +160,7 @@ class MailchimpCRM extends CRM {
         delete response._links;
         console.log(response);
       }
-      this.log("adding " + member.email_address, ProcessStatus.processed);
+      this.log(`adding ${member.email_address}`, ProcessStatus.processed);
       return true;
     } catch (e: any) {
       const b = e?.response?.body || e;

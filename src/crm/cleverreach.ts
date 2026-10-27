@@ -35,15 +35,17 @@ class CleverreachCRM extends CRM {
   };
 
   fetchCampaign = async (campaign: ProcaCampaign): Promise<any> => {
-    const r = await procaCampaign(campaign.id!);
-    this.campaignCache.set(campaign.id!, r);
+    const id = campaign.id;
+    if (!id) throw new Error("campaign has no id, cannot fetch");
+    const r = await procaCampaign(id);
+    this.campaignCache.set(id, r);
     return r;
   };
 
   initializeToken = async () => {
     try {
       this.token = await getToken();
-    } catch (error) {
+    } catch (_error) {
       throw new Error("Failed to retrieve token");
     }
   };
@@ -52,7 +54,9 @@ class CleverreachCRM extends CRM {
     if (this.verbose) {
       console.log(message);
     }
-    let camp = this.campaignCache.get(message.campaign.id!);
+    let camp = message.campaign.id
+      ? this.campaignCache.get(message.campaign.id)
+      : undefined;
     if (!camp) {
       camp = await this.fetchCampaign(message.campaign);
     }
@@ -118,11 +122,11 @@ class CleverreachCRM extends CRM {
     return this.handleMessage(normalized as any);
   };
 
-  fetchContact = async (email: string, context?: any): Promise<any> => {
+  fetchContact = async (_email: string, _context?: any): Promise<any> => {
     return true;
   };
 
-  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+  setSubscribed = async (_id: any, _subscribed: boolean): Promise<boolean> => {
     return true;
   };
 }

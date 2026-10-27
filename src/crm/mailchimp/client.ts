@@ -1,6 +1,5 @@
+import crypto from "node:crypto";
 import mailchimp from "@mailchimp/mailchimp_marketing";
-import crypto from "crypto";
-import { Contact, ContactSubscription } from "./contact";
 
 export const makeClient = () => {
   if (process.env.AUTH_TOKEN) {
@@ -39,10 +38,9 @@ export const allCampaigns = async (
     const r = await client.lists.getListInterestCategories(list);
     const categories = r.categories || [];
     console.log(categories);
-    categories &&
-      categories.forEach((d: any) => {
-        console.log(d.id, d.title);
-      });
+    categories?.forEach((d: any) => {
+      console.log(d.id, d.title);
+    });
     return { interests: [] };
   }
   const response = await client.lists.listInterestCategoryInterests(

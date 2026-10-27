@@ -29,15 +29,18 @@ class CleverreachCRM extends crm_1.CRM {
             return true;
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
-            this.campaignCache.set(campaign.id, r);
+            const id = campaign.id;
+            if (!id)
+                throw new Error("campaign has no id, cannot fetch");
+            const r = yield (0, proca_1.fetchCampaign)(id);
+            this.campaignCache.set(id, r);
             return r;
         });
         this.initializeToken = () => __awaiter(this, void 0, void 0, function* () {
             try {
                 this.token = yield (0, client_1.getToken)();
             }
-            catch (error) {
+            catch (_error) {
                 throw new Error("Failed to retrieve token");
             }
         });
@@ -46,7 +49,9 @@ class CleverreachCRM extends crm_1.CRM {
             if (this.verbose) {
                 console.log(message);
             }
-            let camp = this.campaignCache.get(message.campaign.id);
+            let camp = message.campaign.id
+                ? this.campaignCache.get(message.campaign.id)
+                : undefined;
             if (!camp) {
                 camp = yield this.fetchCampaign(message.campaign);
             }
@@ -86,10 +91,10 @@ class CleverreachCRM extends crm_1.CRM {
             const normalized = Object.assign(Object.assign({}, message), { contact: message.supporter.contact, privacy: message.supporter.privacy, actionId: (_b = message.action) === null || _b === void 0 ? void 0 : _b.id });
             return this.handleMessage(normalized);
         });
-        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
+        this.fetchContact = (_email, _context) => __awaiter(this, void 0, void 0, function* () {
             return true;
         });
-        this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
+        this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
             return true;
         });
         this.crmType = crm_1.CRMType.DoubleOptIn;

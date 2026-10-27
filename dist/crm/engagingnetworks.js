@@ -25,7 +25,7 @@ const authHeaders = {
 };
 const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + "authenticate", {
+        const response = yield fetch(`${apiUrl}authenticate`, {
             method: "POST",
             headers: authHeaders,
             body: apiToken,
@@ -37,7 +37,7 @@ const getToken = () => __awaiter(void 0, void 0, void 0, function* () {
         const data = yield response.json();
         return {
             token: data["ens-auth-token"],
-            expires_in: data["expires_in"] || 3600, // Default to 1 hour if not provided
+            expires_in: data.expires_in || 3600, // Default to 1 hour if not provided
         };
     }
     catch (error) {
@@ -48,7 +48,7 @@ exports.getToken = getToken;
 const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const response = yield fetch(apiUrl + "supporter", {
+        const response = yield fetch(`${apiUrl}supporter`, {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -85,7 +85,7 @@ const upsertSupporter = (data, token) => __awaiter(void 0, void 0, void 0, funct
 exports.upsertSupporter = upsertSupporter;
 const getSupporter = (email, token) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield fetch(apiUrl + "supporter?" + "email=" + "brucewayne@example.com", {
+        const response = yield fetch(`${apiUrl}supporter?email=brucewayne@example.com`, {
             method: "GET",
             headers: {
                 Accept: "application/json",
@@ -121,7 +121,10 @@ class CleverreachCRM extends crm_1.CRM {
             if (!token) {
                 throw new Error("Auth token is missing");
             }
-            const { ["Last Name"]: lastName, City, Postcode, Phone, } = yield (0, exports.getSupporter)(message.contact.email, token);
+            const { "Last Name": lastName, City, Postcode, Phone, } = yield (0, exports.getSupporter)(message.contact.email, token);
+            const questions = {
+                "Accepts Email": "Y",
+            };
             const data = {
                 "Email Address": message.contact.email,
                 "First Name": message.contact.firstName,
@@ -129,15 +132,13 @@ class CleverreachCRM extends crm_1.CRM {
                 City: ((_b = message.action.customFields) === null || _b === void 0 ? void 0 : _b.locality) || City || "",
                 Postcode: ((_c = message.contact) === null || _c === void 0 ? void 0 : _c.postcode) || Postcode || "",
                 Phone: ((_d = message.contact) === null || _d === void 0 ? void 0 : _d.phone) || Phone || "",
-                questions: {
-                    "Accepts Email": "Y",
-                },
+                questions,
             };
             if (message.campaign.name === "naturevoter") {
-                data["questions"]["NatureVoter"] = "Y";
+                data.questions.NatureVoter = "Y";
             }
             if (message.actionPage.locale.toLowerCase().startsWith("fr")) {
-                data["questions"]["French"] = "Y";
+                data.questions.French = "Y";
             }
             const response = yield (0, exports.upsertSupporter)(data, token);
             if (response.status === 200) {

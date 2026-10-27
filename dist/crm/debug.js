@@ -19,7 +19,7 @@ class DebugCRM extends crm_1.CRM {
         super(...arguments);
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a;
-            const camp = yield this.campaign(message.campaign);
+            const _camp = yield this.campaign(message.campaign);
             console.log("message", message.actionId, (_a = message.campaign) === null || _a === void 0 ? void 0 : _a.title);
             return false;
         });

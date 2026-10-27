@@ -12,8 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const node_fs_1 = __importDefault(require("node:fs"));
 const sync_1 = require("csv-stringify/sync");
-const fs_1 = __importDefault(require("fs"));
 const crm_1 = require("../crm");
 const proca_1 = require("../proca");
 const utils_1 = require("../utils");
@@ -23,7 +23,7 @@ class CsvCRM extends crm_1.CRM {
         this.stream = null;
         this.mergeFields = {};
         this.init = () => __awaiter(this, void 0, void 0, function* () {
-            if (!fs_1.default.existsSync(this.csvPath)) {
+            if (!node_fs_1.default.existsSync(this.csvPath)) {
                 const columns = Object.keys(this.simplify({
                     contact: {},
                     action: {},
@@ -40,9 +40,9 @@ class CsvCRM extends crm_1.CRM {
                     header: true,
                     columns,
                 });
-                fs_1.default.writeFileSync(this.csvPath, header);
+                node_fs_1.default.writeFileSync(this.csvPath, header);
             }
-            this.stream = fs_1.default.createWriteStream(this.csvPath, { flags: "a" });
+            this.stream = node_fs_1.default.createWriteStream(this.csvPath, { flags: "a" });
             return true;
         });
         this.simplify = (message) => {
@@ -138,7 +138,7 @@ class CsvCRM extends crm_1.CRM {
         this.csvPath =
             process.env.CSV_PATH ||
                 options.csvPath ||
-                "./data/" + process.env.PROCA_QUEUE + ".csv";
+                `./data/${process.env.PROCA_QUEUE}.csv`;
         console.log("writing to", this.csvPath);
     }
 }

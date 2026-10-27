@@ -30,7 +30,7 @@ class Mailjet extends crm_1.CRM {
         });
         this.addContactToList = (email) => __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield this.mailjet
+                const _response = yield this.mailjet
                     .post("listrecipient", { version: "v3" })
                     .request({
                     IsUnsubscribed: "false",
@@ -70,9 +70,9 @@ class Mailjet extends crm_1.CRM {
             }
             try {
                 // create contact
-                const { response: { status }, } = yield this.mailjet.post("contact", { version: "v3" }).request({
+                yield this.mailjet.post("contact", { version: "v3" }).request({
                     Name: message.contact.lastName
-                        ? message.contact.firstName + " " + message.contact.lastName
+                        ? `${message.contact.firstName} ${message.contact.lastName}`
                         : message.contact.firstName,
                     Email: message.contact.email,
                 });
@@ -100,10 +100,10 @@ class Mailjet extends crm_1.CRM {
                     .id(message.contact.email)
                     .request({
                     Name: message.contact.lastName
-                        ? message.contact.firstName + " " + message.contact.lastName
+                        ? `${message.contact.firstName} ${message.contact.lastName}`
                         : message.contact.firstName,
                 });
-                return status === 200 ? true : false;
+                return status === 200;
             }
             catch (error) {
                 // mailjet returns error 304 when there is nothing to change

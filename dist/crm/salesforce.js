@@ -17,7 +17,7 @@ class SalesforceCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
-            const { userInfo, conn } = yield (0, client_1.makeClient)(this.config);
+            const { conn } = yield (0, client_1.makeClient)(this.config);
             this.crmAPI = conn;
             return true;
         });
@@ -44,9 +44,9 @@ class SalesforceCRM extends crm_1.CRM {
                     if (!LeadId)
                         throw Error(`Could not upsert lead`);
                     try {
-                        const r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
+                        const _r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
                     }
-                    catch (e) {
+                    catch (_e) {
                         return true;
                     }
                     //        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
@@ -61,7 +61,7 @@ class SalesforceCRM extends crm_1.CRM {
                     const ContactId = yield (0, client_1.upsertContact)(this.crmAPI, record);
                     if (!ContactId)
                         throw Error(`Could not upsert contact`);
-                    const r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { ContactId }, message);
+                    const _r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { ContactId }, message);
                     //        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
                 }
                 return true;

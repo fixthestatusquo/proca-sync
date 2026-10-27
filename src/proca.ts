@@ -31,7 +31,7 @@ export async function graphQL(
   };
   if (options.authorization) {
     //    var auth = 'Basic ' + Buffer.from(options.authorization.username + ':' + options.authorization.username.password).toString('base64');
-    headers.Authorization = "Basic " + options.authorization;
+    headers.Authorization = `Basic ${options.authorization}`;
   }
   // console.debug("graphql: ", query, options.variables)
   try {
@@ -48,7 +48,7 @@ export async function graphQL(
     });
     if (!res.ok) {
       return <ProcaResponse>{
-        errors: [{ message: "network error #" + res.status }],
+        errors: [{ message: `network error #${res.status}` }],
       };
     }
     const response = (await res.json()) as any;
@@ -58,7 +58,7 @@ export async function graphQL(
 
       response.errors.fields = [];
       response.errors.forEach((error) => {
-        const field = error.path && error.path.slice(-1)[0];
+        const field = error.path?.slice(-1)[0];
         if (!field) return;
         let msg = error.message.split(":");
         if (msg.length === 2) {
@@ -99,7 +99,7 @@ export const fetchWidget = async (id) => {
   return data?.actionPage;
 };
 export const fetchCampaign = async (id) => {
-  const variables = {};
+  const _variables = {};
   const query = `query campaign ($id: Int! ) {
   campaign (id:$id) {
     id, name, title, config, externalId

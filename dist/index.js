@@ -47,8 +47,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
+const node_fs_1 = require("node:fs");
 const Sentry = __importStar(require("@sentry/node"));
-const fs_1 = require("fs");
 const minimist_1 = __importDefault(require("minimist"));
 const config_1 = require("./config");
 const crm_1 = require("./crm");
@@ -91,9 +91,9 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         opt.env = opt._.shift();
     }
     if (opt.env) {
-        if (!(0, fs_1.existsSync)(opt.env)) {
-            const env = ".env." + opt.env;
-            if ((0, fs_1.existsSync)(env)) {
+        if (!(0, node_fs_1.existsSync)(opt.env)) {
+            const env = `.env.${opt.env}`;
+            if ((0, node_fs_1.existsSync)(env)) {
                 process.env.PROCA_ENV = opt.env;
                 opt.env = env;
             }
@@ -118,7 +118,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const config = (0, config_1.configFromOptions)(conf, opt);
         if (opt.dump) {
-            console.warn("saving into data folder instead of using " + process.env.CRM);
+            console.warn(`saving into data folder instead of using ${process.env.CRM}`);
             process.env.CRM = "file";
         }
         step = `CRM (${process.env.CRM}) init`;

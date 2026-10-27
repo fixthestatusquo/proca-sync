@@ -36,7 +36,7 @@ class TrustCRM extends crm_1.CRM {
             };
             const data = yield (0, client_1.postAction)(actionPayload);
             if ((_d = data.petition_signature) === null || _d === void 0 ? void 0 : _d.verification_token) {
-                const verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
+                const _verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
                 console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", actionPayload.petition_signature.move_code || "no moveCode");
                 return true;
             }

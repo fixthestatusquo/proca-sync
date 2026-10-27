@@ -1,9 +1,6 @@
-import { writeFileSync } from "fs";
-import _ from "lodash";
 import {
   type ActionMessage,
   CRM,
-  CRMType,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
@@ -17,7 +14,7 @@ class DebugCRM extends CRM {
   handleActionContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    const camp = await this.campaign(message.campaign);
+    const _camp = await this.campaign(message.campaign);
     console.log("message", message.actionId, message.campaign?.title);
     return false;
   };

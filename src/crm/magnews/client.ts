@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import type { Contact } from "./interfaces";
 import magnews from "./magnews";
 

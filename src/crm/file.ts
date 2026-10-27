@@ -1,9 +1,7 @@
-import { writeFileSync } from "fs";
-import _ from "lodash";
+import { writeFileSync } from "node:fs";
 import {
   type ActionMessage,
   CRM,
-  CRMType,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
@@ -14,12 +12,11 @@ import {
  */
 
 // TODO export from proca/queue
-type ContactID = string | number | undefined;
 
 const writeJson = (data: object, name: string, folder?: string) => {
   let path = "./data/";
-  if (folder) path = path + folder + "/";
-  writeFileSync(path + name + ".json", JSON.stringify(data, null, 2));
+  if (folder) path = `${path + folder}/`;
+  writeFileSync(`${path + name}.json`, JSON.stringify(data, null, 2));
 };
 
 class FileCRM extends CRM {
@@ -50,8 +47,8 @@ setBounced = async (id : number, bounced:boolean) => {
   handleActionContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    const camp = await this.campaign(message.campaign);
-    writeJson(message, message.action.actionType + "_" + message.actionId);
+    await this.campaign(message.campaign);
+    writeJson(message, `${message.action.actionType}_${message.actionId}`);
     return { processed: true };
   };
 

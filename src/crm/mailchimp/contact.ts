@@ -11,7 +11,7 @@ export const isActionSyncable = (
 
 export const listName = (action: ActionMessageV2, listPerLang = false) => {
   let c = action.campaign.name;
-  if (listPerLang) c = c + ` ${action.actionPage.locale}`;
+  if (listPerLang) c = `${c} ${action.actionPage.locale}`;
   if (action.privacy.optIn) {
     return `${c} (opt-in)`;
   } else {

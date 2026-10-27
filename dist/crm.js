@@ -85,8 +85,6 @@ class CRM {
                 wrapper: this.colorStatus(status),
                 newline: newline,
             });
-            if (status)
-                this.lastStatus = status;
         };
         this.error = (text) => this.log(text, ProcessStatus.error);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
@@ -106,16 +104,16 @@ class CRM {
         this.fetchWidget = (widget) => __awaiter(this, void 0, void 0, function* () {
             return Promise.resolve(widget);
         });
-        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
+        this.fetchContact = (_email, _context) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement fetchContact in your CRM");
         });
-        this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
+        this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement setSubscribed in your CRM");
         });
-        this.setBounce = (id, bounced) => __awaiter(this, void 0, void 0, function* () {
+        this.setBounce = (_id, _bounced) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement setBounce in your CRM");
         });
-        this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
+        this.handleContact = (_message) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement handleContact in your CRM");
         });
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
@@ -138,10 +136,10 @@ class CRM {
                     if (message.privacy.withConsent) {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added " + email + " " + message.action.createdAt, ProcessStatus.processed);
+                            this.log(`added ${email} ${message.action.createdAt}`, ProcessStatus.processed);
                         }
                         else {
-                            this.log("failed " + email + " " + message.action.createdAt, ProcessStatus.error);
+                            this.log(`failed ${email} ${message.action.createdAt}`, ProcessStatus.error);
                         }
                         return r;
                     }
@@ -164,15 +162,15 @@ class CRM {
                     if (message.privacy.withConsent && message.privacy.optIn) {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added " + email + " " + message.action.createdAt, ProcessStatus.processed);
+                            this.log(`added ${email} ${message.action.createdAt}`, ProcessStatus.processed);
                         }
                         else {
-                            this.log("failed " + email + " " + message.action.createdAt, ProcessStatus.error);
+                            this.log(`failed ${email} ${message.action.createdAt}`, ProcessStatus.error);
                         }
                         return r;
                     }
                     if (message.privacy.optIn === false || message.privacy.optIn === null) {
-                        this.log("opt-out " + actionId, ProcessStatus.skipped);
+                        this.log(`opt-out ${actionId}`, ProcessStatus.skipped);
                         //          this.verbose && console.log('opt-out',message.actionId);
                         return true; //OptOut contact, we don't need to process
                     }
@@ -188,10 +186,10 @@ class CRM {
                         // double opt-in is optin (eg by email)
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added doi" + email, ProcessStatus.processed);
+                            this.log(`added doi${email}`, ProcessStatus.processed);
                         }
                         else {
-                            this.log("failed doi" + email, ProcessStatus.error);
+                            this.log(`failed doi${email}`, ProcessStatus.error);
                         }
                         return r;
                     }
@@ -210,28 +208,28 @@ class CRM {
                           }
                           return r; */
                     }
-                    this.log("don't know how to process -optin " + email + " " + actionId, ProcessStatus.error);
+                    this.log(`don't know how to process -optin ${email} ${actionId}`, ProcessStatus.error);
                     break;
                 case CRMType.DoubleOptIn: {
                     const emailStatus = message.privacy.emailStatus;
                     if (emailStatus === "double_opt_in") {
                         const r = this.formatResult(yield this.handleContact(message));
                         if (r) {
-                            this.log("added doi " + email + " " + actionId, ProcessStatus.processed);
+                            this.log(`added doi ${email} ${actionId}`, ProcessStatus.processed);
                             return true;
                         }
                         else {
-                            this.log("failed doi " + email + " " + actionId, ProcessStatus.error);
+                            this.log(`failed doi ${email} ${actionId}`, ProcessStatus.error);
                             return false;
                         }
                     }
-                    this.log("skip sending, it is not double opt in " + email + " " + actionId, ProcessStatus.error);
+                    this.log(`skip sending, it is not double opt in ${email} ${actionId}`, ProcessStatus.error);
                     return true;
                 }
                 case CRMType.ActionContact:
                     throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");
                 default:
-                    throw new Error("unexpected crmType " + this.crmType);
+                    throw new Error(`unexpected crmType ${this.crmType}`);
             }
             console.error("need, because ts wants a return boolean", this.crmType);
             return false;
@@ -312,7 +310,6 @@ class CRM {
         this.widgets = {};
         this.crmType = CRMType.ActionContact;
         this.count = opt.count || { ack: 0, nack: 0, queued: 0 };
-        this.lastStatus = ProcessStatus.unknown;
     }
 }
 exports.CRM = CRM;
@@ -321,7 +318,7 @@ const init = (config) => __awaiter(void 0, void 0, void 0, function* () {
         console.error("you need to set CRM= in your .env to match a class in src/crm/{CRM}.ts");
         throw new Error("missing process.env.CRM");
     }
-    const crm = yield Promise.resolve(`${"./crm/" + process.env.CRM}`).then(s => __importStar(require(s)));
+    const crm = yield Promise.resolve(`${`./crm/${process.env.CRM}`}`).then(s => __importStar(require(s)));
     if (crm.default) {
         const instance = new crm.default(config);
         const success = yield instance.init();
@@ -332,7 +329,7 @@ const init = (config) => __awaiter(void 0, void 0, void 0, function* () {
         return instance;
     }
     else {
-        throw new Error(process.env.CRM + " missing export default YourCRM");
+        throw new Error(`${process.env.CRM} missing export default YourCRM`);
     }
 });
 exports.init = init;

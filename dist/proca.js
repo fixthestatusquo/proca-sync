@@ -26,7 +26,7 @@ function graphQL(operation, query, options) {
         };
         if (options.authorization) {
             //    var auth = 'Basic ' + Buffer.from(options.authorization.username + ':' + options.authorization.username.password).toString('base64');
-            headers.Authorization = "Basic " + options.authorization;
+            headers.Authorization = `Basic ${options.authorization}`;
         }
         // console.debug("graphql: ", query, options.variables)
         try {
@@ -43,7 +43,7 @@ function graphQL(operation, query, options) {
             });
             if (!res.ok) {
                 return {
-                    errors: [{ message: "network error #" + res.status }],
+                    errors: [{ message: `network error #${res.status}` }],
                 };
             }
             const response = (yield res.json());
@@ -51,7 +51,8 @@ function graphQL(operation, query, options) {
                 const toCamel = (s) => s.replace(/([_][a-z])/gi, ($1) => $1.toUpperCase().replace("_", ""));
                 response.errors.fields = [];
                 response.errors.forEach((error) => {
-                    const field = error.path && error.path.slice(-1)[0];
+                    var _a;
+                    const field = (_a = error.path) === null || _a === void 0 ? void 0 : _a.slice(-1)[0];
                     if (!field)
                         return;
                     let msg = error.message.split(":");
@@ -97,7 +98,7 @@ const fetchWidget = (id) => __awaiter(void 0, void 0, void 0, function* () {
 exports.fetchWidget = fetchWidget;
 const fetchCampaign = (id) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const variables = {};
+    const _variables = {};
     const query = `query campaign ($id: Int! ) {
   campaign (id:$id) {
     id, name, title, config, externalId

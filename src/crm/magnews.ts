@@ -1,4 +1,3 @@
-import _ from "lodash";
 import {
   type ActionMessage,
   CRM,
@@ -59,7 +58,7 @@ class MagNewsCRM extends CRM {
       SURNAME: action.contact.lastName,
       CELL: action.contact.phone,
       WBST_AUDIENCE: camp.audience,
-      NOME_UTENTE: action.contact.email + "_" + camp.audience,
+      NOME_UTENTE: `${action.contact.email}_${camp.audience}`,
       UTM_SOURCE: action.tracking.source,
       UTM_MEDIUM: action.tracking.medium,
       UTM_CAMPAIGN: action.tracking.campaign,

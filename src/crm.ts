@@ -95,7 +95,7 @@ interface CRMInterface {
   fetchContact?: (email: string, context?: any) => Promise<any>; // fetch the contact, mostly for debug
   setSubscribed: (id: any, subscribed: boolean) => Promise<boolean>;
   setBounce: (id: any, bounced: boolean) => Promise<boolean>;
-  log: (text: string | void, color: ProcessStatus | void) => void;
+  log: (text?: string, color?: ProcessStatus) => void;
   count: Counters;
 }
 
@@ -113,7 +113,6 @@ export abstract class CRM implements CRMInterface {
   public interactive: boolean;
   public pause: boolean;
   public count: Counters;
-  private lastStatus: ProcessStatus;
 
   constructor(opt: Params) {
     this.verbose = opt?.verbose || false;
@@ -123,10 +122,9 @@ export abstract class CRM implements CRMInterface {
     this.widgets = {};
     this.crmType = CRMType.ActionContact;
     this.count = opt.count || { ack: 0, nack: 0, queued: 0 };
-    this.lastStatus = ProcessStatus.unknown;
   }
 
-  colorStatus = (status: ProcessStatus | void): Function => {
+  colorStatus = (status: ProcessStatus | undefined): Function => {
     switch (status) {
       case ProcessStatus.processed:
         return color.green;
@@ -140,7 +138,7 @@ export abstract class CRM implements CRMInterface {
     return (d: string) => d;
   };
 
-  log = (text: string | void, status: ProcessStatus | void) => {
+  log = (text?: string, status?: ProcessStatus) => {
     //  progress: (count: number; suffix: string; color:string);
     const newline =
       status === ProcessStatus.error || !this.interactive || !text;
@@ -148,7 +146,6 @@ export abstract class CRM implements CRMInterface {
       wrapper: this.colorStatus(status),
       newline: newline,
     });
-    if (status) this.lastStatus = status;
   };
 
   error = (text: string) => this.log(text, ProcessStatus.error);
@@ -174,19 +171,19 @@ export abstract class CRM implements CRMInterface {
     return Promise.resolve(widget);
   };
 
-  fetchContact = async (email: string, context?: any): Promise<any> => {
+  fetchContact = async (_email: string, _context?: any): Promise<any> => {
     throw new Error("you need to implement fetchContact in your CRM");
   };
 
-  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+  setSubscribed = async (_id: any, _subscribed: boolean): Promise<boolean> => {
     throw new Error("you need to implement setSubscribed in your CRM");
   };
-  setBounce = async (id: any, bounced: boolean): Promise<boolean> => {
+  setBounce = async (_id: any, _bounced: boolean): Promise<boolean> => {
     throw new Error("you need to implement setBounce in your CRM");
   };
 
   handleContact = async (
-    message: ActionMessageV2,
+    _message: ActionMessageV2,
   ): Promise<handleResult | boolean> => {
     throw new Error("you need to implement handleContact in your CRM");
   };
@@ -221,12 +218,12 @@ export abstract class CRM implements CRMInterface {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
             this.log(
-              "added " + email + " " + message.action.createdAt,
+              `added ${email} ${message.action.createdAt}`,
               ProcessStatus.processed,
             );
           } else {
             this.log(
-              "failed " + email + " " + message.action.createdAt,
+              `failed ${email} ${message.action.createdAt}`,
               ProcessStatus.error,
             );
           }
@@ -257,19 +254,19 @@ export abstract class CRM implements CRMInterface {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
             this.log(
-              "added " + email + " " + message.action.createdAt,
+              `added ${email} ${message.action.createdAt}`,
               ProcessStatus.processed,
             );
           } else {
             this.log(
-              "failed " + email + " " + message.action.createdAt,
+              `failed ${email} ${message.action.createdAt}`,
               ProcessStatus.error,
             );
           }
           return r;
         }
         if (message.privacy.optIn === false || message.privacy.optIn === null) {
-          this.log("opt-out " + actionId, ProcessStatus.skipped);
+          this.log(`opt-out ${actionId}`, ProcessStatus.skipped);
           //          this.verbose && console.log('opt-out',message.actionId);
           return true; //OptOut contact, we don't need to process
         }
@@ -288,9 +285,9 @@ export abstract class CRM implements CRMInterface {
           // double opt-in is optin (eg by email)
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log("added doi" + email, ProcessStatus.processed);
+            this.log(`added doi${email}`, ProcessStatus.processed);
           } else {
-            this.log("failed doi" + email, ProcessStatus.error);
+            this.log(`failed doi${email}`, ProcessStatus.error);
           }
           return r;
         }
@@ -313,7 +310,7 @@ export abstract class CRM implements CRMInterface {
             return r; */
         }
         this.log(
-          "don't know how to process -optin " + email + " " + actionId,
+          `don't know how to process -optin ${email} ${actionId}`,
           ProcessStatus.error,
         );
         break;
@@ -324,21 +321,15 @@ export abstract class CRM implements CRMInterface {
         if (emailStatus === "double_opt_in") {
           const r = this.formatResult(await this.handleContact(message));
           if (r) {
-            this.log(
-              "added doi " + email + " " + actionId,
-              ProcessStatus.processed,
-            );
+            this.log(`added doi ${email} ${actionId}`, ProcessStatus.processed);
             return true;
           } else {
-            this.log(
-              "failed doi " + email + " " + actionId,
-              ProcessStatus.error,
-            );
+            this.log(`failed doi ${email} ${actionId}`, ProcessStatus.error);
             return false;
           }
         }
         this.log(
-          "skip sending, it is not double opt in " + email + " " + actionId,
+          `skip sending, it is not double opt in ${email} ${actionId}`,
           ProcessStatus.error,
         );
         return true;
@@ -349,7 +340,7 @@ export abstract class CRM implements CRMInterface {
           "You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn",
         );
       default:
-        throw new Error("unexpected crmType " + this.crmType);
+        throw new Error(`unexpected crmType ${this.crmType}`);
     }
     console.error("need, because ts wants a return boolean", this.crmType);
     return false;
@@ -453,7 +444,7 @@ export const init = async (config: Configuration): Promise<CRM> => {
     throw new Error("missing process.env.CRM");
   }
 
-  const crm = await import("./crm/" + process.env.CRM);
+  const crm = await import(`./crm/${process.env.CRM}`);
   if (crm.default) {
     const instance = new crm.default(config);
     const success = await instance.init();
@@ -463,6 +454,6 @@ export const init = async (config: Configuration): Promise<CRM> => {
     }
     return instance;
   } else {
-    throw new Error(process.env.CRM + " missing export default YourCRM");
+    throw new Error(`${process.env.CRM} missing export default YourCRM`);
   }
 };

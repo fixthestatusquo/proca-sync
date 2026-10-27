@@ -11,7 +11,7 @@ import type { CRM } from "./crm";
 import { pause } from "./utils";
 
 export const listen = async (config: Configuration, crm: CRM) => {
-  const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
+  const tag = `proca-sync.${process.env.CRM}.${process.env.PROCA_ENV}`;
   const opts: ConsumerOpts = { tag: tag };
   if (config.concurrency) {
     opts.concurrency = config.concurrency;
@@ -80,7 +80,7 @@ export const listen = async (config: Configuration, crm: CRM) => {
               console.log("pause event...");
               await pause(3);
             }
-            throw new Error("Unknown event type: " + (event as any).eventType);
+            throw new Error(`Unknown event type: ${(event as any).eventType}`);
           }
         }
         default: {
@@ -88,7 +88,7 @@ export const listen = async (config: Configuration, crm: CRM) => {
             console.log("pause...");
             await pause(10);
           }
-          throw new Error("Unknown message type: " + actionOrEvent.schema);
+          throw new Error(`Unknown message type: ${actionOrEvent.schema}`);
         }
       }
     },

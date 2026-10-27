@@ -4,7 +4,6 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-  ProcessStatus,
 } from "../crm";
 
 //import { string2map } from "../utils";
@@ -13,9 +12,6 @@ import {
   addCampaignContact,
   type CrmConfigType,
   campaignByName,
-  contactByEmail,
-  foo,
-  leadByEmail,
   makeClient,
   upsertContact,
   upsertLead,
@@ -24,8 +20,6 @@ import {
 import {
   actionToContactRecord,
   actionToLeadRecord,
-  emailChangedToContactRecord,
-  isActionSyncable,
 } from "./salesforce/contact";
 
 class SalesforceCRM extends CRM {
@@ -70,7 +64,7 @@ class SalesforceCRM extends CRM {
   }
 
   init = async (): Promise<boolean> => {
-    const { userInfo, conn } = await makeClient(this.config);
+    const { conn } = await makeClient(this.config);
     this.crmAPI = conn;
     return true;
   };
@@ -100,13 +94,13 @@ class SalesforceCRM extends CRM {
         const LeadId = await upsertLead(this.crmAPI, record);
         if (!LeadId) throw Error(`Could not upsert lead`);
         try {
-          const r = await addCampaignContact(
+          const _r = await addCampaignContact(
             this.crmAPI,
             camp.Id,
             { LeadId },
             message,
           );
-        } catch (e) {
+        } catch (_e) {
           return true;
         }
         //        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
@@ -119,7 +113,7 @@ class SalesforceCRM extends CRM {
         });
         const ContactId = await upsertContact(this.crmAPI, record);
         if (!ContactId) throw Error(`Could not upsert contact`);
-        const r = await addCampaignContact(
+        const _r = await addCampaignContact(
           this.crmAPI,
           camp.Id,
           { ContactId },

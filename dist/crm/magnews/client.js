@@ -13,10 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addContact = exports.setClientToken = exports.memberHash = void 0;
-const crypto_1 = __importDefault(require("crypto"));
+const node_crypto_1 = __importDefault(require("node:crypto"));
 const magnews_1 = __importDefault(require("./magnews"));
 const memberHash = (email) => {
-    const hash = crypto_1.default.createHash("md5").update(email).digest("hex");
+    const hash = node_crypto_1.default.createHash("md5").update(email).digest("hex");
     return hash;
 };
 exports.memberHash = memberHash;

@@ -15,8 +15,8 @@ const spin = (total, suffix = "", option) => {
     const start = (option === null || option === void 0 ? void 0 : option.newline) !== true ? clc.move.lineBegin : "";
     const end = (option === null || option === void 0 ? void 0 : option.newline) === true ? "\n" : clc.move.lineBegin;
     if (typeof (option === null || option === void 0 ? void 0 : option.wrapper) === "function")
-        process.stdout.write(start + option.wrapper(spinner[total % length] + " " + suffix + end)); // +'\x033[0G');
+        process.stdout.write(start + option.wrapper(`${spinner[total % length]} ${suffix}${end}`)); // +'\x033[0G');
     else
-        process.stdout.write(start + spinner[total % length] + " " + suffix + end); // +'\x033[0G');
+        process.stdout.write(`${start + spinner[total % length]} ${suffix}${end}`); // +'\x033[0G');
 };
 exports.spin = spin;

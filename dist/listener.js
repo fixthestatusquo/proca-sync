@@ -13,7 +13,7 @@ exports.listen = void 0;
 const queue_1 = require("@proca/queue");
 const utils_1 = require("./utils");
 const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
-    const tag = "proca-sync." + process.env.CRM + "." + process.env.PROCA_ENV;
+    const tag = `proca-sync.${process.env.CRM}.${process.env.PROCA_ENV}`;
     const opts = { tag: tag };
     if (config.concurrency) {
         opts.concurrency = config.concurrency;
@@ -72,7 +72,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                         console.log("pause event...");
                         yield (0, utils_1.pause)(3);
                     }
-                    throw new Error("Unknown event type: " + event.eventType);
+                    throw new Error(`Unknown event type: ${event.eventType}`);
                 }
             }
             default: {
@@ -80,7 +80,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                     console.log("pause...");
                     yield (0, utils_1.pause)(10);
                 }
-                throw new Error("Unknown message type: " + actionOrEvent.schema);
+                throw new Error(`Unknown message type: ${actionOrEvent.schema}`);
             }
         }
     }), opts);

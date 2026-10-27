@@ -11,7 +11,7 @@ export type SpinOption = {
   newline: boolean;
 };
 
-export const spin = (total: number, suffix = "", option: SpinOption | void) => {
+export const spin = (total: number, suffix = "", option?: SpinOption) => {
   if (!process.stdout.isTTY) {
     return;
   }
@@ -19,8 +19,8 @@ export const spin = (total: number, suffix = "", option: SpinOption | void) => {
   const end = option?.newline === true ? "\n" : clc.move.lineBegin;
   if (typeof option?.wrapper === "function")
     process.stdout.write(
-      start + option.wrapper(spinner[total % length] + " " + suffix + end),
+      start + option.wrapper(`${spinner[total % length]} ${suffix}${end}`),
     ); // +'\x033[0G');
   else
-    process.stdout.write(start + spinner[total % length] + " " + suffix + end); // +'\x033[0G');
+    process.stdout.write(`${start + spinner[total % length]} ${suffix}${end}`); // +'\x033[0G');
 };

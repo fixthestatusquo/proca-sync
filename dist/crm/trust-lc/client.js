@@ -13,15 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.lookup = exports.verification = exports.postAction = void 0;
-const crypto_1 = __importDefault(require("crypto"));
+const node_crypto_1 = __importDefault(require("node:crypto"));
 const env_1 = require("../../env");
 (0, env_1.loadEnv)();
 const makeHeaders = () => {
-    const key = process.env["TRUST_KEY"];
+    const key = process.env.TRUST_KEY;
     if (!key)
         throw Error("TRUST_KEY not set");
     const stamp = Math.floor(Math.floor(Date.now() / 1000) / 30).toString();
-    const token = crypto_1.default
+    const token = node_crypto_1.default
         .createHmac("sha256", key)
         .update(stamp)
         .digest()
@@ -54,7 +54,7 @@ const verification = (verificationToken, body) => __awaiter(void 0, void 0, void
     if ("string" !== typeof process.env.VERIFICATION_URL) {
         throw new Error("POST_URL missing in env");
     }
-    const url = process.env.VERIFICATION_URL + verificationToken + "/verify";
+    const url = `${process.env.VERIFICATION_URL + verificationToken}/verify`;
     try {
         const response = yield fetch(url, Object.assign({ body: JSON.stringify(body) }, makeHeaders()));
         if (response.status === 204) {

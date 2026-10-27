@@ -7,7 +7,6 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-  ProcessStatus,
 } from "../crm";
 
 export type CrmConfigType = {
@@ -66,7 +65,7 @@ class SupabaseCRM extends CRM {
 
   init = async (): Promise<boolean> => {
     // build the api connection, potentially load some constant or extra data you might need
-    const { data, error } = await this.crmAPI.auth.signInWithPassword({
+    const { error } = await this.crmAPI.auth.signInWithPassword({
       email: this.config.user,
       password: this.config.password,
     });
@@ -74,7 +73,7 @@ class SupabaseCRM extends CRM {
 
     listenConnection(this.openPublishChannel);
 
-    const channel = this.crmAPI
+    const _channel = this.crmAPI
       .channel("schema-db-changes")
       .on(
         "postgres_changes",
@@ -119,7 +118,7 @@ class SupabaseCRM extends CRM {
 
     console.log(data);
     try {
-      const r = await this.pub.send("cus.320.deliver", JSON.stringify(data));
+      const _r = await this.pub.send("cus.320.deliver", JSON.stringify(data));
       console.log("send", data);
     } catch (e) {
       console.log(e);

@@ -9,13 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
+const node_fs_1 = require("node:fs");
 const crm_1 = require("../crm");
+/*
+ * A debug CRM that saves the data into the data folder
+ *
+ */
+// TODO export from proca/queue
 const writeJson = (data, name, folder) => {
     let path = "./data/";
     if (folder)
-        path = path + folder + "/";
-    (0, fs_1.writeFileSync)(path + name + ".json", JSON.stringify(data, null, 2));
+        path = `${path + folder}/`;
+    (0, node_fs_1.writeFileSync)(`${path + name}.json`, JSON.stringify(data, null, 2));
 };
 class FileCRM extends crm_1.CRM {
     constructor(opt) {
@@ -41,8 +46,8 @@ class FileCRM extends crm_1.CRM {
       }
       */
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {
-            const camp = yield this.campaign(message.campaign);
-            writeJson(message, message.action.actionType + "_" + message.actionId);
+            yield this.campaign(message.campaign);
+            writeJson(message, `${message.action.actionType}_${message.actionId}`);
             return { processed: true };
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {

@@ -2,17 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.formatAction = exports.handleConsent = void 0;
 const handleConsent = (action) => {
-    return action.privacy.emailStatus !== "double_opt_in" &&
-        !action.action.customFields.isSubscribed
-        ? false
-        : true;
+    return !(action.privacy.emailStatus !== "double_opt_in" &&
+        !action.action.customFields.isSubscribed);
 };
 exports.handleConsent = handleConsent;
 const formatAction = (queueAction, moveCode) => {
     var _a, _b, _c;
     const postData = queueAction;
     if (!moveCode)
-        moveCode = "AKT" + postData.campaign.externalId;
+        moveCode = `AKT${postData.campaign.externalId}`;
     const action = {
         first_name: postData.contact.firstName,
         last_name: postData.contact.lastName,

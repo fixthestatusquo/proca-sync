@@ -29,13 +29,13 @@ class SupabaseCRM extends crm_1.CRM {
         };
         this.init = () => __awaiter(this, void 0, void 0, function* () {
             // build the api connection, potentially load some constant or extra data you might need
-            const { data, error } = yield this.crmAPI.auth.signInWithPassword({
+            const { error } = yield this.crmAPI.auth.signInWithPassword({
                 email: this.config.user,
                 password: this.config.password,
             });
             this.crmAPI.auth.startAutoRefresh();
             (0, queue_1.listenConnection)(this.openPublishChannel);
-            const channel = this.crmAPI
+            const _channel = this.crmAPI
                 .channel("schema-db-changes")
                 .on("postgres_changes", {
                 event: "UPDATE",
@@ -72,7 +72,7 @@ class SupabaseCRM extends crm_1.CRM {
             }
             console.log(data);
             try {
-                const r = yield this.pub.send("cus.320.deliver", JSON.stringify(data));
+                const _r = yield this.pub.send("cus.320.deliver", JSON.stringify(data));
                 console.log("send", data);
             }
             catch (e) {

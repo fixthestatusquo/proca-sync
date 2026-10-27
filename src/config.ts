@@ -33,7 +33,7 @@ export function configFromOptions(opt: any, argv: any): Configuration {
     process.env.PROCA_URL = `amqps://${process.env.PROCA_USERNAME}:${process.env.PROCA_PASSWORD}@${process.env.PROCA_URL}`;
   }
   const pwd = encodeURIComponent(process.env.PROCA_PASSWORD || "");
-  const user = encodeURIComponent(process.env.PROCA_USERNAME || "");
+  const _user = encodeURIComponent(process.env.PROCA_USERNAME || "");
   // we allow opt.U to override the url
   return {
     url:

@@ -21,7 +21,7 @@ class BrevoCRM extends crm_1.CRM {
             try {
                 camp = yield this.campaign(message.campaign);
             }
-            catch (error) {
+            catch (_error) {
                 console.log("failed fetching the campaign", message.campaign);
                 return { processed: false };
             }
@@ -69,7 +69,7 @@ class BrevoCRM extends crm_1.CRM {
                     if (e.body.code === "invalid_parameter" &&
                         e.body.message === "Invalid LANDLINE_NUMBER number") {
                         try {
-                            payload.attributes["LANDLINE_NUMBER"] = undefined;
+                            payload.attributes.LANDLINE_NUMBER = undefined;
                             yield this.brevo.contacts.createContact(payload);
                             console.error("Invalid phone number");
                             return { processed: true };
@@ -90,7 +90,7 @@ class BrevoCRM extends crm_1.CRM {
         this.campaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             let name = campaign.name;
             if (campaign.externalId) {
-                name = "proca.externalId:" + campaign.externalId;
+                name = `proca.externalId:${campaign.externalId}`;
             }
             if (!this.campaigns[name]) {
                 this.campaigns[name] = yield this.fetchCampaign(campaign);
@@ -152,7 +152,6 @@ class BrevoCRM extends crm_1.CRM {
             case "DOUBLE_OPTIN":
                 this.crmType = crm_1.CRMType.DoubleOptIn;
                 break;
-            case "OPTIN":
             default:
                 this.crmType = crm_1.CRMType.OptIn;
         }

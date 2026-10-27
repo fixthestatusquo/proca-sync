@@ -22,10 +22,9 @@ class MailchimpCRM extends crm_1.CRM {
                 console.log("fetching exisiting lists");
                 const r = yield (0, client_1.allLists)(this.client);
                 const lists = r.lists || [];
-                lists &&
-                    lists.forEach((d) => {
-                        console.log(d.id, d.name);
-                    });
+                lists === null || lists === void 0 ? void 0 : lists.forEach((d) => {
+                    console.log(d.id, d.name);
+                });
                 return false;
             }
             const r = yield (0, client_1.allCampaigns)(this.client, this.list, this.group);
@@ -90,7 +89,7 @@ class MailchimpCRM extends crm_1.CRM {
                     delete response._links;
                     console.log(response);
                 }
-                this.log("adding " + member.email_address, crm_1.ProcessStatus.processed);
+                this.log(`adding ${member.email_address}`, crm_1.ProcessStatus.processed);
                 return true;
             }
             catch (e) {

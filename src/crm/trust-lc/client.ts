@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import crypto from "node:crypto";
 import { loadEnv } from "../../env";
 
 loadEnv();
@@ -6,7 +6,7 @@ loadEnv();
 import type { Signature, Verification } from "./data";
 
 const makeHeaders = () => {
-  const key = process.env["TRUST_KEY"];
+  const key = process.env.TRUST_KEY;
   if (!key) throw Error("TRUST_KEY not set");
   const stamp = Math.floor(Math.floor(Date.now() / 1000) / 30).toString();
   const token = crypto
@@ -49,7 +49,7 @@ export const verification = async (
   if ("string" !== typeof process.env.VERIFICATION_URL) {
     throw new Error("POST_URL missing in env");
   }
-  const url = process.env.VERIFICATION_URL + verificationToken + "/verify";
+  const url = `${process.env.VERIFICATION_URL + verificationToken}/verify`;
   try {
     const response = await fetch(url, {
       body: JSON.stringify(body),

@@ -38,18 +38,18 @@ interface VerificationParams {
 }
 
 export const handleConsent = (action: ActionMessageV2) => {
-  return action.privacy.emailStatus !== "double_opt_in" &&
+  return !(
+    action.privacy.emailStatus !== "double_opt_in" &&
     !action.action.customFields.isSubscribed
-    ? false
-    : true;
+  );
 };
 
 export const formatAction = (
   queueAction: ActionMessageV2,
-  moveCode: "string" | undefined,
+  moveCode: string | undefined,
 ) => {
   const postData = queueAction;
-  if (!moveCode) moveCode = "AKT" + postData.campaign.externalId;
+  if (!moveCode) moveCode = `AKT${postData.campaign.externalId}`;
   const action: TrustAction = {
     first_name: postData.contact.firstName,
     last_name: postData.contact.lastName,

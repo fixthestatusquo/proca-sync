@@ -1,10 +1,10 @@
 // to parse options
 
+import { existsSync } from "node:fs";
 import * as Sentry from "@sentry/node";
-import { existsSync } from "fs";
 import parseArg from "minimist";
 
-import { Configuration, configFromOptions, DEFAULT_URL, help } from "./config";
+import { configFromOptions, help } from "./config";
 import { init } from "./crm";
 import { loadEnv } from "./env";
 import { listen } from "./listener";
@@ -52,7 +52,7 @@ export const main = async (argv: string[]) => {
   }
   if (opt.env) {
     if (!existsSync(opt.env)) {
-      const env = ".env." + opt.env;
+      const env = `.env.${opt.env}`;
       if (existsSync(env)) {
         process.env.PROCA_ENV = opt.env;
         opt.env = env;
@@ -78,7 +78,7 @@ export const main = async (argv: string[]) => {
     const config = configFromOptions(conf, opt);
     if (opt.dump) {
       console.warn(
-        "saving into data folder instead of using " + process.env.CRM,
+        `saving into data folder instead of using ${process.env.CRM}`,
       );
       process.env.CRM = "file";
     }
