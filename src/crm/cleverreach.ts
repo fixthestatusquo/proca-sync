@@ -1,15 +1,15 @@
 import {
+  type ActionMessage,
+  type CampaignUpdatedEvent,
   CRM,
   CRMType,
-  type ActionMessage,
   type EventMessage,
   type handleResult,
   type ProcaCampaign,
-  type CampaignUpdatedEvent,
 } from "../crm";
-import { getToken, upsertContact, getContact } from "./cleverreach/client";
-import { formatAction } from "./cleverreach/data";
 import { fetchCampaign as procaCampaign } from "../proca";
+import { getContact, getToken, upsertContact } from "./cleverreach/client";
+import { formatAction } from "./cleverreach/data";
 
 class CleverreachCRM extends CRM {
   token: string | null = null;

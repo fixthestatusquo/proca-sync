@@ -1,7 +1,7 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
   ProcessStatus,
@@ -10,22 +10,22 @@ import {
 //import { string2map } from "../utils";
 
 import {
+  addCampaignContact,
+  type CrmConfigType,
+  campaignByName,
+  contactByEmail,
+  foo,
+  leadByEmail,
   makeClient,
   upsertContact,
   upsertLead,
-  contactByEmail,
-  campaignByName,
-  addCampaignContact,
-  foo,
-  leadByEmail,
-  type CrmConfigType,
 } from "./salesforce/client";
 
 import {
-  isActionSyncable,
   actionToContactRecord,
   actionToLeadRecord,
   emailChangedToContactRecord,
+  isActionSyncable,
 } from "./salesforce/contact";
 
 class SalesforceCRM extends CRM {
@@ -141,7 +141,6 @@ class SalesforceCRM extends CRM {
       );
       return false;
     }
-    return false;
   };
 }
 

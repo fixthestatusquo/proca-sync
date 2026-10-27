@@ -1,12 +1,12 @@
+import { writeFileSync } from "fs";
 import _ from "lodash";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-import { writeFileSync } from "fs";
 
 /*
  * A debug CRM that displays the messages and events in the log

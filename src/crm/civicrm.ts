@@ -1,7 +1,7 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
   ProcessStatus,
@@ -99,7 +99,7 @@ class CiviCRM extends CRM {
         process.exit(1); // should we create the contacts without putting them in a group?
       }
     }
-    let countries: any ;
+    let countries: any;
     try {
       countries = await this.crmAPI.get(
         "Country",
@@ -150,7 +150,6 @@ class CiviCRM extends CRM {
         source,
       );
     }
-    return false;
   };
 
   getParams = (
@@ -396,10 +395,10 @@ class CiviCRM extends CRM {
     if (r.error_code) {
       throw new Error(
         "can't read campaign " +
-        campaign.name +
-        ":" +
-        r.error_message +
-        ". CHeck your permission on civicampaign",
+          campaign.name +
+          ":" +
+          r.error_message +
+          ". CHeck your permission on civicampaign",
       );
     }
     if (r.count === 1) {

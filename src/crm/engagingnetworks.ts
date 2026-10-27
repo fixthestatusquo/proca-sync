@@ -1,4 +1,4 @@
-import { CRM, CRMType, type ActionMessage, type handleResult } from "../crm";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
 import { loadEnv } from "../env";
 
 loadEnv();
@@ -55,7 +55,7 @@ export const upsertSupporter = async (data, token: string) => {
 
     if (!response.ok) {
       let errorMessage = `HTTP error! Status: ${response.status}`;
-      let errorBody;
+      let errorBody: any;
 
       try {
         errorBody = await response.json();

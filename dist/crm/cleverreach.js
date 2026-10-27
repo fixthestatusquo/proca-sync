@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
+const proca_1 = require("../proca");
 const client_1 = require("./cleverreach/client");
 const data_1 = require("./cleverreach/data");
-const proca_1 = require("../proca");
 class CleverreachCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);

@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
-const utils_1 = require("../utils");
 const proca_1 = require("../proca");
+const utils_1 = require("../utils");
 class RateLimiter {
     constructor(maxPerMinute = 80) {
         this.timestamps = [];

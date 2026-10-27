@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { loadEnv } from "../../env";
+
 loadEnv();
 
 import type { Signature, Verification } from "./data";

@@ -1,4 +1,4 @@
-import { CRM, CRMType, type ActionMessage, type handleResult } from "../crm";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
 import { string2map } from "../utils";
 
 type Params = {

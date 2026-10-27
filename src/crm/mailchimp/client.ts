@@ -1,5 +1,5 @@
-import crypto from "crypto";
 import mailchimp from "@mailchimp/mailchimp_marketing";
+import crypto from "crypto";
 import { Contact, ContactSubscription } from "./contact";
 
 export const makeClient = () => {

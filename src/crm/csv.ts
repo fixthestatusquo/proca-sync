@@ -1,14 +1,14 @@
+import { stringify } from "csv-stringify/sync";
+import fs from "fs";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
-  ProcessStatus,
-  type ProcaCampaign,
   type Params,
+  type ProcaCampaign,
+  ProcessStatus,
 } from "../crm";
-import fs from "fs";
-import { stringify } from "csv-stringify/sync";
 import { fetchCampaign as procaCampaign } from "../proca";
 import { string2map } from "../utils";
 
@@ -47,7 +47,7 @@ class CsvCRM extends CRM {
           tracking: {},
         }),
       );
-      for (let extra in this.mergeFields) {
+      for (const extra in this.mergeFields) {
         columns.push(extra);
       }
 
@@ -109,7 +109,7 @@ class CsvCRM extends CRM {
     const sync = camp.config?.component?.sync || {};
 
     if (sync) {
-      for (let key in sync) {
+      for (const key in sync) {
         record[key] = sync[key];
       }
     }

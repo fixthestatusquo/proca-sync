@@ -17,7 +17,11 @@
   "scripts": {
     "build": "tsc",
     "test": "ts-node-dev src/test.ts",
-    "start": "ts-node-dev src/index.ts"
+    "start": "ts-node-dev src/index.ts",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check . && tsc --noEmit",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "keywords": [
     "petition",
@@ -39,6 +43,7 @@
     "AMQP"
   ],
   "devDependencies": {
+    "@biomejs/biome": "^2.6.3",
     "@sentry/types": "^10.38.0",
     "@types/cli-color": "^2.0.6",
     "@types/jsforce": "^1.11.6",

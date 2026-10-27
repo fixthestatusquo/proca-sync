@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const supabase_js_1 = require("@supabase/supabase-js");
 const queue_1 = require("@proca/queue");
+const supabase_js_1 = require("@supabase/supabase-js");
+const crm_1 = require("../crm");
 const crmType = process.env.ACTION_TYPE || "OptIn";
 class SupabaseCRM extends crm_1.CRM {
     constructor(opt) {

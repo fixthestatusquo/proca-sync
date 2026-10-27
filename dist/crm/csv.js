@@ -12,9 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const fs_1 = __importDefault(require("fs"));
 const sync_1 = require("csv-stringify/sync");
+const fs_1 = __importDefault(require("fs"));
+const crm_1 = require("../crm");
 const proca_1 = require("../proca");
 const utils_1 = require("../utils");
 class CsvCRM extends crm_1.CRM {
@@ -33,7 +33,7 @@ class CsvCRM extends crm_1.CRM {
                     actionPage: {},
                     tracking: {},
                 }));
-                for (let extra in this.mergeFields) {
+                for (const extra in this.mergeFields) {
                     columns.push(extra);
                 }
                 const header = (0, sync_1.stringify)([], {
@@ -91,7 +91,7 @@ class CsvCRM extends crm_1.CRM {
             const camp = yield this.campaign(message.campaign);
             const sync = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
             if (sync) {
-                for (let key in sync) {
+                for (const key in sync) {
                     record[key] = sync[key];
                 }
             }

@@ -3,10 +3,8 @@ import type { ActionMessageV2, EventMessageV2 } from "@proca/queue";
 type EmailStatusEvent = Extract<EventMessageV2, { eventType: "email_status" }>;
 
 //                                              allow custom fields vvv
-export interface ContactAttributes extends Record<
-  string,
-  string | boolean | undefined
-> {
+export interface ContactAttributes
+  extends Record<string, string | boolean | undefined> {
   Email: string;
   FirstName: string;
   LastName?: string;
@@ -17,10 +15,8 @@ export interface ContactAttributes extends Record<
   EmailBouncedDate?: string;
 }
 
-export interface LeadAttributes extends Record<
-  string,
-  string | boolean | undefined
-> {
+export interface LeadAttributes
+  extends Record<string, string | boolean | undefined> {
   Email: string;
   FirstName: string;
   LastName?: string;

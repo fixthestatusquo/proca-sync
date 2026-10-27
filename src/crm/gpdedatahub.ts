@@ -1,18 +1,18 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
   type ProcaWidget,
 } from "../crm";
-import { formatAction } from "./gpdedatahub/data";
-import { postAction } from "./gpdedatahub/client";
-import { deepMerge } from "../utils";
 import {
   fetchCampaign as procaCampaign,
   fetchWidget as procaWidget,
 } from "../proca";
+import { deepMerge } from "../utils";
+import { postAction } from "./gpdedatahub/client";
+import { formatAction } from "./gpdedatahub/data";
 
 class gpdedatahubCRM extends CRM {
   constructor(opt: object) {

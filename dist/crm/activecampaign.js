@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const lodash_1 = require("lodash");
 const crm_1 = require("../crm");
 const env_1 = require("../env");
-const lodash_1 = require("lodash");
 const proca_1 = require("../proca");
 (0, env_1.loadEnv)();
 class ActiveCampaign extends crm_1.CRM {

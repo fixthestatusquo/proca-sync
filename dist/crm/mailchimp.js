@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
-const contact_1 = require("./mailchimp/contact");
-const client_1 = require("./mailchimp/client");
 const utils_1 = require("../utils");
+const client_1 = require("./mailchimp/client");
+const contact_1 = require("./mailchimp/contact");
 class MailchimpCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);
@@ -54,7 +54,6 @@ class MailchimpCRM extends crm_1.CRM {
                 console.log("error adding", e);
                 throw e;
             }
-            return false;
         });
         this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
             return (0, client_1.findMember)(this.client, email);
@@ -115,7 +114,6 @@ class MailchimpCRM extends crm_1.CRM {
                 }
                 return false;
             }
-            return true;
         });
         this.crmType = crm_1.CRMType.OptIn;
         if (!process.env.AUTH_TOKEN) {

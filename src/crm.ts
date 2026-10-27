@@ -1,13 +1,13 @@
 import {
-  Campaign,
   ActionMessageV2,
-  EventMessageV2,
+  Campaign,
   CampaignUpdatedEventMessage,
   //  ActionPage as Widget,
   type Counters,
+  EventMessageV2,
 } from "@proca/queue";
-import type { Configuration } from "./config";
 import color from "cli-color";
+import type { Configuration } from "./config";
 import { spin } from "./spinner";
 
 export type handleResult = {
@@ -22,10 +22,12 @@ export enum ProcessStatus {
   ignored = 3,
   error = 4,
 }
-export { ActionMessageV2 as ActionMessage };
-export { EventMessageV2 as EventMessage };
-export { Campaign as ProcaCampaign };
-export { CampaignUpdatedEventMessage as CampaignUpdatedEvent };
+export {
+  ActionMessageV2 as ActionMessage,
+  Campaign as ProcaCampaign,
+  CampaignUpdatedEventMessage as CampaignUpdatedEvent,
+  EventMessageV2 as EventMessage,
+};
 
 type ProcaCampaign = Campaign;
 
@@ -140,7 +142,8 @@ export abstract class CRM implements CRMInterface {
 
   log = (text: string | void, status: ProcessStatus | void) => {
     //  progress: (count: number; suffix: string; color:string);
-    const newline = status == ProcessStatus.error || !this.interactive || !text;
+    const newline =
+      status === ProcessStatus.error || !this.interactive || !text;
     spin(this.count.ack + this.count.nack, text || "", {
       wrapper: this.colorStatus(status),
       newline: newline,
@@ -239,12 +242,6 @@ export abstract class CRM implements CRMInterface {
           );
           return true;
         }
-        this.verbose && console.log(message);
-        this.log(
-          "don't know how to process " + email + " " + actionId,
-          ProcessStatus.error,
-        );
-        break;
       case CRMType.OptIn:
         if (!message.privacy.withConsent) {
           this.log(
@@ -345,7 +342,6 @@ export abstract class CRM implements CRMInterface {
           ProcessStatus.error,
         );
         return true;
-        break;
       }
 
       case CRMType.ActionContact:

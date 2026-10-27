@@ -1,12 +1,13 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-import { string2map } from "../utils";
 import { fetchCampaign as procaCampaign } from "../proca";
+import { string2map } from "../utils";
+
 class RateLimiter {
   private timestamps: number[] = [];
   private readonly maxPerMinute: number;
@@ -322,7 +323,9 @@ class OhmeCRM extends CRM {
         console.error(`[ohme] 429 received, halting`);
         return { processed: false };
       }
-      console.error(`[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`);
+      console.error(
+        `[ohme] unexpected error for ${email}: ${JSON.stringify(e)}`,
+      );
       return { processed: false };
     }
   };

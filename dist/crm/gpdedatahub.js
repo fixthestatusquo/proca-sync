@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
-const data_1 = require("./gpdedatahub/data");
-const client_1 = require("./gpdedatahub/client");
-const utils_1 = require("../utils");
 const proca_1 = require("../proca");
+const utils_1 = require("../utils");
+const client_1 = require("./gpdedatahub/client");
+const data_1 = require("./gpdedatahub/data");
 class gpdedatahubCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);

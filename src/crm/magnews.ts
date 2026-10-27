@@ -1,19 +1,17 @@
 import _ from "lodash";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-
+import { addContact, setClientToken } from "./magnews/client";
 import type {
   Contact,
-  ContactValues,
   ContactOptions,
+  ContactValues,
 } from "./magnews/interfaces";
-
-import { setClientToken, addContact } from "./magnews/client";
 
 /*
  *

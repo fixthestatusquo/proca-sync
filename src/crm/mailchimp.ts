@@ -1,28 +1,27 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
+import { string2map } from "../utils";
 import {
-  actionToContactRecord as formatAction,
-  type Contact,
-  type ContactSubscription,
-} from "./mailchimp/contact";
-import {
-  ping,
-  allLists,
   allCampaigns,
-  senders,
-  makeClient,
-  upsertList,
+  allLists,
   //  addContactToList,
   findMember,
+  makeClient,
+  ping,
+  senders,
+  upsertList,
 } from "./mailchimp/client";
-
-import { string2map } from "../utils";
+import {
+  type Contact,
+  type ContactSubscription,
+  actionToContactRecord as formatAction,
+} from "./mailchimp/contact";
 
 type Params = {
   [key: string]: any;
@@ -123,7 +122,6 @@ class MailchimpCRM extends CRM {
       console.log("error adding", e);
       throw e;
     }
-    return false;
   };
 
   fetchContact = async (email: string): Promise<any> => {
@@ -188,7 +186,6 @@ class MailchimpCRM extends CRM {
       }
       return false;
     }
-    return true;
   };
 }
 

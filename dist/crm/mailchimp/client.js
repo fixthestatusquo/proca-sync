@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findMember = exports.memberHash = exports.upsertList = exports.allCampaigns = exports.allLists = exports.senders = exports.ping = exports.makeClient = void 0;
-const crypto_1 = __importDefault(require("crypto"));
 const mailchimp_marketing_1 = __importDefault(require("@mailchimp/mailchimp_marketing"));
+const crypto_1 = __importDefault(require("crypto"));
 const makeClient = () => {
     if (process.env.AUTH_TOKEN) {
         const [tok, srv] = process.env.AUTH_TOKEN.split("-");

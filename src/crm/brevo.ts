@@ -1,8 +1,8 @@
 import { BrevoClient } from "@getbrevo/brevo";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
@@ -37,7 +37,7 @@ class BrevoCRM extends CRM {
   handleContact = async (
     message: ActionMessage,
   ): Promise<handleResult | boolean> => {
-    let camp;
+    let camp: any;
     try {
       camp = await this.campaign(message.campaign);
     } catch (error) {

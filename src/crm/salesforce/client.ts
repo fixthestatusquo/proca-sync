@@ -1,5 +1,5 @@
-import { Connection, type Record as SFRecord } from "jsforce";
 import type { ActionMessageV2 } from "@proca/queue";
+import { Connection, type Record as SFRecord } from "jsforce";
 
 export type CrmConfigType = {
   server: string;
@@ -30,7 +30,7 @@ export const campaignByName = async (
   name: string,
   opt: any,
 ) => {
-  let campaign;
+  let campaign: any;
   const campaignTypeId = opt.campaignType;
 
   // fetch
@@ -103,7 +103,7 @@ export const leadByEmail = async (conn: Connection, Email: string) => {
 };
 
 export const upsertLead = async (conn: Connection, contact: SFRecord) => {
-  let r;
+  let r: any;
 
   try {
     r = await conn.sobject("Lead").upsert(contact, "Email");

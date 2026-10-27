@@ -77,7 +77,6 @@ class SalesforceCRM extends crm_1.CRM {
                     ` CODE>${er.errorCode}<`);
                 return false;
             }
-            return false;
         });
         this.crmType = crm_1.CRMType.OptIn;
         if (!process.env.SALESFORCE_URL) {

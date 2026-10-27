@@ -1,4 +1,5 @@
 "use strict";
+// to parse options
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -46,14 +47,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
-// to parse options
-const minimist_1 = __importDefault(require("minimist"));
+const Sentry = __importStar(require("@sentry/node"));
 const fs_1 = require("fs");
-const utils_1 = require("./utils");
-const env_1 = require("./env");
+const minimist_1 = __importDefault(require("minimist"));
 const config_1 = require("./config");
 const crm_1 = require("./crm");
-const Sentry = __importStar(require("@sentry/node"));
+const env_1 = require("./env");
+const utils_1 = require("./utils");
 const clihelp = () => {
     console.log([
         "options",

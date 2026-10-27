@@ -1,13 +1,13 @@
+import { pick } from "lodash";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type EventMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
 import { loadEnv } from "../env";
-import { pick } from "lodash";
 import { fetchCampaign as procaCampaign } from "../proca";
 
 loadEnv();
@@ -265,9 +265,10 @@ class ActiveCampaign extends CRM {
     const camp = await this.campaign(message.campaign);
     const sync = camp.config?.component?.sync || {};
 
-    const statusTagId = emailStatus === "double_opt_in"
-      ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
-      : undefined;
+    const statusTagId =
+      emailStatus === "double_opt_in"
+        ? sync.tag_subscribed || process.env.CRM_TAG_SUBSCRIBED
+        : undefined;
 
     return this.handleMessage(message, statusTagId);
   };

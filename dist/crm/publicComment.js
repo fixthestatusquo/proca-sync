@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
 const supabase_js_1 = require("@supabase/supabase-js");
+const crm_1 = require("../crm");
 class PublicCommentCRM extends crm_1.CRM {
     constructor(opt) {
         super(opt);

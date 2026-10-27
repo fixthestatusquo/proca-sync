@@ -79,7 +79,6 @@ class CiviCRM extends crm_1.CRM {
             else {
                 return this.updateContact(existing, message.contact, action, camp.id, source);
             }
-            return false;
         });
         this.getParams = (contact, action, campaign_id, source) => {
             var _a, _b, _c;

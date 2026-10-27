@@ -1,10 +1,10 @@
 import {
-  syncQueue,
   type ActionMessageV2,
-  type EventMessageV2,
+  type CampaignUpdatedEventMessage,
   type ConsumerOpts,
   count,
-  type CampaignUpdatedEventMessage,
+  type EventMessageV2,
+  syncQueue,
 } from "@proca/queue";
 import type { Configuration } from "./config";
 import type { CRM } from "./crm";

@@ -108,6 +108,10 @@ _please remove any personal data before adding examples to git — they usually 
 $ npm run build
 ```
 
+# checks
+
+`npm run check` (biome formatting + lint, then `tsc --noEmit`) runs on pre-commit once you have done `npm install` (it sets `core.hooksPath` to `.githooks`) and on every push/PR via `.github/workflows/check.yml`. `npm run format` rewrites files, `npm run lint` shows the warnings without failing.
+
 # run in production
 
 put your env file in a path the user can read (we like /etc/proca-sync/[yourorg].env)

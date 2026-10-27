@@ -80,7 +80,7 @@ class CRM {
         };
         this.log = (text, status) => {
             //  progress: (count: number; suffix: string; color:string);
-            const newline = status == ProcessStatus.error || !this.interactive || !text;
+            const newline = status === ProcessStatus.error || !this.interactive || !text;
             (0, spinner_1.spin)(this.count.ack + this.count.nack, text || "", {
                 wrapper: this.colorStatus(status),
                 newline: newline,
@@ -153,9 +153,6 @@ class CRM {
                             actionId, ProcessStatus.error);
                         return true;
                     }
-                    this.verbose && console.log(message);
-                    this.log("don't know how to process " + email + " " + actionId, ProcessStatus.error);
-                    break;
                 case CRMType.OptIn:
                     if (!message.privacy.withConsent) {
                         this.log("no withConsent " +
@@ -230,7 +227,6 @@ class CRM {
                     }
                     this.log("skip sending, it is not double opt in " + email + " " + actionId, ProcessStatus.error);
                     return true;
-                    break;
                 }
                 case CRMType.ActionContact:
                     throw new Error("You need to eith: \n -define handleActionContact on your CRM or\n- set crmType to Contact or OptIn");

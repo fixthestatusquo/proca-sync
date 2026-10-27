@@ -1,4 +1,4 @@
-import { type Config, type Contact, AddMemberResponse } from "./interfaces";
+import { AddMemberResponse, type Config, type Contact } from "./interfaces";
 
 class magnews {
   protected bearerToken: string = "";

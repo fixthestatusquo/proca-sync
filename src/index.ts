@@ -1,12 +1,13 @@
 // to parse options
-import parseArg from "minimist";
-import { existsSync } from "fs";
-import { loadEnv } from "./env";
 
-import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
-import { listen } from "./listener";
-import { init } from "./crm";
 import * as Sentry from "@sentry/node";
+import { existsSync } from "fs";
+import parseArg from "minimist";
+
+import { Configuration, configFromOptions, DEFAULT_URL, help } from "./config";
+import { init } from "./crm";
+import { loadEnv } from "./env";
+import { listen } from "./listener";
 
 const clihelp = () => {
   console.log(

@@ -1,15 +1,14 @@
+import { listenConnection } from "@proca/queue";
+
+import { createClient } from "@supabase/supabase-js";
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
   ProcessStatus,
 } from "../crm";
-
-import { createClient } from "@supabase/supabase-js";
-
-import { listenConnection } from "@proca/queue";
 
 export type CrmConfigType = {
   server: string;

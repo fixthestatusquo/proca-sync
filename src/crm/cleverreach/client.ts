@@ -1,4 +1,5 @@
 import { loadEnv } from "../../env";
+
 loadEnv();
 
 const tokenUrl = process.env.CRM_TOKEN_URL;

@@ -27,12 +27,12 @@
  */
 
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type Params,
-  ProcaCampaign,
+  type ProcaCampaign,
   //  ProcessStatus,
 } from "../crm";
 

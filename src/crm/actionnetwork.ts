@@ -2,6 +2,7 @@ import type { ActionMessageV2 } from "@proca/queue";
 import { CRM, CRMType, type handleResult, type ProcaCampaign } from "../crm";
 import { loadEnv } from "../env";
 import { fetchCampaign as procaCampaign } from "../proca";
+
 loadEnv();
 
 const url = process.env.CRM_URL as string;

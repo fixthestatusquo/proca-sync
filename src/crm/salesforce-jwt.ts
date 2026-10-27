@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
 import { createSign } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { Connection, type Record as SFRecord } from "jsforce";
-import { CRM, CRMType, type ActionMessage, type handleResult } from "../crm";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
 import { string2map } from "../utils";
 
 type CrmConfigType = {
@@ -197,9 +197,9 @@ class SalesforceJWTCRM extends CRM {
       .map((f) => f.name)
       .sort((a, b) => a.localeCompare(b));
     this.log(`${known} fields: ${available.join(", ")}`);
-    const missing = [
-      ...new Set(Object.values(this.config.fields)),
-    ].filter((f) => !available.includes(f));
+    const missing = [...new Set(Object.values(this.config.fields))].filter(
+      (f) => !available.includes(f),
+    );
     if (missing.length) {
       this.error(
         `configured fields not on ${known} (INVALID_FIELD if written): ${missing.join(", ")}`,

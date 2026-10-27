@@ -1,13 +1,13 @@
 import {
+  type ActionMessage,
   CRM,
   CRMType,
-  type ActionMessage,
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-import { formatAction, handleConsent } from "./trust-lc/data";
-import { postAction, verification } from "./trust-lc/client";
 import { fetchCampaign as procaCampaign } from "../proca";
+import { postAction, verification } from "./trust-lc/client";
+import { formatAction, handleConsent } from "./trust-lc/data";
 
 class TrustCRM extends CRM {
   constructor(opt: {}) {
