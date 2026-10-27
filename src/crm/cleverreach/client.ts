@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
+import { loadEnv } from "../../env";
+loadEnv();
 
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID; //letters

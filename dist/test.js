@@ -48,9 +48,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 // to parse options
 const minimist_1 = __importDefault(require("minimist"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = require("fs");
 const utils_1 = require("./utils");
+const env_1 = require("./env");
 const config_1 = require("./config");
 const crm_1 = require("./crm");
 const Sentry = __importStar(require("@sentry/node"));
@@ -82,7 +82,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             return true;
         },
     });
-    let envConfig;
+    let envFile = ".env";
     if (opt.help) {
         clihelp();
         process.exit(0);
@@ -100,9 +100,9 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             console.error("missing env", opt.env);
             process.exit(1);
         }
-        envConfig = { path: opt.env };
+        envFile = opt.env;
     }
-    const conf = dotenv_1.default.config(envConfig);
+    const conf = (0, env_1.loadEnv)(envFile);
     if (process.env.SENTRY_URL) {
         Sentry.init({ dsn: process.env.SENTRY_URL });
     }
@@ -113,7 +113,6 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             process.env.CRM = "file";
         }
         const crm = yield (0, crm_1.init)(config);
-        console.log("reading files", opt._);
         if (opt._.length === 0) {
             console.warn("missing file(s) to process, defaulting to data/petition_optin.json");
             opt._.push("data/petition_optin.json");

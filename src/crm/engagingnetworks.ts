@@ -1,7 +1,7 @@
 import { CRM, CRMType, type ActionMessage, type handleResult } from "../crm";
-import dotenv from "dotenv";
+import { loadEnv } from "../env";
 
-dotenv.config();
+loadEnv();
 
 const apiUrl = process.env.CRM_URL;
 const apiToken = process.env.CRM_API_TOKEN;

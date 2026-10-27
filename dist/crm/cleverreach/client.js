@@ -8,13 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upsertContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
+const env_1 = require("../../env");
+(0, env_1.loadEnv)();
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID; //letters
 const secret = process.env.CRM_SECRET;

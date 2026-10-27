@@ -48,8 +48,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 // to parse options
 const minimist_1 = __importDefault(require("minimist"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = require("fs");
+const env_1 = require("./env");
 const config_1 = require("./config");
 const listener_1 = require("./listener");
 const crm_1 = require("./crm");
@@ -82,7 +82,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             return true;
         },
     });
-    let envConfig = {};
+    let envFile = ".env";
     if (opt.help) {
         clihelp();
         process.exit(0);
@@ -102,7 +102,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
                 process.exit(1);
             }
         }
-        envConfig = { path: opt.env };
+        envFile = opt.env;
     }
     else {
         if (process.env.NODE_ENV !== "production") {
@@ -110,8 +110,7 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             process.exit(1);
         }
     }
-    envConfig.quiet = true; // removes the ad
-    const conf = dotenv_1.default.config(envConfig);
+    const conf = (0, env_1.loadEnv)(envFile);
     if (process.env.SENTRY_URL) {
         Sentry.init({ dsn: process.env.SENTRY_URL });
     }

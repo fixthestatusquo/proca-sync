@@ -8,15 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const crm_1 = require("../crm");
-const dotenv_1 = __importDefault(require("dotenv"));
+const env_1 = require("../env");
 const lodash_1 = require("lodash");
 const proca_1 = require("../proca");
-dotenv_1.default.config();
+(0, env_1.loadEnv)();
 class ActiveCampaign extends crm_1.CRM {
     constructor(opt) {
         super(opt);

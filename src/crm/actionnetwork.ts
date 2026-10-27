@@ -1,8 +1,8 @@
 import type { ActionMessageV2 } from "@proca/queue";
 import { CRM, CRMType, type handleResult, type ProcaCampaign } from "../crm";
-import dotenv from "dotenv";
+import { loadEnv } from "../env";
 import { fetchCampaign as procaCampaign } from "../proca";
-dotenv.config();
+loadEnv();
 
 const url = process.env.CRM_URL as string;
 const token = process.env.CRM_API_TOKEN as string; // change!!

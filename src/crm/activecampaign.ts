@@ -6,11 +6,11 @@ import {
   type handleResult,
   type ProcaCampaign,
 } from "../crm";
-import dotenv from "dotenv";
+import { loadEnv } from "../env";
 import { pick } from "lodash";
 import { fetchCampaign as procaCampaign } from "../proca";
 
-dotenv.config();
+loadEnv();
 
 export type Message = ActionMessage | EventMessage;
 

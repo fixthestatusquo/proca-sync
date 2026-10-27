@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import dotenv from "dotenv";
-dotenv.config();
+import { loadEnv } from "../../env";
+loadEnv();
 
 import type { Signature, Verification } from "./data";
 

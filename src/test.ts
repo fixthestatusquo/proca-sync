@@ -1,8 +1,8 @@
 // to parse options
 import parseArg from "minimist";
-import dotenv from "dotenv";
 import { existsSync, readFileSync } from "fs";
 import { pause } from "./utils";
+import { loadEnv } from "./env";
 
 import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { init } from "./crm";
@@ -40,7 +40,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig: any = {};
+  let envFile = ".env";
   if (opt.help) {
     clihelp();
     process.exit(0);
@@ -57,10 +57,9 @@ export const main = async (argv: string[]) => {
       console.error("missing env", opt.env);
       process.exit(1);
     }
-    envConfig = { path: opt.env };
+    envFile = opt.env;
   }
-  envConfig.quiet = true; // removes the ad
-  const conf = dotenv.config(envConfig);
+  const conf = loadEnv(envFile);
   if (process.env.SENTRY_URL) {
     Sentry.init({ dsn: process.env.SENTRY_URL });
   }

@@ -1,7 +1,7 @@
 // to parse options
 import parseArg from "minimist";
-import dotenv from "dotenv";
 import { existsSync } from "fs";
+import { loadEnv } from "./env";
 
 import { Configuration, DEFAULT_URL, help, configFromOptions } from "./config";
 import { listen } from "./listener";
@@ -40,7 +40,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig: dotenv.DotenvConfigOptions = {};
+  let envFile = ".env";
   if (opt.help) {
     clihelp();
     process.exit(0);
@@ -60,15 +60,14 @@ export const main = async (argv: string[]) => {
         process.exit(1);
       }
     }
-    envConfig = { path: opt.env };
+    envFile = opt.env;
   } else {
     if (process.env.NODE_ENV !== "production") {
       console.error("missing -e or --env params");
       process.exit(1);
     }
   }
-  envConfig.quiet = true; // removes the ad
-  const conf = dotenv.config(envConfig);
+  const conf = loadEnv(envFile);
   if (process.env.SENTRY_URL) {
     Sentry.init({ dsn: process.env.SENTRY_URL });
   }
