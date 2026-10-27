@@ -1,0 +1,5 @@
+#!/bin/sh
+# installed by `npm run prepare` (git config core.hooksPath .githooks)
+set -e
+npx biome check --staged --no-errors-on-unmatched
+npx tsc --noEmit

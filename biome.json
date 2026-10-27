@@ -21,8 +21,7 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noExplicitAny": "off",
-        "noFallthroughSwitchClause": "warn"
+        "noExplicitAny": "off"
       },
       "correctness": {
         "noUnusedFunctionParameters": "off"

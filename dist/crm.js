@@ -287,17 +287,10 @@ class CRM {
                         const r = this.formatResult(yield this.handleEvent(event));
                         return r;
                     }
-                    // Different kinds of problems with email delivery:
-                    case "bounce": {
-                        console.log("bounce", event.supporter.contact.email);
-                    }
-                    case "blocked": {
-                        console.log("blocked", event.supporter.contact.email);
-                    } // pre-blocked by our transactional email provider (malformed etc)
-                    case "spam": {
-                        console.log(`marked as spam from ${event.supporter.contact.email}`);
-                    }
-                    // supporter clicked "this is spam" on our email
+                    // Different kinds of problems with email delivery all mean: set as bounced
+                    case "bounce":
+                    case "blocked": // pre-blocked by our transactional email provider (malformed etc)
+                    case "spam": // supporter clicked "this is spam" on our email
                     case "unsub": {
                         // supporter clicked "unsubscribe" on our email (if provided by Gmail etc)
                         console.log(`${event.supporter.privacy.emailStatus} from ${event.supporter.contact.email}`);
@@ -309,7 +302,7 @@ class CRM {
             console.log("Unhandled event type", event);
             return false;
         });
-        this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
+        this.handleEvent = (_message) => __awaiter(this, void 0, void 0, function* () {
             return Promise.resolve({ processed: false });
         });
         this.verbose = (opt === null || opt === void 0 ? void 0 : opt.verbose) || false;

@@ -419,17 +419,10 @@ export abstract class CRM implements CRMInterface {
           return r;
         }
 
-        // Different kinds of problems with email delivery:
-        case "bounce": {
-          console.log("bounce", event.supporter.contact.email);
-        }
-        case "blocked": {
-          console.log("blocked", event.supporter.contact.email);
-        } // pre-blocked by our transactional email provider (malformed etc)
-        case "spam": {
-          console.log(`marked as spam from ${event.supporter.contact.email}`);
-        }
-        // supporter clicked "this is spam" on our email
+        // Different kinds of problems with email delivery all mean: set as bounced
+        case "bounce":
+        case "blocked": // pre-blocked by our transactional email provider (malformed etc)
+        case "spam": // supporter clicked "this is spam" on our email
         case "unsub": {
           // supporter clicked "unsubscribe" on our email (if provided by Gmail etc)
           console.log(
@@ -446,7 +439,7 @@ export abstract class CRM implements CRMInterface {
   };
 
   handleEvent = async (
-    message: EventMessageV2,
+    _message: EventMessageV2,
   ): Promise<handleResult | boolean> => {
     return Promise.resolve({ processed: false });
   };
