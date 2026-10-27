@@ -40,7 +40,7 @@ export const main = async (argv: string[]) => {
     },
   });
 
-  let envConfig: any;
+  let envConfig: any = {};
   if (opt.help) {
     clihelp();
     process.exit(0);
@@ -59,6 +59,7 @@ export const main = async (argv: string[]) => {
     }
     envConfig = { path: opt.env };
   }
+  envConfig.quiet = true; // removes the ad
   const conf = dotenv.config(envConfig);
   if (process.env.SENTRY_URL) {
     Sentry.init({ dsn: process.env.SENTRY_URL });
@@ -73,7 +74,6 @@ export const main = async (argv: string[]) => {
       process.env.CRM = "file";
     }
     const crm = await init(config);
-    console.log("reading files", opt._);
     if (opt._.length === 0) {
       console.warn(
         "missing file(s) to process, defaulting to data/petition_optin.json",
