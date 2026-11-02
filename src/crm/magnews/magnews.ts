@@ -1,4 +1,4 @@
-import type { Config, Contact } from "./interfaces";
+import type { Config, Contact } from "./interfaces.ts";
 
 class magnews {
   protected bearerToken: string = "";

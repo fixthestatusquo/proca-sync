@@ -3,10 +3,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import * as Sentry from "@sentry/node";
 import parseArg from "minimist";
-import { configFromOptions, help } from "./config";
-import { init } from "./crm";
-import { loadEnv } from "./env";
-import { pause } from "./utils";
+import { configFromOptions, help } from "./config.ts";
+import { init } from "./crm.ts";
+import { loadEnv } from "./env.ts";
+import { pause } from "./utils.ts";
 
 const clihelp = () => {
   console.log(
@@ -110,7 +110,12 @@ export const main = async (argv: string[]) => {
   }
 };
 
-if (require.main === module) {
+// dist (cjs) uses require.main, a native node/esm run has none: match our own file
+if (
+  typeof require === "undefined"
+    ? process.argv[1]?.endsWith("/test.ts")
+    : require.main === module
+) {
   (async () => {
     await main(process.argv.slice(2));
     console.log("");

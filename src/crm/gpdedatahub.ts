@@ -5,14 +5,14 @@ import {
   type handleResult,
   type ProcaCampaign,
   type ProcaWidget,
-} from "../crm";
+} from "../crm.ts";
 import {
   fetchCampaign as procaCampaign,
   fetchWidget as procaWidget,
-} from "../proca";
-import { deepMerge } from "../utils";
-import { postAction } from "./gpdedatahub/client";
-import { formatAction } from "./gpdedatahub/data";
+} from "../proca.ts";
+import { deepMerge } from "../utils.ts";
+import { postAction } from "./gpdedatahub/client.ts";
+import { formatAction } from "./gpdedatahub/data.ts";
 
 class gpdedatahubCRM extends CRM {
   constructor(opt: object) {

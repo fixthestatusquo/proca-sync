@@ -1,5 +1,5 @@
 //import dotenv from "dotenv";
-import type { GPAction } from "./data";
+import type { GPAction } from "./data.ts";
 
 //dotenv.config();
 

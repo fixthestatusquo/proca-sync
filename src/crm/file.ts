@@ -4,7 +4,7 @@ import {
   CRM,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
+} from "../crm.ts";
 
 /*
  * A debug CRM that saves the data into the data folder

@@ -1,8 +1,8 @@
 import { createSign } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { Connection, type Record as SFRecord } from "jsforce";
-import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
-import { string2map } from "../utils";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm.ts";
+import { string2map } from "../utils.ts";
 
 type CrmConfigType = {
   loginUrl: string;

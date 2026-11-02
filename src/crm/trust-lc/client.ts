@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
-import { loadEnv } from "../../env";
+import { loadEnv } from "../../env.ts";
 
 loadEnv();
 
-import type { Signature, Verification } from "./data";
+import type { Signature, Verification } from "./data.ts";
 
 const makeHeaders = () => {
   const key = process.env.TRUST_KEY;

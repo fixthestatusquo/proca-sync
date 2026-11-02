@@ -1,14 +1,12 @@
+import civicrm from "civicrm";
 import {
   type ActionMessage,
   CRM,
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-
-import { string2map } from "../utils";
-
-const civicrm = require("civicrm");
+} from "../crm.ts";
+import { string2map } from "../utils.ts";
 
 type CivicrmConfig = {
   server: string;

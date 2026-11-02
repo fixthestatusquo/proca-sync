@@ -4,10 +4,10 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-import { fetchCampaign as procaCampaign } from "../proca";
-import { postAction, verification } from "./trust-lc/client";
-import { formatAction, handleConsent } from "./trust-lc/data";
+} from "../crm.ts";
+import { fetchCampaign as procaCampaign } from "../proca.ts";
+import { postAction, verification } from "./trust-lc/client.ts";
+import { formatAction, handleConsent } from "./trust-lc/data.ts";
 
 class TrustCRM extends CRM {
   constructor(opt: {}) {

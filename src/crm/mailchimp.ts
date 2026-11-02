@@ -5,20 +5,20 @@ import {
   type handleResult,
   type ProcaCampaign,
   ProcessStatus,
-} from "../crm";
-import { string2map } from "../utils";
+} from "../crm.ts";
+import { string2map } from "../utils.ts";
 import {
   allCampaigns,
   allLists,
   //  addContactToList,
   findMember,
   makeClient,
-} from "./mailchimp/client";
+} from "./mailchimp/client.ts";
 import {
   type Contact,
   type ContactSubscription,
   actionToContactRecord as formatAction,
-} from "./mailchimp/contact";
+} from "./mailchimp/contact.ts";
 
 type Params = {
   [key: string]: any;

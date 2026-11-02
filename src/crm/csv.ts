@@ -7,9 +7,9 @@ import {
   type handleResult,
   type Params,
   type ProcaCampaign,
-} from "../crm";
-import { fetchCampaign as procaCampaign } from "../proca";
-import { string2map } from "../utils";
+} from "../crm.ts";
+import { fetchCampaign as procaCampaign } from "../proca.ts";
+import { string2map } from "../utils.ts";
 
 type CsvCRMOptions = Params & {
   csvPath?: string;

@@ -1,4 +1,4 @@
-import type { ActionMessage } from "../../crm";
+import type { ActionMessage } from "../../crm.ts";
 
 type Attributes = Record<"created_at", string>;
 

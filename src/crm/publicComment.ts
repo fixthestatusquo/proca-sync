@@ -5,7 +5,7 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
+} from "../crm.ts";
 
 export type CrmConfigType = {
   server: string;

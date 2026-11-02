@@ -34,7 +34,7 @@ import {
   type Params,
   type ProcaCampaign,
   //  ProcessStatus,
-} from "../crm";
+} from "../crm.ts";
 
 class StdOut extends CRM {
   dryRun: boolean = false;

@@ -6,10 +6,10 @@ import {
   type EventMessage,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-import { fetchCampaign as procaCampaign } from "../proca";
-import { getContact, getToken, upsertContact } from "./cleverreach/client";
-import { formatAction } from "./cleverreach/data";
+} from "../crm.ts";
+import { fetchCampaign as procaCampaign } from "../proca.ts";
+import { getContact, getToken, upsertContact } from "./cleverreach/client.ts";
+import { formatAction } from "./cleverreach/data.ts";
 
 class CleverreachCRM extends CRM {
   token: string | null = null;

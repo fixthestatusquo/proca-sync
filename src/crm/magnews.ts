@@ -4,13 +4,13 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-import { addContact, setClientToken } from "./magnews/client";
+} from "../crm.ts";
+import { addContact, setClientToken } from "./magnews/client.ts";
 import type {
   Contact,
   ContactOptions,
   ContactValues,
-} from "./magnews/interfaces";
+} from "./magnews/interfaces.ts";
 
 /*
  *

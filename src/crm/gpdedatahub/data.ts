@@ -1,4 +1,4 @@
-import type { ActionMessage } from "../../crm";
+import type { ActionMessage } from "../../crm.ts";
 
 export type GPAction = ActionMessage & { promo_code?: string } & {
   form_type?: string;

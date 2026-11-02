@@ -35,6 +35,9 @@
     // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
     "resolveJsonModule": true /* Enable importing .json files */,
+    "allowImportingTsExtensions": true /* import "./x.ts" works with the native node type stripping */,
+    "rewriteRelativeImportExtensions": true /* emit "./x.js" in dist */,
+    "erasableSyntaxOnly": true /* only syntax node can strip: no enum/namespace */,
     // "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */
 
     /* JavaScript Support */

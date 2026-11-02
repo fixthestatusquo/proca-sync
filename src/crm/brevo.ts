@@ -5,8 +5,8 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-import { string2map } from "../utils";
+} from "../crm.ts";
+import { string2map } from "../utils.ts";
 
 class BrevoCRM extends CRM {
   private brevo: BrevoClient;

@@ -47,7 +47,7 @@ export async function graphQL(
       }),
     });
     if (!res.ok) {
-      return <ProcaResponse>{
+      return {
         errors: [{ message: `network error #${res.status}` }],
       };
     }
@@ -77,7 +77,7 @@ export async function graphQL(
     data = response.data;
   } catch (error) {
     console.error(error);
-    return <ProcaResponse>{ errors: [{ message: error.toString() }] };
+    return { errors: [{ message: error.toString() }] } as ProcaResponse;
   }
   return data;
 }

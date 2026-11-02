@@ -6,9 +6,9 @@ import {
   type EventMessageV2,
   syncQueue,
 } from "@proca/queue";
-import type { Configuration } from "./config";
-import type { CRM } from "./crm";
-import { pause } from "./utils";
+import type { Configuration } from "./config.ts";
+import type { CRM } from "./crm.ts";
+import { pause } from "./utils.ts";
 
 export const listen = async (config: Configuration, crm: CRM) => {
   const tag = `proca-sync.${process.env.CRM}.${process.env.PROCA_ENV}`;

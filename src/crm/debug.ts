@@ -3,7 +3,7 @@ import {
   CRM,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
+} from "../crm.ts";
 
 /*
  * A debug CRM that displays the messages and events in the log

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import type { Contact } from "./interfaces";
-import magnews from "./magnews";
+import type { Contact } from "./interfaces.ts";
+import magnews from "./magnews.ts";
 
 export const memberHash = (email: string) => {
   const hash = crypto.createHash("md5").update(email).digest("hex");

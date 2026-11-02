@@ -1,4 +1,4 @@
-import { pick } from "lodash";
+import lodash from "lodash";
 import {
   type ActionMessage,
   CRM,
@@ -6,9 +6,11 @@ import {
   type EventMessage,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
-import { loadEnv } from "../env";
-import { fetchCampaign as procaCampaign } from "../proca";
+} from "../crm.ts";
+import { loadEnv } from "../env.ts";
+import { fetchCampaign as procaCampaign } from "../proca.ts";
+
+const { pick } = lodash;
 
 loadEnv();
 

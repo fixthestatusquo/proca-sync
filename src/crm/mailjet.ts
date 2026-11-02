@@ -1,5 +1,6 @@
-import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
-import { string2map } from "../utils";
+import mailjet from "node-mailjet";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm.ts";
+import { string2map } from "../utils.ts";
 
 type Params = {
   [key: string]: any;
@@ -35,7 +36,7 @@ class Mailjet extends CRM {
     }
 
     try {
-      this.mailjet = require("node-mailjet").apiConnect(
+      this.mailjet = mailjet.apiConnect(
         process.env.MJ_APIKEY_PUBLIC,
         process.env.MJ_APIKEY_PRIVATE,
       );

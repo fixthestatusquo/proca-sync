@@ -4,9 +4,9 @@ import {
   CRMType,
   type handleResult,
   type ProcaCampaign,
-} from "../crm";
+} from "../crm.ts";
 
-//import { string2map } from "../utils";
+//import { string2map } from "../utils.ts";
 
 import {
   addCampaignContact,
@@ -15,12 +15,12 @@ import {
   makeClient,
   upsertContact,
   upsertLead,
-} from "./salesforce/client";
+} from "./salesforce/client.ts";
 
 import {
   actionToContactRecord,
   actionToLeadRecord,
-} from "./salesforce/contact";
+} from "./salesforce/contact.ts";
 
 class SalesforceCRM extends CRM {
   client: any;

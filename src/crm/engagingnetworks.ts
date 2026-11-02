@@ -1,5 +1,5 @@
-import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm";
-import { loadEnv } from "../env";
+import { type ActionMessage, CRM, CRMType, type handleResult } from "../crm.ts";
+import { loadEnv } from "../env.ts";
 
 loadEnv();
 

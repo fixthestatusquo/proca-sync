@@ -1,28 +1,29 @@
-import {
+import type {
   ActionMessageV2,
   Campaign,
   CampaignUpdatedEventMessage,
   //  ActionPage as Widget,
-  type Counters,
+  Counters,
   EventMessageV2,
 } from "@proca/queue";
 import color from "cli-color";
-import type { Configuration } from "./config";
-import { spin } from "./spinner";
+import type { Configuration } from "./config.ts";
+import { spin } from "./spinner.ts";
 
 export type handleResult = {
   processed: boolean; // if the message has been processed or skipped
   // there will likely be more attributes to let the CRM inform the queue processor to pause for instance
 };
 
-export enum ProcessStatus {
-  unknown = 0,
-  processed = 1,
-  skipped = 2,
-  ignored = 3,
-  error = 4,
-}
-export {
+export const ProcessStatus = {
+  unknown: 0,
+  processed: 1,
+  skipped: 2,
+  ignored: 3,
+  error: 4,
+} as const;
+export type ProcessStatus = (typeof ProcessStatus)[keyof typeof ProcessStatus];
+export type {
   ActionMessageV2 as ActionMessage,
   Campaign as ProcaCampaign,
   CampaignUpdatedEventMessage as CampaignUpdatedEvent,
@@ -99,12 +100,13 @@ interface CRMInterface {
   count: Counters;
 }
 
-export enum CRMType {
-  ActionContact, // Process all actions, primary and secondary, optin and optout
-  Contact, // Process only the primary actions (eg petition signature, mtt), not the secondary ones (eg share actions)
-  OptIn, // Process only the primary actions of the contacts that opted in
-  DoubleOptIn, //only if double opt-in
-}
+export const CRMType = {
+  ActionContact: 0, // Process all actions, primary and secondary, optin and optout
+  Contact: 1, // Process only the primary actions (eg petition signature, mtt), not the secondary ones (eg share actions)
+  OptIn: 2, // Process only the primary actions of the contacts that opted in
+  DoubleOptIn: 3, //only if double opt-in
+} as const;
+export type CRMType = (typeof CRMType)[keyof typeof CRMType];
 export abstract class CRM implements CRMInterface {
   public campaigns: Record<string, any>;
   public widgets: Record<string, any>; // not used by default
@@ -444,7 +446,9 @@ export const init = async (config: Configuration): Promise<CRM> => {
     throw new Error("missing process.env.CRM");
   }
 
-  const crm = await import(`./crm/${process.env.CRM}`);
+  // .ts for running from source, bare specifier for the compiled dist build
+  const name = `./crm/${process.env.CRM}`;
+  const crm = await import(`${name}.ts`).catch(() => import(name));
   if (crm.default) {
     const instance = new crm.default(config);
     const success = await instance.init();

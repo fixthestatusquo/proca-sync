@@ -1,7 +1,7 @@
 import type { ActionMessageV2 } from "@proca/queue";
-import { CRM, CRMType, type handleResult, type ProcaCampaign } from "../crm";
-import { loadEnv } from "../env";
-import { fetchCampaign as procaCampaign } from "../proca";
+import { CRM, CRMType, type handleResult, type ProcaCampaign } from "../crm.ts";
+import { loadEnv } from "../env.ts";
+import { fetchCampaign as procaCampaign } from "../proca.ts";
 
 loadEnv();
 
