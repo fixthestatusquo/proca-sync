@@ -173,15 +173,22 @@ export abstract class CRM implements CRMInterface {
     return Promise.resolve(widget);
   };
 
-  fetchContact = async (_email: string, _context?: any): Promise<any> => {
-    throw new Error("you need to implement fetchContact in your CRM");
+  fetchContact = async (email: string, context?: any): Promise<any> => {
+    throw new Error(
+      `you need to implement fetchContact ${email} in your CRM ${context}`,
+    );
   };
 
-  setSubscribed = async (_id: any, _subscribed: boolean): Promise<boolean> => {
-    throw new Error("you need to implement setSubscribed in your CRM");
+  setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
+    //throw new Error("you need to implement setSubscribed in your CRM");
+    console.log(`${id} has unsubscribed ${subscribed}`);
+    return true;
   };
-  setBounce = async (_id: any, _bounced: boolean): Promise<boolean> => {
-    throw new Error("you need to implement setBounce in your CRM");
+
+  setBounce = async (id: any, bounced: boolean): Promise<boolean> => {
+    //throw new Error("you need to implement setBounce in your CRM");
+    console.log(`${id} has bounced ${bounced}`);
+    return true;
   };
 
   handleContact = async (
