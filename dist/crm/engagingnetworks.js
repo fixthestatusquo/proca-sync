@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSupporter = exports.upsertSupporter = exports.getToken = void 0;
-const crm_1 = require("../crm");
-const env_1 = require("../env");
-(0, env_1.loadEnv)();
+const crm_ts_1 = require("../crm.js");
+const env_ts_1 = require("../env.js");
+(0, env_ts_1.loadEnv)();
 const apiUrl = process.env.CRM_URL;
 const apiToken = process.env.CRM_API_TOKEN;
 if (!apiUrl || !apiToken) {
@@ -106,7 +106,7 @@ const getSupporter = (email, token) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getSupporter = getSupporter;
-class CleverreachCRM extends crm_1.CRM {
+class CleverreachCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this._token = null;
@@ -151,7 +151,7 @@ class CleverreachCRM extends crm_1.CRM {
             }
             return response.status === 200;
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
     }
     // Getter for token that initializes it if needed
     getToken() {

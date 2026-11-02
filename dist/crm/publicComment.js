@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const supabase_js_1 = require("@supabase/supabase-js");
-const crm_1 = require("../crm");
-class PublicCommentCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+class PublicCommentCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
@@ -79,7 +79,7 @@ class PublicCommentCRM extends crm_1.CRM {
             console.log(error);
             return false;
         });
-        this.crmType = crm_1.CRMType.Contact;
+        this.crmType = crm_ts_1.CRMType.Contact;
         if (!process.env.CRM_URL) {
             console.error("you need to set the url of your crm endpoint in the .env.xx");
             process.exit(1);

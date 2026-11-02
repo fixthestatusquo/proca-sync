@@ -9,20 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const proca_1 = require("../proca");
-const utils_1 = require("../utils");
-const client_1 = require("./gpdedatahub/client");
-const data_1 = require("./gpdedatahub/data");
-class gpdedatahubCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const proca_ts_1 = require("../proca.js");
+const utils_ts_1 = require("../utils.js");
+const client_ts_1 = require("./gpdedatahub/client.js");
+const data_ts_1 = require("./gpdedatahub/data.js");
+class gpdedatahubCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            const r = yield (0, proca_ts_1.fetchCampaign)(campaign.id);
             return r;
         });
         this.fetchWidget = (widget) => __awaiter(this, void 0, void 0, function* () {
-            return (0, proca_1.fetchWidget)(widget.id);
+            return (0, proca_ts_1.fetchWidget)(widget.id);
         });
         // CRM will take double actions and respond with 200 status
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
@@ -36,17 +36,17 @@ class gpdedatahubCRM extends crm_1.CRM {
                 const widget = yield this.widget(message.actionPage);
                 const variant = (_c = (_b = widget.config.component) === null || _b === void 0 ? void 0 : _b.test) === null || _c === void 0 ? void 0 : _c.find((d) => d.name === message.tracking.content);
                 if (variant)
-                    camp.config = (0, utils_1.deepMerge)(camp.config, { component: variant.component });
+                    camp.config = (0, utils_ts_1.deepMerge)(camp.config, { component: variant.component });
                 else
                     console.error("utm_content isn't a variant in config.component.test");
                 console.log("AB TEST variant", variant.name, camp.config.component.sync);
             }
             console.log("Taken from the queue", message.action.id, "test:", message.action.testing);
-            const actionPayload = (0, data_1.formatAction)(message, camp.config);
+            const actionPayload = (0, data_ts_1.formatAction)(message, camp.config);
             if (this.verbose) {
                 console.log(actionPayload);
             }
-            const status = yield (0, client_1.postAction)(actionPayload);
+            const status = yield (0, client_ts_1.postAction)(actionPayload);
             if (status === 200) {
                 console.log(`Action ${message.actionId} sent`);
                 return true;
@@ -56,7 +56,7 @@ class gpdedatahubCRM extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.DoubleOptIn;
+        this.crmType = crm_ts_1.CRMType.DoubleOptIn;
     }
 }
 exports.default = gpdedatahubCRM;

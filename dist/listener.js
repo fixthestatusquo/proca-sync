@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.listen = void 0;
 const queue_1 = require("@proca/queue");
-const utils_1 = require("./utils");
+const utils_ts_1 = require("./utils.js");
 const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
     const tag = `proca-sync.${process.env.CRM}.${process.env.PROCA_ENV}`;
     const opts = { tag: tag };
@@ -35,7 +35,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                 const r = yield crm.handleActionContact(action);
                 if (crm.pause) {
                     console.log("pause action...");
-                    yield (0, utils_1.pause)(10);
+                    yield (0, utils_ts_1.pause)(10);
                 }
                 if (config.dryRun) {
                     return false;
@@ -54,7 +54,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                 if (event.eventType === "email_status" ||
                     event.eventType === "campaign_updated") {
                     if (crm.pause) {
-                        yield (0, utils_1.pause)(3);
+                        yield (0, utils_ts_1.pause)(3);
                     }
                     const r = yield crm.handleEmailStatusChange(event);
                     if (typeof r === "object" && "processed" in r)
@@ -70,7 +70,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                 else {
                     if (crm.pause) {
                         console.log("pause event...");
-                        yield (0, utils_1.pause)(3);
+                        yield (0, utils_ts_1.pause)(3);
                     }
                     throw new Error(`Unknown event type: ${event.eventType}`);
                 }
@@ -78,7 +78,7 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
             default: {
                 if (crm.pause) {
                     console.log("pause...");
-                    yield (0, utils_1.pause)(10);
+                    yield (0, utils_ts_1.pause)(10);
                 }
                 throw new Error(`Unknown message type: ${actionOrEvent.schema}`);
             }

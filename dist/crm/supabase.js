@@ -11,9 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("@proca/queue");
 const supabase_js_1 = require("@supabase/supabase-js");
-const crm_1 = require("../crm");
+const crm_ts_1 = require("../crm.js");
 const crmType = process.env.ACTION_TYPE || "OptIn";
-class SupabaseCRM extends crm_1.CRM {
+class SupabaseCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.openPublishChannel = (rabbit) => {
@@ -107,7 +107,7 @@ class SupabaseCRM extends crm_1.CRM {
             console.log(error);
             return false;
         });
-        this.crmType = crm_1.CRMType[crmType];
+        this.crmType = crm_ts_1.CRMType[crmType];
         if (!process.env.CRM_URL) {
             console.error("you need to set the url of your crm endpoint in the .env.xx");
             process.exit(1);

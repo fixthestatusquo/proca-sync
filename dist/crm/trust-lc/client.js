@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.lookup = exports.verification = exports.postAction = void 0;
 const node_crypto_1 = __importDefault(require("node:crypto"));
-const env_1 = require("../../env");
-(0, env_1.loadEnv)();
+const env_ts_1 = require("../../env.js");
+(0, env_ts_1.loadEnv)();
 const makeHeaders = () => {
     const key = process.env.TRUST_KEY;
     if (!key)

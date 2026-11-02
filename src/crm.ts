@@ -422,8 +422,7 @@ export abstract class CRM implements CRMInterface {
             `${event.supporter.privacy.emailStatus} from ${event.supporter.contact.email}`,
           );
 
-          await this.setBounce(cont.id, true);
-          break;
+          return await this.setBounce(cont.id, true);
         }
       }
     }

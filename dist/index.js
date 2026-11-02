@@ -45,15 +45,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = void 0;
 const node_fs_1 = require("node:fs");
 const Sentry = __importStar(require("@sentry/node"));
 const minimist_1 = __importDefault(require("minimist"));
-const config_1 = require("./config");
-const crm_1 = require("./crm");
-const env_1 = require("./env");
-const listener_1 = require("./listener");
+const config_ts_1 = require("./config.js");
+const crm_ts_1 = require("./crm.js");
+const env_ts_1 = require("./env.js");
+const listener_ts_1 = require("./listener.js");
 const clihelp = () => {
     console.log([
         "options",
@@ -110,21 +111,21 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
             process.exit(1);
         }
     }
-    const conf = (0, env_1.loadEnv)(envFile);
+    const conf = (0, env_ts_1.loadEnv)(envFile);
     if (process.env.SENTRY_URL) {
         Sentry.init({ dsn: process.env.SENTRY_URL });
     }
     let step = "configuration";
     try {
-        const config = (0, config_1.configFromOptions)(conf, opt);
+        const config = (0, config_ts_1.configFromOptions)(conf, opt);
         if (opt.dump) {
             console.warn(`saving into data folder instead of using ${process.env.CRM}`);
             process.env.CRM = "file";
         }
         step = `CRM (${process.env.CRM}) init`;
-        const crm = yield (0, crm_1.init)(config);
+        const crm = yield (0, crm_ts_1.init)(config);
         step = `queue connection (${config.queue})`;
-        const queue = yield (0, listener_1.listen)(config, crm);
+        const queue = yield (0, listener_ts_1.listen)(config, crm);
         console.log("listening for messages");
         process.on("SIGINT", () => __awaiter(void 0, void 0, void 0, function* () {
             console.log("Caught interrupt signal");
@@ -139,11 +140,14 @@ const main = (argv) => __awaiter(void 0, void 0, void 0, function* () {
         console.error(`${step} failed: ${er}`);
         Sentry.captureException(er);
         if (step === "configuration")
-            (0, config_1.help)();
+            (0, config_ts_1.help)();
         process.exit(1);
     }
 });
 exports.main = main;
-if (require.main === module) {
+// dist (cjs) uses require.main, a native node/esm run has none: match our own file
+if (typeof require === "undefined"
+    ? (_a = process.argv[1]) === null || _a === void 0 ? void 0 : _a.endsWith("/index.ts")
+    : require.main === module) {
     (0, exports.main)(process.argv.slice(2));
 }

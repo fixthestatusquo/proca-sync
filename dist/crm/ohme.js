@@ -9,9 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const proca_1 = require("../proca");
-const utils_1 = require("../utils");
+const crm_ts_1 = require("../crm.js");
+const proca_ts_1 = require("../proca.js");
+const utils_ts_1 = require("../utils.js");
 class RateLimiter {
     constructor(maxPerMinute = 80) {
         this.timestamps = [];
@@ -50,7 +50,7 @@ class RateLimiter {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 }
-class OhmeCRM extends crm_1.CRM {
+class OhmeCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
@@ -112,7 +112,7 @@ class OhmeCRM extends crm_1.CRM {
             }
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            return (0, proca_1.fetchCampaign)(campaign.id);
+            return (0, proca_ts_1.fetchCampaign)(campaign.id);
         });
         this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
             return true;
@@ -122,17 +122,17 @@ class OhmeCRM extends crm_1.CRM {
         });
         switch (process.env.CRM_TYPE) {
             case "DOUBLE_OPTIN":
-                this.crmType = crm_1.CRMType.DoubleOptIn;
+                this.crmType = crm_ts_1.CRMType.DoubleOptIn;
                 break;
             case "CONTACT":
-                this.crmType = crm_1.CRMType.Contact;
+                this.crmType = crm_ts_1.CRMType.Contact;
                 break;
             case "ACTION_CONTACT":
-                this.crmType = crm_1.CRMType.ActionContact;
+                this.crmType = crm_ts_1.CRMType.ActionContact;
                 break;
             default:
                 // 'OPTIN'
-                this.crmType = crm_1.CRMType.OptIn;
+                this.crmType = crm_ts_1.CRMType.OptIn;
         }
         this.ohmeUrl =
             process.env.CRM_API_URL || "https://api-ohme.oneheart.fr/api/v1";
@@ -140,10 +140,10 @@ class OhmeCRM extends crm_1.CRM {
         this.token = process.env.CRM_API_TOKEN || "";
         this.sourceField = process.env.CRM_SOURCE || "";
         this.contactExtraFields = process.env.CONTACT_EXTRA_FIELDS
-            ? (0, utils_1.string2map)(process.env.CONTACT_EXTRA_FIELDS)
+            ? (0, utils_ts_1.string2map)(process.env.CONTACT_EXTRA_FIELDS)
             : undefined;
         this.interactionExtraFields = process.env.INTERACTION_EXTRA_FIELDS
-            ? (0, utils_1.string2map)(process.env.INTERACTION_EXTRA_FIELDS)
+            ? (0, utils_ts_1.string2map)(process.env.INTERACTION_EXTRA_FIELDS)
             : undefined;
         this.rateLimiter = new RateLimiter(parseInt(process.env.OHME_RATE_LIMIT || "80", 10));
         if (!this.user || !this.token) {

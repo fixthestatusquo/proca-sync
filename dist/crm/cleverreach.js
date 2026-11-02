@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const proca_1 = require("../proca");
-const client_1 = require("./cleverreach/client");
-const data_1 = require("./cleverreach/data");
-class CleverreachCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const proca_ts_1 = require("../proca.js");
+const client_ts_1 = require("./cleverreach/client.js");
+const data_ts_1 = require("./cleverreach/data.js");
+class CleverreachCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.token = null;
@@ -32,13 +32,13 @@ class CleverreachCRM extends crm_1.CRM {
             const id = campaign.id;
             if (!id)
                 throw new Error("campaign has no id, cannot fetch");
-            const r = yield (0, proca_1.fetchCampaign)(id);
+            const r = yield (0, proca_ts_1.fetchCampaign)(id);
             this.campaignCache.set(id, r);
             return r;
         });
         this.initializeToken = () => __awaiter(this, void 0, void 0, function* () {
             try {
-                this.token = yield (0, client_1.getToken)();
+                this.token = yield (0, client_ts_1.getToken)();
             }
             catch (_error) {
                 throw new Error("Failed to retrieve token");
@@ -67,8 +67,8 @@ class CleverreachCRM extends crm_1.CRM {
             if (!this.token) {
                 throw new Error("Token is not available");
             }
-            const hasValues = yield (0, client_1.getContact)(message.contact.email, this.token);
-            const done = yield (0, client_1.upsertContact)(this.token, (0, data_1.formatAction)(message, hasValues, customLabel.toLowerCase()), listId);
+            const hasValues = yield (0, client_ts_1.getContact)(message.contact.email, this.token);
+            const done = yield (0, client_ts_1.upsertContact)(this.token, (0, data_ts_1.formatAction)(message, hasValues, customLabel.toLowerCase()), listId);
             if (done) {
                 console.log(`Message ${message.actionId} sent`);
                 return true;
@@ -97,7 +97,12 @@ class CleverreachCRM extends crm_1.CRM {
         this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
             return true;
         });
-        this.crmType = crm_1.CRMType.DoubleOptIn;
+        // bounces/spam/unsub are not synced to CleverReach, ack them so they leave the queue
+        this.setBounce = (id, bounced) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`setBounce ${id} ${bounced}: not synced to CleverReach, ignoring`);
+            return true;
+        });
+        this.crmType = crm_ts_1.CRMType.DoubleOptIn;
         this.initializeToken();
     }
 }

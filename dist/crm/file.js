@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_fs_1 = require("node:fs");
-const crm_1 = require("../crm");
+const crm_ts_1 = require("../crm.js");
 /*
  * A debug CRM that saves the data into the data folder
  *
@@ -22,7 +22,7 @@ const writeJson = (data, name, folder) => {
         path = `${path + folder}/`;
     (0, node_fs_1.writeFileSync)(`${path + name}.json`, JSON.stringify(data, null, 2));
 };
-class FileCRM extends crm_1.CRM {
+class FileCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         /*

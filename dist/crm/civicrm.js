@@ -8,11 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const utils_1 = require("../utils");
-const civicrm = require("civicrm");
-class CiviCRM extends crm_1.CRM {
+const civicrm_1 = __importDefault(require("civicrm"));
+const crm_ts_1 = require("../crm.js");
+const utils_ts_1 = require("../utils.js");
+class CiviCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
@@ -315,7 +318,7 @@ class CiviCRM extends crm_1.CRM {
             return r.values;
         });
         this.countries = {};
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
         if (!process.env.CIVICRM_API_KEY) {
             console.error("you need to set the CIVICRM_API_KEY from CiviCRM in the .env.xx");
             process.exit(1);
@@ -334,7 +337,7 @@ class CiviCRM extends crm_1.CRM {
         if (process.env.CIVICRM_KEY) {
             config.key = process.env.CIVICRM_KEY;
         }
-        this.crmAPI = civicrm(config);
+        this.crmAPI = (0, civicrm_1.default)(config);
         if (this.verbose) {
             this.crmAPI.debug(true);
         }
@@ -345,7 +348,7 @@ class CiviCRM extends crm_1.CRM {
         if (typeof process.env.CUSTOM_FIELDS === "string") {
             // get query format, key = contact field, value = merge field in CiviCRM
             // eg. MERGE_FIELDS="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
-            this.customFields = (0, utils_1.string2map)(process.env.CUSTOM_FIELDS);
+            this.customFields = (0, utils_ts_1.string2map)(process.env.CUSTOM_FIELDS);
             console.log("custom mergeFields", this.customFields);
         }
     }

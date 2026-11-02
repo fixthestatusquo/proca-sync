@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upsertContact = exports.getGroups = exports.getContact = exports.getToken = void 0;
-const env_1 = require("../../env");
-(0, env_1.loadEnv)();
+const env_ts_1 = require("../../env.js");
+(0, env_ts_1.loadEnv)();
 const tokenUrl = process.env.CRM_TOKEN_URL;
 const ID = process.env.CRM_ID; //letters
 const secret = process.env.CRM_SECRET;

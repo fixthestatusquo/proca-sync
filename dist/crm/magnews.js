@@ -9,8 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const client_1 = require("./magnews/client");
+const crm_ts_1 = require("../crm.js");
+const client_ts_1 = require("./magnews/client.js");
 /*
  *
 
@@ -18,13 +18,13 @@ interface CRM {
   fetchCampaigns = () : Promise<void>
 }
 */
-class MagNewsCRM extends crm_1.CRM {
+class MagNewsCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             const camp = yield this.campaign(message.campaign);
             const member = this.actionToContactRecord(message, camp);
-            const r = (yield (0, client_1.addContact)(this.clientToken, member));
+            const r = (yield (0, client_ts_1.addContact)(this.clientToken, member));
             if (!r) {
                 //not sure what to do
                 return { processed: true };
@@ -70,8 +70,8 @@ class MagNewsCRM extends crm_1.CRM {
                 console.log(e);
             }
         });
-        this.crmType = crm_1.CRMType.OptIn; // will only process opt-in contacts, the other events are filtered before the class
-        this.clientToken = (0, client_1.setClientToken)();
+        this.crmType = crm_ts_1.CRMType.OptIn; // will only process opt-in contacts, the other events are filtered before the class
+        this.clientToken = (0, client_ts_1.setClientToken)();
         this.iddatabase = 6;
         this.idnewsletter = 1811;
         this.audience = "ecipel"; // single "campaign" mapping, TODO: implement fetchCampaign when more than one is needed

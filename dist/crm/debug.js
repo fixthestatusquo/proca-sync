@@ -9,12 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
+const crm_ts_1 = require("../crm.js");
 /*
  * A debug CRM that displays the messages and events in the log
  *
  */
-class DebugCRM extends crm_1.CRM {
+class DebugCRM extends crm_ts_1.CRM {
     constructor() {
         super(...arguments);
         this.handleActionContact = (message) => __awaiter(this, void 0, void 0, function* () {

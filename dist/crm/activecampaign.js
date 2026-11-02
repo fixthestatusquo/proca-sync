@@ -8,17 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
-const crm_1 = require("../crm");
-const env_1 = require("../env");
-const proca_1 = require("../proca");
-(0, env_1.loadEnv)();
-class ActiveCampaign extends crm_1.CRM {
+const lodash_1 = __importDefault(require("lodash"));
+const crm_ts_1 = require("../crm.js");
+const env_ts_1 = require("../env.js");
+const proca_ts_1 = require("../proca.js");
+const { pick } = lodash_1.default;
+(0, env_ts_1.loadEnv)();
+class ActiveCampaign extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            return (0, proca_1.fetchCampaign)(campaign.id);
+            return (0, proca_ts_1.fetchCampaign)(campaign.id);
         });
         this.body = (contact, sync) => {
             const fieldValues = this.getOrgFieldValues(contact, sync);
@@ -149,7 +153,7 @@ class ActiveCampaign extends crm_1.CRM {
                 const sync = ((_b = (_a = camp.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) || {};
                 const listid = sync.listid || process.env.CRM_LIST_ID;
                 const tagids = sync.tagids || process.env.CRM_TAG_IDS;
-                const contactPayload = Object.assign(Object.assign({}, (0, lodash_1.pick)(message.contact, [
+                const contactPayload = Object.assign(Object.assign({}, pick(message.contact, [
                     "email",
                     "firstName",
                     "lastName",
@@ -183,16 +187,16 @@ class ActiveCampaign extends crm_1.CRM {
         });
         switch (process.env.CRM_TYPE) {
             case "DOUBLE_OPTIN":
-                this.crmType = crm_1.CRMType.DoubleOptIn;
+                this.crmType = crm_ts_1.CRMType.DoubleOptIn;
                 break;
             case "CONTACT":
-                this.crmType = crm_1.CRMType.Contact;
+                this.crmType = crm_ts_1.CRMType.Contact;
                 break;
             case "ACTION_CONTACT":
-                this.crmType = crm_1.CRMType.ActionContact;
+                this.crmType = crm_ts_1.CRMType.ActionContact;
                 break;
             default:
-                this.crmType = crm_1.CRMType.DoubleOptIn;
+                this.crmType = crm_ts_1.CRMType.DoubleOptIn;
         }
         this.url = process.env.CRM_URL || "";
         this.token = process.env.CRM_API_TOKEN || "";

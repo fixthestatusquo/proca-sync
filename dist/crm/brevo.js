@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const brevo_1 = require("@getbrevo/brevo");
-const crm_1 = require("../crm");
-const utils_1 = require("../utils");
-class BrevoCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const utils_ts_1 = require("../utils.js");
+class BrevoCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.folderId = 0;
@@ -150,17 +150,17 @@ class BrevoCRM extends crm_1.CRM {
         });
         switch (process.env.CRM_TYPE) {
             case "DOUBLE_OPTIN":
-                this.crmType = crm_1.CRMType.DoubleOptIn;
+                this.crmType = crm_ts_1.CRMType.DoubleOptIn;
                 break;
             default:
-                this.crmType = crm_1.CRMType.OptIn;
+                this.crmType = crm_ts_1.CRMType.OptIn;
         }
         this.brevo = new brevo_1.BrevoClient({
             apiKey: process.env.SENDINBLUE_KEY || process.env.BREVO_KEY || "",
         });
         const attributes = process.env.CONTACT_ATTRIBUTES;
         if (attributes !== undefined) {
-            this.mapping = (0, utils_1.string2map)(attributes);
+            this.mapping = (0, utils_ts_1.string2map)(attributes);
         }
     }
 }

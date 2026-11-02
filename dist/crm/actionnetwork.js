@@ -9,10 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const env_1 = require("../env");
-const proca_1 = require("../proca");
-(0, env_1.loadEnv)();
+const crm_ts_1 = require("../crm.js");
+const env_ts_1 = require("../env.js");
+const proca_ts_1 = require("../proca.js");
+(0, env_ts_1.loadEnv)();
 const url = process.env.CRM_URL;
 const token = process.env.CRM_API_TOKEN; // change!!
 const formID = process.env.CRM_FORM;
@@ -70,11 +70,11 @@ const getHeaders = (test) => ({
     "Content-Type": "application/json",
     "OSDI-API-Token": test && testToken ? testToken : token,
 });
-class ActionNetwork extends crm_1.CRM {
+class ActionNetwork extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            const r = yield (0, proca_ts_1.fetchCampaign)(campaign.id);
             return r;
         });
         // submit an action (form submission) for a given person
@@ -220,7 +220,7 @@ class ActionNetwork extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.Contact;
+        this.crmType = crm_ts_1.CRMType.Contact;
         this.formCache = new Map();
         this.tagCache = new Map();
     }

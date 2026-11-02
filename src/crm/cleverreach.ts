@@ -129,6 +129,13 @@ class CleverreachCRM extends CRM {
   setSubscribed = async (_id: any, _subscribed: boolean): Promise<boolean> => {
     return true;
   };
+
+  setBounce = async (id: any, bounced: boolean): Promise<boolean> => {
+    console.log(
+      `setBounce ${id} ${bounced}: not synced to CleverReach, ignoring`,
+    );
+    return true;
+  };
 }
 
 export default CleverreachCRM;

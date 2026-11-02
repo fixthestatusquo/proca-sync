@@ -14,10 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_fs_1 = __importDefault(require("node:fs"));
 const sync_1 = require("csv-stringify/sync");
-const crm_1 = require("../crm");
-const proca_1 = require("../proca");
-const utils_1 = require("../utils");
-class CsvCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const proca_ts_1 = require("../proca.js");
+const utils_ts_1 = require("../utils.js");
+class CsvCRM extends crm_ts_1.CRM {
     constructor(options = {}) {
         super(options);
         this.stream = null;
@@ -83,7 +83,7 @@ class CsvCRM extends crm_1.CRM {
             return record;
         };
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            return (0, proca_1.fetchCampaign)(campaign.id);
+            return (0, proca_ts_1.fetchCampaign)(campaign.id);
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
@@ -131,9 +131,9 @@ class CsvCRM extends crm_1.CRM {
                 }
             });
         };
-        this.crmType = crm_1.CRMType.Contact;
+        this.crmType = crm_ts_1.CRMType.Contact;
         if (typeof process.env.MERGE_FIELDS === "string") {
-            this.mergeFields = (0, utils_1.string2map)(process.env.MERGE_FIELDS);
+            this.mergeFields = (0, utils_ts_1.string2map)(process.env.MERGE_FIELDS);
         }
         this.csvPath =
             process.env.CSV_PATH ||

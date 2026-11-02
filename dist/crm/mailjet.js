@@ -8,10 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const utils_1 = require("../utils");
-class Mailjet extends crm_1.CRM {
+const node_mailjet_1 = __importDefault(require("node-mailjet"));
+const crm_ts_1 = require("../crm.js");
+const utils_ts_1 = require("../utils.js");
+class Mailjet extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
@@ -115,7 +119,7 @@ class Mailjet extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
         if (!process.env.MJ_APIKEY_PUBLIC) {
             console.error("you need to set the MJ_APIKEY_PUBLIC from mailjet in the .env.xx");
             process.exit(1);
@@ -131,7 +135,7 @@ class Mailjet extends crm_1.CRM {
             this.list = +process.env.LIST;
         }
         try {
-            this.mailjet = require("node-mailjet").apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
+            this.mailjet = node_mailjet_1.default.apiConnect(process.env.MJ_APIKEY_PUBLIC, process.env.MJ_APIKEY_PRIVATE);
         }
         catch (e) {
             console.log(e.message, "can't connect, check MJ_APIKEY_PUBLIC and PRIVATE?");
@@ -140,7 +144,7 @@ class Mailjet extends crm_1.CRM {
         if (typeof process.env.CONTACT_PROPERTIES === "string") {
             // get query format, key = contact field, value = merge field in mailjet
             // eg. CONTACT_PROPERTIES="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
-            this.contactProperties = (0, utils_1.string2map)(process.env.CONTACT_PROPERTIES);
+            this.contactProperties = (0, utils_ts_1.string2map)(process.env.CONTACT_PROPERTIES);
         }
     }
 }

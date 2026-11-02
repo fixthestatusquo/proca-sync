@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addContact = exports.setClientToken = exports.memberHash = void 0;
 const node_crypto_1 = __importDefault(require("node:crypto"));
-const magnews_1 = __importDefault(require("./magnews"));
+const magnews_ts_1 = __importDefault(require("./magnews.js"));
 const memberHash = (email) => {
     const hash = node_crypto_1.default.createHash("md5").update(email).digest("hex");
     return hash;
@@ -25,16 +25,16 @@ const setClientToken = () => {
         const tok = process.env.AUTH_TOKEN;
         if (!tok)
             throw Error("auth token is empty!");
-        magnews_1.default.setConfig({
+        magnews_ts_1.default.setConfig({
             accessToken: tok,
         });
-        return magnews_1.default.getToken();
+        return magnews_ts_1.default.getToken();
     }
     throw Error("Define AUTH_TOKEN");
 };
 exports.setClientToken = setClientToken;
 const addContact = (token, member) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield magnews_1.default.addListMember(token, member);
+    const result = yield magnews_ts_1.default.addListMember(token, member);
     return result;
 });
 exports.addContact = addContact;

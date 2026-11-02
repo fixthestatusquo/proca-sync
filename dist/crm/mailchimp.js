@@ -9,25 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const utils_1 = require("../utils");
-const client_1 = require("./mailchimp/client");
-const contact_1 = require("./mailchimp/contact");
-class MailchimpCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const utils_ts_1 = require("../utils.js");
+const client_ts_1 = require("./mailchimp/client.js");
+const contact_ts_1 = require("./mailchimp/contact.js");
+class MailchimpCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
             var _a;
             if (this.list === "") {
                 console.log("fetching exisiting lists");
-                const r = yield (0, client_1.allLists)(this.client);
+                const r = yield (0, client_ts_1.allLists)(this.client);
                 const lists = r.lists || [];
                 lists === null || lists === void 0 ? void 0 : lists.forEach((d) => {
                     console.log(d.id, d.name);
                 });
                 return false;
             }
-            const r = yield (0, client_1.allCampaigns)(this.client, this.list, this.group);
+            const r = yield (0, client_ts_1.allCampaigns)(this.client, this.list, this.group);
             (_a = r.interests) === null || _a === void 0 ? void 0 : _a.forEach((d) => {
                 console.log("campaign?", d.id, d.name, d.subscriber_count);
             });
@@ -35,7 +35,7 @@ class MailchimpCRM extends crm_1.CRM {
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             //const response = await this.client.ping.get();
-            const actionPayload = (0, contact_1.actionToContactRecord)(message, this.mergeFields, false, false);
+            const actionPayload = (0, contact_ts_1.actionToContactRecord)(message, this.mergeFields, false, false);
             if (this.verbose) {
                 console.log(actionPayload);
             }
@@ -55,7 +55,7 @@ class MailchimpCRM extends crm_1.CRM {
             }
         });
         this.fetchContact = (email) => __awaiter(this, void 0, void 0, function* () {
-            return (0, client_1.findMember)(this.client, email);
+            return (0, client_ts_1.findMember)(this.client, email);
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
             console.log("fetching campaign", campaign.name);
@@ -66,7 +66,7 @@ class MailchimpCRM extends crm_1.CRM {
             }
             return campaign;
         });
-        this.addContactToList = (client_2, list_id_1, member_1, ...args_1) => __awaiter(this, [client_2, list_id_1, member_1, ...args_1], void 0, function* (client, list_id, member, verbose = false) {
+        this.addContactToList = (client_1, list_id_1, member_1, ...args_1) => __awaiter(this, [client_1, list_id_1, member_1, ...args_1], void 0, function* (client, list_id, member, verbose = false) {
             var _a, _b;
             if (!member.status) {
                 member.status = member.status_if_new;
@@ -89,7 +89,7 @@ class MailchimpCRM extends crm_1.CRM {
                     delete response._links;
                     console.log(response);
                 }
-                this.log(`adding ${member.email_address}`, crm_1.ProcessStatus.processed);
+                this.log(`adding ${member.email_address}`, crm_ts_1.ProcessStatus.processed);
                 return true;
             }
             catch (e) {
@@ -100,13 +100,13 @@ class MailchimpCRM extends crm_1.CRM {
                             this.log("member exists already", b);
                         }
                         else {
-                            this.log("", crm_1.ProcessStatus.skipped);
+                            this.log("", crm_ts_1.ProcessStatus.skipped);
                         }
                         return true;
                     case "Forgotten Email Not Subscribed":
                     case "Member In Compliance State":
                     case "Invalid Resource":
-                        this.log((b === null || b === void 0 ? void 0 : b.detail) || b.title, crm_1.ProcessStatus.ignored);
+                        this.log((b === null || b === void 0 ? void 0 : b.detail) || b.title, crm_ts_1.ProcessStatus.ignored);
                         return true;
                     default:
                         console.log("unexpected error", b);
@@ -114,7 +114,7 @@ class MailchimpCRM extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
         if (!process.env.AUTH_TOKEN) {
             console.error("you need to set the AUTH_TOKEN from mailchimp in the .env.xx");
             process.exit(1);
@@ -133,7 +133,7 @@ class MailchimpCRM extends crm_1.CRM {
         }
         this.interest = process.env.INTEREST || "";
         try {
-            this.client = (0, client_1.makeClient)();
+            this.client = (0, client_ts_1.makeClient)();
         }
         catch (e) {
             console.log(e.message, "can't connected, check AUTH_TOKEN?");
@@ -142,7 +142,7 @@ class MailchimpCRM extends crm_1.CRM {
         if (typeof process.env.MERGE_FIELDS === "string") {
             // get query format, key = contact field, value = merge field in mailchimp
             // eg. MERGE_FIELDS="firstName=PRENOM&lastName=NOM&country=PAYS&locality=VILLE&postcode=CP&street=RUE1"
-            this.mergeFields = (0, utils_1.string2map)(process.env.MERGE_FIELDS);
+            this.mergeFields = (0, utils_ts_1.string2map)(process.env.MERGE_FIELDS);
             console.log("custom mergeFields", this.mergeFields);
         }
     }

@@ -9,34 +9,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-const proca_1 = require("../proca");
-const client_1 = require("./trust-lc/client");
-const data_1 = require("./trust-lc/data");
-class TrustCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+const proca_ts_1 = require("../proca.js");
+const client_ts_1 = require("./trust-lc/client.js");
+const data_ts_1 = require("./trust-lc/data.js");
+class TrustCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const r = yield (0, proca_1.fetchCampaign)(campaign.id);
+            const r = yield (0, proca_ts_1.fetchCampaign)(campaign.id);
             return r;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b, _c, _d;
             console.log("Taken from queue", message.action.id);
             const campaign = yield this.fetchCampaign(message.campaign);
-            const actionPayload = (0, data_1.formatAction)(message, (_c = (_b = (_a = campaign === null || campaign === void 0 ? void 0 : campaign.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.moveCode);
+            const actionPayload = (0, data_ts_1.formatAction)(message, (_c = (_b = (_a = campaign === null || campaign === void 0 ? void 0 : campaign.config) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.sync) === null || _c === void 0 ? void 0 : _c.moveCode);
             if (this.verbose) {
                 console.log(actionPayload);
             }
             const verificationPayload = {
                 petition_signature: {
                     subscribe_newsletter: actionPayload.petition_signature.subscribe_newsletter,
-                    data_handling_consent: (0, data_1.handleConsent)(message),
+                    data_handling_consent: (0, data_ts_1.handleConsent)(message),
                 },
             };
-            const data = yield (0, client_1.postAction)(actionPayload);
+            const data = yield (0, client_ts_1.postAction)(actionPayload);
             if ((_d = data.petition_signature) === null || _d === void 0 ? void 0 : _d.verification_token) {
-                const _verified = yield (0, client_1.verification)(data.petition_signature.verification_token, verificationPayload);
+                const _verified = yield (0, client_ts_1.verification)(data.petition_signature.verification_token, verificationPayload);
                 console.log("Verified", "data:", "actionId:", message.actionId, "moveCode:", actionPayload.petition_signature.move_code || "no moveCode");
                 return true;
             }
@@ -49,7 +49,7 @@ class TrustCRM extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.DoubleOptIn;
+        this.crmType = crm_ts_1.CRMType.DoubleOptIn;
     }
 }
 exports.default = TrustCRM;

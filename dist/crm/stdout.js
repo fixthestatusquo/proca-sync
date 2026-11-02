@@ -36,8 +36,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-class StdOut extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+class StdOut extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.dryRun = false;
@@ -92,7 +92,7 @@ class StdOut extends crm_1.CRM {
                 return false;
             return true;
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
     }
 }
 exports.default = StdOut;

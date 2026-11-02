@@ -9,20 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crm_1 = require("../crm");
-//import { string2map } from "../utils";
-const client_1 = require("./salesforce/client");
-const contact_1 = require("./salesforce/contact");
-class SalesforceCRM extends crm_1.CRM {
+const crm_ts_1 = require("../crm.js");
+//import { string2map } from "../utils.ts";
+const client_ts_1 = require("./salesforce/client.js");
+const contact_ts_1 = require("./salesforce/contact.js");
+class SalesforceCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
-            const { conn } = yield (0, client_1.makeClient)(this.config);
+            const { conn } = yield (0, client_ts_1.makeClient)(this.config);
             this.crmAPI = conn;
             return true;
         });
         this.fetchCampaign = (campaign) => __awaiter(this, void 0, void 0, function* () {
-            const camp = yield (0, client_1.campaignByName)(this.crmAPI, campaign.name, this.config);
+            const camp = yield (0, client_ts_1.campaignByName)(this.crmAPI, campaign.name, this.config);
             return camp;
         });
         this.handleContact = (message) => __awaiter(this, void 0, void 0, function* () {
@@ -34,17 +34,17 @@ class SalesforceCRM extends crm_1.CRM {
                 const defaultLastName = "[not provided]";
                 //#ExecStart=/opt/nvm/nvm-exec salesforce-sync -q cus... -l -O Opt_In__c -D -T
                 if (this.config.lead) {
-                    const record = (0, contact_1.actionToLeadRecord)(message, {
+                    const record = (0, contact_ts_1.actionToLeadRecord)(message, {
                         language: this.config.fieldLanguage,
                         doubleOptIn: this.config.doi,
                         optInField: this.config.fieldOptIn,
                         defaultLastName: defaultLastName,
                     });
-                    const LeadId = yield (0, client_1.upsertLead)(this.crmAPI, record);
+                    const LeadId = yield (0, client_ts_1.upsertLead)(this.crmAPI, record);
                     if (!LeadId)
                         throw Error(`Could not upsert lead`);
                     try {
-                        const _r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
+                        const _r = yield (0, client_ts_1.addCampaignContact)(this.crmAPI, camp.Id, { LeadId }, message);
                     }
                     catch (_e) {
                         return true;
@@ -52,16 +52,16 @@ class SalesforceCRM extends crm_1.CRM {
                     //        console.log(`Added lead to campaign ${JSON.stringify(r)}`);
                 }
                 else {
-                    const record = (0, contact_1.actionToContactRecord)(message, {
+                    const record = (0, contact_ts_1.actionToContactRecord)(message, {
                         language: this.config.fieldLanguage,
                         doubleOptIn: this.config.doi,
                         optInField: this.config.fieldOptIn,
                         defaultLastName: defaultLastName,
                     });
-                    const ContactId = yield (0, client_1.upsertContact)(this.crmAPI, record);
+                    const ContactId = yield (0, client_ts_1.upsertContact)(this.crmAPI, record);
                     if (!ContactId)
                         throw Error(`Could not upsert contact`);
-                    const _r = yield (0, client_1.addCampaignContact)(this.crmAPI, camp.Id, { ContactId }, message);
+                    const _r = yield (0, client_ts_1.addCampaignContact)(this.crmAPI, camp.Id, { ContactId }, message);
                     //        console.log(`Added contact to campaign ${JSON.stringify(r)}`);
                 }
                 return true;
@@ -78,7 +78,7 @@ class SalesforceCRM extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
         if (!process.env.SALESFORCE_URL) {
             this.error("you need to set the url of your api4 endpoint in the .env.xx");
             process.exit(1);

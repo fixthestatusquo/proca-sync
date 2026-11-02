@@ -13,8 +13,8 @@ exports.actionToRecord = exports.DEFAULT_FIELDS = exports.jwtAssertion = void 0;
 const node_crypto_1 = require("node:crypto");
 const node_fs_1 = require("node:fs");
 const jsforce_1 = require("jsforce");
-const crm_1 = require("../crm");
-const utils_1 = require("../utils");
+const crm_ts_1 = require("../crm.js");
+const utils_ts_1 = require("../utils.js");
 // Salesforce expects the generic login host in `aud`, not the My Domain token URL
 const audience = (loginUrl) => {
     if (loginUrl.includes("test.salesforce.com") ||
@@ -124,7 +124,7 @@ const actionToRecord = (message, fields) => {
     return record;
 };
 exports.actionToRecord = actionToRecord;
-class SalesforceJWTCRM extends crm_1.CRM {
+class SalesforceJWTCRM extends crm_ts_1.CRM {
     constructor(opt) {
         super(opt);
         this.init = () => __awaiter(this, void 0, void 0, function* () {
@@ -165,7 +165,7 @@ class SalesforceJWTCRM extends crm_1.CRM {
                 return false;
             }
         });
-        this.crmType = crm_1.CRMType.OptIn;
+        this.crmType = crm_ts_1.CRMType.OptIn;
         const keyPath = process.env.SALESFORCE_PRIVATE_KEY_PATH;
         if (!process.env.SALESFORCE_URL || !process.env.SALESFORCE_CONSUMER_KEY) {
             throw new Error("set SALESFORCE_URL, SALESFORCE_CONSUMER_KEY, SALESFORCE_USERNAME and SALESFORCE_PRIVATE_KEY_PATH in the .env");
@@ -178,7 +178,7 @@ class SalesforceJWTCRM extends crm_1.CRM {
             username: process.env.SALESFORCE_USERNAME || "missing SALESFORCE_USERNAME",
             privateKey: (0, node_fs_1.readFileSync)(keyPath, "utf8"),
             object: process.env.SALESFORCE_OBJECT || "Contact",
-            fields: (0, utils_1.string2map)(process.env.SALESFORCE_FIELDS || exports.DEFAULT_FIELDS),
+            fields: (0, utils_ts_1.string2map)(process.env.SALESFORCE_FIELDS || exports.DEFAULT_FIELDS),
         };
     }
 }
