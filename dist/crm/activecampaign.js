@@ -185,6 +185,10 @@ class ActiveCampaign extends crm_ts_1.CRM {
         this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
             return true;
         });
+        this.setBounce = (id, bounced) => __awaiter(this, void 0, void 0, function* () {
+            console.log(`setBounce ${id} ${bounced}: not synced to ActiveCampaign, ignoring`);
+            return true;
+        });
         switch (process.env.CRM_TYPE) {
             case "DOUBLE_OPTIN":
                 this.crmType = crm_ts_1.CRMType.DoubleOptIn;

@@ -97,7 +97,6 @@ class CleverreachCRM extends crm_ts_1.CRM {
         this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
             return true;
         });
-        // bounces/spam/unsub are not synced to CleverReach, ack them so they leave the queue
         this.setBounce = (id, bounced) => __awaiter(this, void 0, void 0, function* () {
             console.log(`setBounce ${id} ${bounced}: not synced to CleverReach, ignoring`);
             return true;

@@ -347,6 +347,13 @@ class ActiveCampaign extends CRM {
   setSubscribed = async (id: any, subscribed: boolean): Promise<boolean> => {
     return true;
   };
+
+  setBounce = async (id: any, bounced: boolean): Promise<boolean> => {
+    console.log(
+      `setBounce ${id} ${bounced}: not synced to ActiveCampaign, ignoring`,
+    );
+    return true;
+  };
 }
 
 export default ActiveCampaign;
