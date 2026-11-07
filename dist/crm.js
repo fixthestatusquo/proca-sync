@@ -102,14 +102,18 @@ class CRM {
         this.fetchWidget = (widget) => __awaiter(this, void 0, void 0, function* () {
             return Promise.resolve(widget);
         });
-        this.fetchContact = (_email, _context) => __awaiter(this, void 0, void 0, function* () {
-            throw new Error("you need to implement fetchContact in your CRM");
+        this.fetchContact = (email, context) => __awaiter(this, void 0, void 0, function* () {
+            throw new Error(`you need to implement fetchContact ${email} in your CRM ${context}`);
         });
-        this.setSubscribed = (_id, _subscribed) => __awaiter(this, void 0, void 0, function* () {
-            throw new Error("you need to implement setSubscribed in your CRM");
+        this.setSubscribed = (id, subscribed) => __awaiter(this, void 0, void 0, function* () {
+            //throw new Error("you need to implement setSubscribed in your CRM");
+            console.log(`${id} has unsubscribed ${subscribed}`);
+            return true;
         });
-        this.setBounce = (_id, _bounced) => __awaiter(this, void 0, void 0, function* () {
-            throw new Error("you need to implement setBounce in your CRM");
+        this.setBounce = (id, bounced) => __awaiter(this, void 0, void 0, function* () {
+            //throw new Error("you need to implement setBounce in your CRM");
+            console.log(`${id} has bounced ${bounced}`);
+            return true;
         });
         this.handleContact = (_message) => __awaiter(this, void 0, void 0, function* () {
             throw new Error("you need to implement handleContact in your CRM");

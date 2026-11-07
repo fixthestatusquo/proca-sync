@@ -67,6 +67,9 @@ class BrevoCRM extends CRM {
     if (process.env.DOUBLE_OPTIN) {
       attributes[process.env.DOUBLE_OPTIN] = "Yes";
     }
+    if (process.env.CAMPAIGN_ATTRIBUTE) {
+      attributes[process.env.CAMPAIGN_ATTRIBUTE] = message.campaign.name;
+    }
 
     const listIds = [camp.id];
     if (process.env.LIST) {
@@ -80,7 +83,7 @@ class BrevoCRM extends CRM {
       emailBlacklisted: false,
       updateEnabled: true,
     };
-
+    console.log("payload", payload);
     try {
       await this.brevo.contacts.createContact(payload);
       console.log("contact added", message.contact.email);
