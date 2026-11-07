@@ -83,7 +83,6 @@ class BrevoCRM extends CRM {
       emailBlacklisted: false,
       updateEnabled: true,
     };
-    console.log("payload", payload);
     try {
       await this.brevo.contacts.createContact(payload);
       console.log("contact added", message.contact.email);
