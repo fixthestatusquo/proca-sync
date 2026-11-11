@@ -1,6 +1,9 @@
 import type { ActionMessage } from "../../crm.ts";
 
-export type GPAction = ActionMessage & { promo_code?: string } & {
+export type GPAction = ActionMessage & {
+  promo_code?: string;
+  bannerid?: string;
+} & {
   form_type?: string;
 };
 
@@ -12,12 +15,16 @@ export const formatAction = (queueAction: ActionMessage, config: any) => {
     queueAction.action.actionType === "email"
       ? "protestmail"
       : "petition";
+  if (data.action.customFields.bannerid)
+    data.bannerid = data.action.customFields.bannerid.toString();
   if (
     data.action.customFields.promocode ||
     data.action.customFields.promocodephone
   ) {
     data.promo_code = data.contact?.phone
-      ? data.action.customFields.promocodephone.toString() || ""
+      ? data.action.customFields.promocodephone.toString() ||
+        data.action.customFields.promocodephone.toString() ||
+        ""
       : data.action.customFields.promocode.toString() || "";
   } else if (
     config?.component?.sync?.promoCode?.default ||
