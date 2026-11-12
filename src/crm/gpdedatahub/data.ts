@@ -22,10 +22,10 @@ export const formatAction = (queueAction: ActionMessage, config: any) => {
     data.action.customFields.promocodephone
   ) {
     data.promo_code = data.contact?.phone
-      ? data.action.customFields.promocodephone.toString() ||
-        data.action.customFields.promocodephone.toString() ||
+      ? data.action.customFields.promocodephone?.toString() ||
+        data.action.customFields.promocode?.toString() ||
         ""
-      : data.action.customFields.promocode.toString() || "";
+      : data.action.customFields.promocode?.toString() || "";
   } else if (
     config?.component?.sync?.promoCode?.default ||
     config?.component?.sync?.promoCode?.phone
