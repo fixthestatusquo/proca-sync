@@ -82,6 +82,7 @@ const makeClient = (c_1, ...args_1) => __awaiter(void 0, [c_1, ...args_1], void 
     });
 });
 // Dot path in the Proca message = Salesforce field. Override with SALESFORCE_FIELDS.
+// The key "*" maps the whole Proca message (the full payload event) as JSON.
 // Defaults are standard Contact fields; no standard equivalent for action.createdAt
 // (CreatedDate is read-only) or campaign.id (that lives on CampaignMember).
 exports.DEFAULT_FIELDS = "contact.firstName=FirstName" +
@@ -95,6 +96,8 @@ exports.DEFAULT_FIELDS = "contact.firstName=FirstName" +
     "&action.customFields.comment=Description";
 const readPath = (obj, path) => {
     let value = obj;
+    if (path === "*")
+        return JSON.stringify(obj);
     for (const key of path.split(".")) {
         if (typeof value !== "object" || value === null)
             return undefined;
@@ -120,7 +123,6 @@ const actionToRecord = (message, fields) => {
         }
         record[target] = value;
     }
-    console.log(record);
     return record;
 };
 exports.actionToRecord = actionToRecord;
