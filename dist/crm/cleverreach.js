@@ -82,7 +82,8 @@ class CleverreachCRM extends crm_ts_1.CRM {
         });
         this.handleEvent = (message) => __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            if (message.eventType === "campaign_updated") {
+            if (message.eventType === "campaign_updated" || // legacy name
+                message.eventType === "campaign.update") {
                 return this.handleCampaignUpdate(message);
             }
             if (message.eventType !== "email_status")

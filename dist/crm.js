@@ -119,9 +119,15 @@ class CRM {
             throw new Error("you need to implement handleContact in your CRM");
         });
         this.handleCampaignUpdate = (message) => __awaiter(this, void 0, void 0, function* () {
-            console.warn("campaign update", message.campaign.name, message.campaign.title);
+            var _a;
+            const name = (_a = message.campaign) === null || _a === void 0 ? void 0 : _a.name;
+            if (!name) {
+                console.warn("campaign update without campaign name, ignoring", message);
+                return true;
+            }
+            console.warn("campaign update", name, message.campaign.title);
             //we need to refetch campaign when it is updated, clear the cache
-            delete this.campaign[message.campaign.name];
+            delete this.campaigns[name];
             return true;
         });
         this.formatResult = (result) => {
@@ -264,7 +270,8 @@ class CRM {
             // 4. Event message arrives, We set Contact as bounced
             var _a;
             // events unrelated to CRM are handled separately
-            if (event.eventType === "campaign_updated") {
+            if (event.eventType === "campaign_updated" || // legacy name
+                event.eventType === "campaign.update") {
                 const r = yield this.handleCampaignUpdate(event);
                 return r;
             }

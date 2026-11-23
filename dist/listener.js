@@ -52,7 +52,8 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                 // We are interested in email status changes
                 // other types mosly need to be processed to be removed from the queue
                 if (event.eventType === "email_status" ||
-                    event.eventType === "campaign_updated") {
+                    event.eventType === "campaign_updated" || // legacy name
+                    event.eventType === "campaign.update") {
                     if (crm.pause) {
                         yield (0, utils_ts_1.pause)(3);
                     }
