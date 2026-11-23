@@ -52,8 +52,9 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                 // We are interested in email status changes
                 // other types mosly need to be processed to be removed from the queue
                 if (event.eventType === "email_status" ||
-                    event.eventType === "campaign_updated" || // legacy name
-                    event.eventType === "campaign.update") {
+                    event.eventType === "campaign_updated" ||
+                    event.eventType === "campaign.update" // new name?
+                ) {
                     if (crm.pause) {
                         yield (0, utils_ts_1.pause)(3);
                     }
@@ -64,8 +65,9 @@ const listen = (config, crm) => __awaiter(void 0, void 0, void 0, function* () {
                         return r;
                     return true;
                 }
-                else if (event.eventType === "confirm_created") {
-                    console.log("Ignoring and removing from the queue confirm_created event");
+                else if (event.eventType === "confirm_created" ||
+                    event.eventType === "campaign.add") {
+                    console.log(`Ignoring and removing from the queue ${event.eventType} event`);
                     return true;
                 }
                 else {
