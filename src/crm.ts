@@ -200,13 +200,14 @@ export abstract class CRM implements CRMInterface {
   handleCampaignUpdate = async (
     message: CampaignUpdatedEventMessage,
   ): Promise<handleResult | boolean> => {
-    console.warn(
-      "campaign update",
-      message.campaign.name,
-      message.campaign.title,
-    );
+    const name = message.campaign?.name;
+    if (!name) {
+      console.warn("campaign update without campaign name, ignoring", message);
+      return true;
+    }
+    console.warn("campaign update", name, message.campaign.title);
     //we need to refetch campaign when it is updated, clear the cache
-    delete this.campaign[message.campaign.name];
+    delete this.campaigns[name];
     return true;
   };
 
@@ -388,8 +389,13 @@ export abstract class CRM implements CRMInterface {
 
     // events unrelated to CRM are handled separately
 
-    if (event.eventType === "campaign_updated") {
-      const r = await this.handleCampaignUpdate(event);
+    if (
+      event.eventType === "campaign_updated" || // legacy name
+      (event as any).eventType === "campaign.update"
+    ) {
+      const r = await this.handleCampaignUpdate(
+        event as CampaignUpdatedEventMessage,
+      );
       return r;
     }
 

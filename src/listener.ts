@@ -60,7 +60,8 @@ export const listen = async (config: Configuration, crm: CRM) => {
           // other types mosly need to be processed to be removed from the queue
           if (
             event.eventType === "email_status" ||
-            event.eventType === "campaign_updated"
+            event.eventType === "campaign_updated" || // legacy name
+            (event as any).eventType === "campaign.update"
           ) {
             if (crm.pause) {
               await pause(3);

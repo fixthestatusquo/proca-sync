@@ -106,8 +106,11 @@ class CleverreachCRM extends CRM {
   handleEvent = async (
     message: EventMessage,
   ): Promise<handleResult | boolean> => {
-    if (message.eventType === "campaign_updated") {
-      return this.handleCampaignUpdate(message);
+    if (
+      message.eventType === "campaign_updated" || // legacy name
+      (message as any).eventType === "campaign.update"
+    ) {
+      return this.handleCampaignUpdate(message as CampaignUpdatedEvent);
     }
     if (message.eventType !== "email_status") return true;
 
