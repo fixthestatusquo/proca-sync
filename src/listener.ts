@@ -60,8 +60,8 @@ export const listen = async (config: Configuration, crm: CRM) => {
           // other types mosly need to be processed to be removed from the queue
           if (
             event.eventType === "email_status" ||
-            event.eventType === "campaign_updated" || // legacy name
-            (event as any).eventType === "campaign.update"
+            event.eventType === "campaign_updated" ||
+            (event as any).eventType === "campaign.update" // new name?
           ) {
             if (crm.pause) {
               await pause(3);
@@ -71,9 +71,12 @@ export const listen = async (config: Configuration, crm: CRM) => {
 
             if (typeof r === "boolean") return r;
             return true;
-          } else if (event.eventType === "confirm_created") {
+          } else if (
+            event.eventType === "confirm_created" ||
+            (event as any).eventType === "campaign.add"
+          ) {
             console.log(
-              "Ignoring and removing from the queue confirm_created event",
+              `Ignoring and removing from the queue ${(event as any).eventType} event`,
             );
             return true;
           } else {
