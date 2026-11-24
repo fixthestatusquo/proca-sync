@@ -7,6 +7,10 @@ export type GPAction = ActionMessage & {
   form_type?: string;
 };
 
+// we can replace the promocode logig with this when we are sure no widgets use the old promocode logic
+// const promo = data.action.customFields.promocode?.toString() || config?.component?.sync?.promoCode;
+// if (promo) data.promo_code = promo;
+
 export const formatAction = (queueAction: ActionMessage, config: any) => {
   const data: GPAction = queueAction;
   /// Add data form_type
